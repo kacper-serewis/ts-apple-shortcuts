@@ -1,0 +1,167 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "validation": {
+    "typecheck": "passed: compiler, tests and all examples",
+    "tests": {
+      "passed": 548,
+      "failed": 0
+    },
+    "focusedTests": 17,
+    "textListSeparatorCases": 25,
+    "plist": "Apple plutil -lint passed for both workflows",
+    "signingMode": "people-who-know-me",
+    "nativeRegressionFixtures": 25
+  },
+  "change": "Compile array join to native text accumulation with empty-entry preservation, comma default, runtime literal separator and explicit numeric/boolean scalar text conversion. Receiver and separator evaluate once in source order.",
+  "verifiedShortcut": {
+    "name": "TS-Array-Join",
+    "actionCount": 342,
+    "observedOutputs": [
+      "Text: |a||b|; compact ab; default ,a,,b,",
+      "Empty: <>/<>/|; singleton Ada",
+      "Numbers: 0|-1|1.25|1234567; flags false,true,false",
+      "Escapes: 😀$1\\.*$1$1\\.*quote\"\\",
+      "Rows: Ada / Lin; nested 1:2;2:3",
+      "Snapshot: a|b; source changed"
+    ],
+    "observationNote": "The raw result UI did not expose the final newline of the Escapes output. A separate JSON-encoded probe verified that the newline was retained.",
+    "completion": "All six result dialogs appeared in order. After final Done, the editor showed play available without error.",
+    "importComparison": "All 342 imported actions read from the simulator database match the compiler output exactly."
+  },
+  "additionalProbe": {
+    "name": "TS-Join-Escapes",
+    "actionCount": 46,
+    "source": "artifacts/array-join-escapes-probe.ts",
+    "observedOutputs": [
+      "\"😀$1\\\\.*$1$1\\\\.*quote\\\"\\\\\\n\"",
+      "\"\\na\\n\\nb\\n\""
+    ],
+    "completion": "Both JSON outputs exactly matched the expected strings; the editor returned to play available.",
+    "importComparison": "All 46 imported actions match the compiler output exactly."
+  },
+  "nativeCoverage": [
+    "Leading, trailing and consecutive empty text items",
+    "Empty arrays, singleton empty text and singleton ordinary text",
+    "Omitted, empty and runtime literal separators",
+    "Negative and fractional numbers, large integer and boolean true/false conversion",
+    "Emoji, dollar signs, backslashes, quote, embedded/trailing newline and newline separators",
+    "Join inside map/helper calls with independent locals",
+    "Receiver captured before separator side effects"
+  ],
+  "compilerCoverage": [
+    "25 text-list/separator combinations compared with JavaScript",
+    "Numeric and boolean arrays with three separators",
+    "Readonly tuple and untyped empty array",
+    "Receiver/argument effects once, including ignored empty-list calls",
+    "Parsed JSON pipeline and repeated independent join calls",
+    "Reject object, opaque, nested and heterogeneous item types; argument spreads, optional calls and non-text separator",
+    "Source fixture comparison and raw/catalog roundtrips"
+  ],
+  "limitations": [
+    "Homogeneous flat arrays only; no nested arrays, object coercion, heterogeneous arrays, null/undefined items or holes.",
+    "Separator must be text; no implicit conversion or optional calls.",
+    "Native numeric precision and exponent formatting apply; not complete JavaScript number-to-string semantics.",
+    "Native loop accumulates text repeatedly and adds runtime cost for large lists.",
+    "Physical devices remain unverified; full Shortcuts/TypeScript coverage is incomplete."
+  ],
+  "files": [
+    {
+      "path": "src/compiler.ts",
+      "sha256": "a3b09d47ef4c7f9b2f4b3df5ee5ab52c1ff84461adca271d53e8357a93d41a86"
+    },
+    {
+      "path": "test/array-join.test.ts",
+      "sha256": "e982a183d6e76db843d47167a8240149b1448fe259a45d48f7002876542086da"
+    },
+    {
+      "path": "test/typescript.test.ts",
+      "sha256": "7b463e36be109cf2ccc07a3fd6d48afff04d4854848c8958493dacc523b515f3"
+    },
+    {
+      "path": "test/toolkit.test.ts",
+      "sha256": "1c3246e541b8a3e854e99fde8613197817f6194cdaf412dcbec7f23669cda4c1"
+    },
+    {
+      "path": "examples/array-join-test.ts",
+      "sha256": "3a21948f2f51baed046d2d51b4b9761b870505cfcffb381eb1d2e2424389c276"
+    },
+    {
+      "path": "test/fixtures/ios26-array-join-workflow.json",
+      "sha256": "0ce1b765bf1deeee85f527964b2fc84fa829316038c50817fc70631a62dcdc8c"
+    },
+    {
+      "path": "artifacts/array-join-escapes-probe.ts",
+      "sha256": "20f1a3c5db0645f61f9bb71f811a3591953dbe8566aec28daca19ae4932f79ee"
+    },
+    {
+      "path": "README.md",
+      "sha256": "07581abcae521b7f51ec0e6b314f2ea341bb3bd461a6b9b70f4736e6f174a0bd"
+    },
+    {
+      "path": "package.json",
+      "sha256": "e9ff9ab3e03a959f5f004d1dd82f0a21edff50b0356380a1098972fc1e9ef651"
+    },
+    {
+      "path": "dist/TS-Array-Join.json",
+      "sha256": "8c2d55758693caf59ba8a7ce52134930dcef9f68fde27ef306209ff674fa2b29"
+    },
+    {
+      "path": "dist/TS-Array-Join.unsigned.plist",
+      "sha256": "abf076d5d43d4833897bce23939b00bc9466d7fc0cbe8eb140376bbe0f77ba40"
+    },
+    {
+      "path": "dist/TS-Array-Join.shortcut",
+      "sha256": "033658298fb2babd18fa4992fa1503a2e8079928112079909fcf89ceb58037b5"
+    },
+    {
+      "path": "dist/TS-Join-Escapes.json",
+      "sha256": "f6367347761ff4c78c7a1ba6695f6229ed701c694b9039c41121f994b91b33b3"
+    },
+    {
+      "path": "dist/TS-Join-Escapes.unsigned.plist",
+      "sha256": "01c541eb0f0a855b4dc16439386a8f30d9807d830b21e6c9a348fd12c04bc854"
+    },
+    {
+      "path": "dist/TS-Join-Escapes.shortcut",
+      "sha256": "125cc33a699fb8e9670efcc6f83fde53140a0bc012a845493f4513a46467fe5b"
+    },
+    {
+      "path": "artifacts/ios-array-join-empty.png",
+      "sha256": "5562dd2901dfebbdd5dd3ac28919a13f257e6855fe17b0a20e8b6e46a15dbd71"
+    },
+    {
+      "path": "artifacts/ios-array-join-escaped-json.png",
+      "sha256": "7a36f0f0bc124ce380a3f84e05ac1304ba5664707b0da670795f813ffa4e50a1"
+    },
+    {
+      "path": "artifacts/ios-array-join-escapes.png",
+      "sha256": "2227d5d8ba779b048f36ebf7233608b387ce61f96b66e86cb53e5eac8a170a75"
+    },
+    {
+      "path": "artifacts/ios-array-join-newlines-json.png",
+      "sha256": "eb43fa4a1c10be5622cce4daec041b6b604486c4df76bbda953ada60a3559d79"
+    },
+    {
+      "path": "artifacts/ios-array-join-rows.png",
+      "sha256": "1a14baa6b822c03f34fb5515be265293af9d923309647c68f295c5a950f2320e"
+    },
+    {
+      "path": "artifacts/ios-array-join-scalars.png",
+      "sha256": "d3e973f01dc1bb3fdbbbb7668173d5a0058d8f97c1b59c1e4b7f621c7b74c5c8"
+    },
+    {
+      "path": "artifacts/ios-array-join-snapshot.png",
+      "sha256": "cdd8b5bf4cbbcf46d95e7135964512ef3f790241d91c0a9c1d13c1c7b93e892c"
+    },
+    {
+      "path": "artifacts/ios-array-join-text.png",
+      "sha256": "19b7b4cceb22c3ee6468ce1a198e0d83ef201708328a39ed69556c1c532693eb"
+    }
+  ]
+}

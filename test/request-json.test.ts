@@ -76,6 +76,14 @@ test("a bodyless write request has no request body or automatic Content-Type", (
   assert.deepEqual(items.map((i: any) => i.WFKey.Value.string), ['Accept']);
 });
 
+test("headers composed from known object literals keep static names and overwrite values", () => {
+  evaluate(source(`const defaults = { Accept: "default", "X-Test": "old" };
+    const headers = {...defaults, "X-Test": "new"};
+    await requestJson<{}>("https://offline.invalid", {headers});`), [], [], (n, r) => {
+    assert.deepEqual(readRequest(n,r).headers, {accept:"default", "x-test":"new"}); return {};
+  });
+});
+
 test("JSON bodies attach serialized text through File mode and responses retain typed arrays", () => {
   const actions = compile(source('const rows = await requestJson<{ n: number }[]>("https://offline.invalid", { method: "POST", json: { n: 1 } }); await showResult(rows[0].n);')).workflow.WFWorkflowActions;
   const request = actions.find(a => a.WFWorkflowActionIdentifier.endsWith('.downloadurl'))!.WFWorkflowActionParameters;

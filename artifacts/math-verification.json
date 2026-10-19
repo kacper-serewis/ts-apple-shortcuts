@@ -1,0 +1,147 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "validation": {
+    "typecheck": "passed: compiler, tests and all examples",
+    "tests": {
+      "passed": 474,
+      "failed": 0
+    },
+    "focusedTests": 24,
+    "plist": "Apple plutil -lint passed",
+    "signingMode": "people-who-know-me",
+    "nativeRegressionFixtures": 21
+  },
+  "change": "Support direct global Math.abs/sign/min/max/floor/ceil/trunc/round/pow/sqrt calls and E/PI/LN2/LN10/LOG2E/LOG10E/SQRT1_2/SQRT2 constants. Lower to existing native calculations and numeric conditions with argument snapshots and lexical shadowing.",
+  "verifiedShortcut": {
+    "name": "TS-Math",
+    "actionCount": 383,
+    "observedOutputs": [
+      "Negative: -2.5:-3,-2,-2,-2;-2.1:-3,-2,-2,-2;-1.5:-2,-1,-1,-1;-0.6:-1,0,0,-1;-0.5:-1,0,0,0;-0.1:-1,0,0,0;0:0,0,0,0;",
+      "Positive: 0.1:0,1,0,0;0.5:0,1,0,1;0.6:0,1,0,1;1.5:1,2,1,2;2.5:2,3,2,3;3:3,3,3,3;",
+      "Signs: 2.5/-1;0.1/-1;0/0;0.1/1;2.5/1;",
+      "Extremes: -7/5/9",
+      "Powers: 8/-8/9/4",
+      "Constants: 3142/2718/693/2303/1443/434/707/1414",
+      "Arrays: 1/-2/3; max 3"
+    ],
+    "completion": "All seven outputs appeared in order. After final Done, the editor showed play available with no error.",
+    "importComparison": "All 383 imported actions read from the simulator database match the compiled output exactly."
+  },
+  "nativeCoverage": [
+    "floor/ceil/trunc/round on seven negative-or-zero and six positive inputs, including halves",
+    "abs/sign for negative, zero and positive input",
+    "min/max with multiple arguments and min singleton",
+    "Positive and negative integer powers, square root and fractional power",
+    "All eight constants scaled and rounded",
+    "map and reduce with Math calls"
+  ],
+  "compilerCoverage": [
+    "Boundary vectors include adjacent floating-point values around +/-0.5 and +/-4503599627370495.5; compare to JS with signed zero normalized",
+    "All call arguments evaluated once left-to-right before calculation, with earlier mutable reads frozen",
+    "Ignored calls and await retain argument effects",
+    "Static bracket member calls and constant aliases",
+    "Lexical object/parameter Math shadows, TDZ, import and helper shadows",
+    "Reject empty min/max, wrong arity/type, spreads, optional calls, dynamic member names, function aliases, unsupported methods and known negative square root",
+    "New source fixture comparison and exact raw/catalog roundtrips"
+  ],
+  "limitations": [
+    "Finite-number subset; native precision, range and formatting apply.",
+    "Full IEEE-754 equivalence, NaN, infinity and signed zero are not supported.",
+    "Runtime domain/overflow failures follow native behavior, without a custom validator.",
+    "Boundary vectors beyond those in the native example have compiler/IR coverage only.",
+    "No Math.random, trigonometric/logarithmic methods, function aliases, dynamic member names, spreads or coercion.",
+    "Physical devices and other OS versions remain unverified; full Shortcuts/TypeScript coverage is incomplete."
+  ],
+  "files": [
+    {
+      "path": "src/compiler.ts",
+      "sha256": "5097b08b7ec95480f1f592bc5128446e813f0134aa7ea14baf25c4bff239d233"
+    },
+    {
+      "path": "src/emitter.ts",
+      "sha256": "cdb3bf4b49e5dc614a3f897b26663ad9b6b9fdc95e7da3e48e0cdbd4f909c116"
+    },
+    {
+      "path": "src/model.ts",
+      "sha256": "3d3ade436086fdbbb14f46fc0d4f781bcec25288c7ad8acadd545e1d949861bb"
+    },
+    {
+      "path": "test/support/evaluate.ts",
+      "sha256": "4c10d9899c1f2c4fe159fec9f0ac2056e4850d6f2944a6d5577db8aa4706dec2"
+    },
+    {
+      "path": "test/math.test.ts",
+      "sha256": "837d00669792a02c423ffb01539f673051c00777f3a868e7494408146ec56c7d"
+    },
+    {
+      "path": "test/typescript.test.ts",
+      "sha256": "fd9ddb5c713ff011fff3fb018ccbd6a451125f1710de550f8e4d9494fdbed833"
+    },
+    {
+      "path": "test/toolkit.test.ts",
+      "sha256": "c28314605d73ca3d16e4a2dc54ad3d21b0144e9f33eb6b07098f21ff9e8528d7"
+    },
+    {
+      "path": "examples/math-test.ts",
+      "sha256": "75eff59c6b1c2362fa8f91715c03ca9aeeb3c40aa807b4b97b589290634618ac"
+    },
+    {
+      "path": "test/fixtures/ios26-math-workflow.json",
+      "sha256": "20cbe29276b4160dc9aff5f9b79c6b51cb8444b3209aa2e491ed2525d2c16814"
+    },
+    {
+      "path": "README.md",
+      "sha256": "6d70935dd9c764580b6aa0d726c1fdc0f1b094a4d6a687941014ebad29ee7e74"
+    },
+    {
+      "path": "package.json",
+      "sha256": "ef084cc1dcd477973da8d27ba1aebe3da2be87d7ec0beca0011c533620d85584"
+    },
+    {
+      "path": "dist/TS-Math.json",
+      "sha256": "93d7252c80c22707ecc3bf9aab245e5af581f03fb5f1cb0e57b732b05ad243d3"
+    },
+    {
+      "path": "dist/TS-Math.unsigned.plist",
+      "sha256": "228fb011d8646a5fc1d0feaf56a6ae3e2b4d5ac5df5e49aca5fdb9c15642f44c"
+    },
+    {
+      "path": "dist/TS-Math.shortcut",
+      "sha256": "79e38c4f199d6b0b39558acecabab15a85aecb32fc7987be9b98734b49b26ba5"
+    },
+    {
+      "path": "artifacts/ios-math-arrays.png",
+      "sha256": "517da0c68b127bd43d9ad4dd3a665f73a46cae51779229d872e1fddffd449f1d"
+    },
+    {
+      "path": "artifacts/ios-math-constants.png",
+      "sha256": "5e4b26ae3a086cfe6352febd0a4a30787b51b2da9cfd89e295e1a2e51e1755d0"
+    },
+    {
+      "path": "artifacts/ios-math-extremes.png",
+      "sha256": "7466564f5128bfe333f969699d97572668ba62cda081e6200b41396414b50c11"
+    },
+    {
+      "path": "artifacts/ios-math-negative.png",
+      "sha256": "341b738cb2070700e0cc24bdeebe836c5d242c75cb2a96179d92c80c61140d2e"
+    },
+    {
+      "path": "artifacts/ios-math-positive.png",
+      "sha256": "8fb8bcc8178eafdaedb2389c1b9984289af6f789a30a1623bcbcab7f07510c8c"
+    },
+    {
+      "path": "artifacts/ios-math-powers.png",
+      "sha256": "08cbc50997a0ba068da22a6fe75d533a2c07448a50791aec087459db0d69cfc6"
+    },
+    {
+      "path": "artifacts/ios-math-signs.png",
+      "sha256": "6fb8465c347f2c764e24075c2df4d3111f0c1f6d56d9983764e6998ddbadb2fc"
+    }
+  ]
+}

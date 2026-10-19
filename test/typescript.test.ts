@@ -56,6 +56,14 @@ for (const [example, fixture] of [
   ["json-conversion-test", "ios26-json-conversion-workflow"],
   ["request-json-test", "ios26-request-json-workflow"],
   ["string-methods-test", "ios26-string-methods-workflow"],
+  ["math-test", "ios26-math-workflow"],
+  ["array-composition-test", "ios26-array-composition-workflow"],
+  ["object-spread-test", "ios26-object-spread-workflow"],
+  ["array-copy-test", "ios26-array-copy-workflow"],
+  ["array-join-test", "ios26-array-join-workflow"],
+  ["array-offset-test", "ios26-array-offset-workflow"],
+  ["text-replace-test", "ios26-text-replace-workflow"],
+  ["text-replace-all-test", "ios26-text-replace-all-workflow"],
 ] as const) {
   test(`${example} retains the verified workflow with any legacy text-equality migration`, () => {
     const source = readFileSync(new URL(`../../examples/${example}.ts`, import.meta.url), "utf8");

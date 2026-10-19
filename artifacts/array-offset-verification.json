@@ -1,0 +1,175 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "originIntegration": {
+    "head": "10c93f95149ba7e7befddd454225aedbb29905f4",
+    "originMain": "10c93f95149ba7e7befddd454225aedbb29905f4",
+    "method": "Fast-forward integrations of aa5468c and 10c93f9; local work saved and reapplied without conflicts",
+    "dependencies": "npm ci completed",
+    "preservedOriginalUntrackedFiles": 54,
+    "preservationCheck": "Git blob hashes match the first backup for every originally untracked file",
+    "retainedBackups": [
+      "7b587660f251ab569c025f1b151c2c1e33bd2a3d",
+      "5910316a60d1a3b8852e84ba27ad4696944280b0"
+    ]
+  },
+  "validation": {
+    "typecheck": "passed: compiler, tests and all examples",
+    "tests": {
+      "passed": 603,
+      "failed": 0
+    },
+    "metadataTests": 4,
+    "focusedTests": 38,
+    "newFocusedTests": 9,
+    "dynamicBoundCases": 156,
+    "lookupCallsAcrossBoundCases": 312,
+    "browserBuild": "npm run build:site passed",
+    "browserNodeParityExamples": 8,
+    "plist": "Apple plutil -lint passed",
+    "signingMode": "people-who-know-me",
+    "nativeRegressionFixtures": 26
+  },
+  "change": "Accept finite runtime fromIndex values for array includes and indexOf. Truncate toward zero and resolve negative positions from the captured receiver length. Preserve source-order argument evaluation and existing constant-bound workflows.",
+  "verifiedShortcut": {
+    "name": "TS-Array-Offsets",
+    "actionCount": 470,
+    "observedOutputs": [
+      "Offsets: 0Y;2Y;2Y;0Y;2Y;-1N;-1N;",
+      "Text: 2Y;2Y;-1N; Bool: 2Y;2Y;-1N;",
+      "Empty: -1N;-1N;-1N;",
+      "Snapshot: 2; source 9; needle 9",
+      "Nested: 0,2,-1"
+    ],
+    "completion": "All five outputs appeared in order. After final Done, the editor showed play available without error.",
+    "importComparison": "All 470 imported actions read from the simulator database match the compiled output exactly.",
+    "updatedHostComparison": "The source regression fixture passes after the visualizer host integration; Node and browser-memory hosts also produce equivalent workflows."
+  },
+  "nativeCoverage": [
+    "Negative, fractional, zero and out-of-range runtime bounds",
+    "Numeric, text and boolean scalar lookups",
+    "Empty receiver defaults",
+    "Receiver and needle snapshots survive later argument effects",
+    "Lookup state resets inside helper/map calls"
+  ],
+  "compilerCoverage": [
+    "156 list/needle/fromIndex combinations compared with JavaScript for both methods",
+    "Receiver, needle and start evaluate once in source order",
+    "Argument effects occur for empty receivers and ignored results",
+    "Runtime starts from askNumber and helpers",
+    "Reject nonnumeric starts and argument spreads",
+    "Existing constant-bound fixtures and exact raw/catalog roundtrips",
+    "New list/object examples compile equivalently through Node and in-memory browser hosts"
+  ],
+  "observations": [
+    {
+      "kind": "Device automation timeout",
+      "detail": "Opening the result overlay timed out after the first dialog. The pending operation was observed to terminate, the existing simulator was inspected and recovered, and the remaining four dialogs were verified without rerunning the shortcut."
+    }
+  ],
+  "limitations": [
+    "Finite numbers only; no NaN/Infinity, explicit undefined or numeric coercion semantics.",
+    "Homogeneous text/number/boolean arrays only; object identity, mixed arrays and nested arrays remain unsupported.",
+    "Native precision and guarded-iteration overhead apply.",
+    "Physical devices remain unverified; full Shortcuts/TypeScript coverage is incomplete."
+  ],
+  "files": [
+    {
+      "path": "src/compiler.ts",
+      "sha256": "8c33db78587a8220cd63c737fa9572e40e9ede42468faab44924ffb0393b3af9"
+    },
+    {
+      "path": "src/emitter.ts",
+      "sha256": "6357489135845121c7b0d76adc22bf97192200d3f50fec8fafa50195b8757814"
+    },
+    {
+      "path": "src/hosts/host.ts",
+      "sha256": "2e2fee5e051a99d427cf322165099adbc50e1e245a67dfa51ff9550c2ac30c68"
+    },
+    {
+      "path": "src/hosts/node-host.ts",
+      "sha256": "59ce838bdd9359db5382ee81957ee8ed449c88d6d72c95c919d5cc3836264229"
+    },
+    {
+      "path": "src/hosts/memory-host.ts",
+      "sha256": "58cbd0a9e3b2b4f4129da62d28521625f5098467bc6aeee00b788a94e83fecb4"
+    },
+    {
+      "path": "test/array-search.test.ts",
+      "sha256": "d6f0e8a9f22cb294a89c95156f8287d401ac20e64bb4fd983e398184303e87f7"
+    },
+    {
+      "path": "test/array-offset.test.ts",
+      "sha256": "774ff113aebfb3a9f8f926717d4a810e4af204fef29a6e96242844654f2d38cc"
+    },
+    {
+      "path": "test/typescript.test.ts",
+      "sha256": "47d6eb4cd83f7c6304bbc4895972fb24020d0fbcadb952884f77e3a5e950060a"
+    },
+    {
+      "path": "test/toolkit.test.ts",
+      "sha256": "734930a93998ebda7937148a13dc2c1cc32eb54de36f979891e035fc5216746a"
+    },
+    {
+      "path": "test/visualizer.test.ts",
+      "sha256": "c89080442ea5f1e2b64a51259bf8eb6fd00ee0c6b1b6b0c4ecb623185b540d8c"
+    },
+    {
+      "path": "examples/array-offset-test.ts",
+      "sha256": "71f250ff569ff2f61166e5050e42059121e1c142c6734ea6e831fde288894a38"
+    },
+    {
+      "path": "test/fixtures/ios26-array-offset-workflow.json",
+      "sha256": "adfe385855f66253c61b458418fa7de40d7fe2e6056950411548e7dd59fb0fea"
+    },
+    {
+      "path": "README.md",
+      "sha256": "1ea8ff8a57c43ec5d9253e279ba40a40c13f77d06e7a4c7cf0bc0d0963662637"
+    },
+    {
+      "path": "package.json",
+      "sha256": "bab8471d240cd02e9288250cfa6333007f76945420bad1d6eedbb2c8b762476f"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "2cbd1c8d3cee4fa22f8f15b60f9869ae77a3a1c79ecdee36d8ef0305f536f8bf"
+    },
+    {
+      "path": "dist/TS-Array-Offsets.json",
+      "sha256": "0ecc6d67ae6327db2ae1b921c4d9a6e73d6bfa92109dc3d6f43b7ae798283f17"
+    },
+    {
+      "path": "dist/TS-Array-Offsets.unsigned.plist",
+      "sha256": "e814b7973c0347c5f298d482cefbdebd0f8bbfd7d366fea41c350885596783ce"
+    },
+    {
+      "path": "dist/TS-Array-Offsets.shortcut",
+      "sha256": "f337beed28bc57a20f602411051303f2dcc761874c2179fa038b2f453ae05a5a"
+    },
+    {
+      "path": "artifacts/ios-array-offset-empty.png",
+      "sha256": "19a2ee97f651be6978d997bf7c80c4064820f46c6eaae5b06837bb5e871b0de1"
+    },
+    {
+      "path": "artifacts/ios-array-offset-nested.png",
+      "sha256": "25bc481f3e558048ed18d925e74257bdd36583f070d97bfb221d4c87d8821f54"
+    },
+    {
+      "path": "artifacts/ios-array-offset-numbers.png",
+      "sha256": "2620c22a88362bcb875a8a04b13f9710a50ea543588977d030483b758ff68c4f"
+    },
+    {
+      "path": "artifacts/ios-array-offset-scalars.png",
+      "sha256": "d97e2cd81d2768e63ea735a4c88fb9fb3d9b869629b8f347f9a22e3d8d4f117d"
+    },
+    {
+      "path": "artifacts/ios-array-offset-snapshot.png",
+      "sha256": "1da745820e8cde6faf6833891d8628eaea25cb39d9e8d84d93edfc4009961c28"
+    }
+  ]
+}

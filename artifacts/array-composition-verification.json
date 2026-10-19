@@ -1,0 +1,153 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "validation": {
+    "typecheck": "passed: compiler, tests and all examples",
+    "tests": {
+      "passed": 492,
+      "failed": 0
+    },
+    "focusedTests": 17,
+    "plist": "Apple plutil -lint passed",
+    "signingMode": "people-who-know-me",
+    "nativeRegressionFixtures": 22
+  },
+  "change": "Support existing JSON objects in array literals and flat typed array spreads. Assemble complete JSON fragments, remove delimiters only at fragment boundaries, parse a dictionary envelope and extract the new list. Preserve static List emission where composition is unnecessary.",
+  "verifiedShortcut": {
+    "name": "TS-Array-Composition",
+    "actionCount": 537,
+    "observedOutputs": [
+      "Object: 1/Ada/1/N",
+      "Rows: 3/Ada/Lin/Sam; sum 6",
+      "Numbers: []/[42]/[0,2,4,6]",
+      "Flags: [false,true]",
+      "Text: [\"\\\",[\",\"],\",\"\",\"quote\\\"\\\\\\n😀\",\"last\"]",
+      "Nested: 3/0/0",
+      "Copy: [1,2]; original [9]"
+    ],
+    "completion": "All seven outputs appeared in order. After final Done, the editor showed play available with no error.",
+    "importComparison": "All 537 imported actions read from the simulator database match the compiled output exactly."
+  },
+  "nativeCoverage": [
+    "Helper-returned object in singleton array retains scalar, boolean and nested list fields",
+    "Mixing ordinary object elements with parsed object-array spreads and empty spreads preserves order and typed access",
+    "Empty, singleton and multi-item numeric list assembly",
+    "Boolean values preserved in JSON",
+    "Empty strings, JSON-delimiter-like text, quotes, backslashes, newline and emoji preserved",
+    "Composed lists as dictionary fields, then stringify/parse roundtrip",
+    "Copy survives later reassignment of original list variable"
+  ],
+  "compilerCoverage": [
+    "Spread sources and ordinary elements evaluated exactly once in source order",
+    "Earlier reads survive later expression reassignment",
+    "Multiple object spreads compose with map/reduce",
+    "Readonly tuple spread",
+    "Reject strings/nonlists, holes, nested array elements/spreads and opaque native items including unions",
+    "Prior negative tests updated to cover still-unsupported holes/string spreads and positive dynamic-object construction",
+    "Source fixture comparison and exact raw/catalog roundtrips"
+  ],
+  "limitations": [
+    "Composition requires flat JSON-compatible lists; arrays of arrays remain unsupported.",
+    "Native number precision and key ordering apply.",
+    "JSON value reconstruction does not preserve JS shared object identity or mutation semantics.",
+    "No string iterable spreads, opaque file/app-entity elements, holes or function argument spreads.",
+    "Native dictionary parameter field states still require inline-encodable containers.",
+    "Extra serialization actions increase workflow size and runtime.",
+    "Physical devices and other OS versions remain unverified; full Shortcuts/TypeScript coverage is incomplete."
+  ],
+  "files": [
+    {
+      "path": "src/compiler.ts",
+      "sha256": "597764f8afbcd769a1ade29cd29d243edf54bf3235fdaaff19bdce45463085d8"
+    },
+    {
+      "path": "src/emitter.ts",
+      "sha256": "eca788ed68a95aac843575d575a022607826135315d5034697c4eed7a546d238"
+    },
+    {
+      "path": "src/model.ts",
+      "sha256": "6cbff416f740c493fc825b6846a5081a7009799800df4a7d92b63d12f927c257"
+    },
+    {
+      "path": "test/support/evaluate.ts",
+      "sha256": "ee54d73e7bfad9d5640c32a9fb689444d96ebc722d6d871cf497370d441c1624"
+    },
+    {
+      "path": "test/array-composition.test.ts",
+      "sha256": "775e632cab4eea124e74edbb0816c703fd195f628d6db8945139e21d9b414d5a"
+    },
+    {
+      "path": "test/loops.test.ts",
+      "sha256": "18dc964d80fbc67146884308dd66c3d358fe3c92c3d146d189e413e1a7eaf1c4"
+    },
+    {
+      "path": "test/typescript.test.ts",
+      "sha256": "fdf836ffe8e9eb3df83caebf8aca2b12a9d0ca25f8e52a033a616f2ee60464af"
+    },
+    {
+      "path": "test/toolkit.test.ts",
+      "sha256": "58e8493d7d8dd3010dc561912d8e094e9635d58714f42efa9cad5836f880b81a"
+    },
+    {
+      "path": "examples/array-composition-test.ts",
+      "sha256": "578c4479085ddcf45fc12980c83a87e83d059665536e03eab2fae37809392fb7"
+    },
+    {
+      "path": "test/fixtures/ios26-array-composition-workflow.json",
+      "sha256": "cccb23c5ae9bc6ecb99a732d2755a14f318f2bf770b9ad395360f501e85f0bfc"
+    },
+    {
+      "path": "README.md",
+      "sha256": "f238db8785e28055cb0e8959b1f0e3b15104fd1645cf55d52e0aa8afbc3cfec5"
+    },
+    {
+      "path": "package.json",
+      "sha256": "f783f80d0a24e400d7b864ca78a72620aea9fa68275ea306b0763ef3fc3830ba"
+    },
+    {
+      "path": "dist/TS-Array-Composition.json",
+      "sha256": "57a9bf334f25bb2a6765feeeecc0ff38b0e29ca808de74e9f5c8b5ecd9b54216"
+    },
+    {
+      "path": "dist/TS-Array-Composition.unsigned.plist",
+      "sha256": "e38ba64b99332f4cc04709620299ea37f16f297c0a2774d87249b3ab5caa8876"
+    },
+    {
+      "path": "dist/TS-Array-Composition.shortcut",
+      "sha256": "2010f04b7069a3c184804dbd88c28cf70a43aa054045f3a2f977aab738354072"
+    },
+    {
+      "path": "artifacts/ios-array-composition-copy.png",
+      "sha256": "42b96fe3428422f466fa5157fdaf8e32e7c11ffadfbbdc2966520ed84b6d2b0e"
+    },
+    {
+      "path": "artifacts/ios-array-composition-flags.png",
+      "sha256": "900e71d8944643b16b927a67ac0522eca5921944cfbb0f7ea60fbf507afebd2c"
+    },
+    {
+      "path": "artifacts/ios-array-composition-nested.png",
+      "sha256": "2b62a71899551dde54aac6a307df7c780167425b5d6f0dd7fda8f7ef1eaa9415"
+    },
+    {
+      "path": "artifacts/ios-array-composition-numbers.png",
+      "sha256": "af3ec1bdfbf37552f7249f746ecf049e891d2315c53a17ecdb70057037e0df76"
+    },
+    {
+      "path": "artifacts/ios-array-composition-object.png",
+      "sha256": "3fe1263dac9a7fab0e8b77a40b31579cdeedad30d3137e07d1b1ee153466a639"
+    },
+    {
+      "path": "artifacts/ios-array-composition-rows.png",
+      "sha256": "dcb2307350c1f6cb051b838c7364a544df3b5771f9d1aae200148ac2a9080490"
+    },
+    {
+      "path": "artifacts/ios-array-composition-text.png",
+      "sha256": "e69fb8cb06d4801d3db4348de966c820be6abd9fafeb03201aa74fc29fe1867a"
+    }
+  ]
+}

@@ -120,7 +120,7 @@ for (const [body, error] of [
   ['[1, 2].some(n => { if (n > 1) { return true; } });', /Unsupported JSON value type/],
   ['[1].some(n => true, {});', /thisArg/],
   ['[1].every((n = 1) => true);', /binding parameters/],
-  ['const n = await askNumber("from"); [1].indexOf(1, n);', /fromIndex must be a constant/],
+  ['[1].indexOf(1, "0");', /Expected a number/],
   ['[1].includes();', /requires a search value/],
   ['[1].indexOf(1, 0, 1);', /requires a search value/],
   ['[{ n: 1 }].includes({ n: 1 });', /object identity/],

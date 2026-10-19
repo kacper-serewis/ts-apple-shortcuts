@@ -81,7 +81,7 @@ export function emitWorkflow(ir: IRNode[], { name, settings = {} }: { name: stri
       return { WFItemType: 2, WFValue: { Value: lists.get(value.id)!.map(v => listItem(v, line)), WFSerializationType: "WFArrayParameterState" } };
     }
     if (value.kind === "object-ref" || value.kind === "list-ref") {
-      throw new Error(`Line ${line}: embedding a dynamic object/list inside an array literal or dictionary parameter state is not supported. Object literals can contain existing containers; pass their result with attachment().`);
+      throw new Error(`Line ${line}: embedding a dynamic object/list in native parameter field state is not supported. Compose the value in TypeScript and pass its result with attachment().`);
     }
     if (value.kind === "boolean" || value.kind === "ref" && value.valueType === "boolean") {
       return { WFItemType: 4, WFValue: { Value: value.kind === "boolean" ? Number(value.value) : attachment(value), WFSerializationType: "WFNumberSubstitutableState" } };
@@ -153,6 +153,37 @@ export function emitWorkflow(ir: IRNode[], { name, settings = {} }: { name: stri
     }
     emit(identifier, { GroupingIdentifier: group, WFControlFlowMode: 2 }, line);
   }
+  function jsonValue(value: Value, line: number): OutputRef {
+    if (value.kind === "object-ref" || value.kind === "list-ref") return jsonContainer(value, line);
+    if (value.kind === "ref" && value.valueType === "content") throw new Error(`Line ${line}: JSON composition requires JSON-compatible values, not opaque native content.`);
+    const wrapped = uuid();
+    emit("dictionary", { UUID: wrapped, WFItems: dictionary([["__value", value]], line) }, line);
+    return replace(jsonContainer(localRef(wrapped, "Dictionary", "object-ref"), line), String.raw`\A\s*\{\s*"__value"\s*:\s*([\s\S]*)\}\s*\z`, "$1", line);
+  }
+  function assembleList(items: { value: Value; spread: boolean }[], line: number): string {
+    // Serialize each item independently. Delimiters are only edited at the
+    // boundaries of complete JSON fragments, never inside user strings.
+    const parts: (string | OutputRef)[] = ['{"__value":['];
+    for (const item of items) {
+      if (item.spread) {
+        if (item.value.kind !== "list-ref") throw new Error(`Line ${line}: array spreads require a list.`);
+        const contents = replace(jsonContainer(item.value, line), String.raw`\A\[([\s\S]+)\]\z`, ",$1", line);
+        parts.push(replace(contents, String.raw`\A\[\]\z`, "", line));
+      } else {
+        if (item.value.kind === "list-ref") throw new Error(`Line ${line}: nested array elements are not supported in composed arrays; use a spread to append a flat list.`);
+        parts.push(",", jsonValue(item.value, line));
+      }
+    }
+    parts.push("]}");
+    const joined = uuid();
+    emit("gettext", { UUID: joined, WFTextActionText: text({ kind: "text", parts }) }, line);
+    const json = replace(localRef(joined, "Text"), String.raw`\A\{"__value":\[,`, '{"__value":[', line);
+    const parsed = uuid();
+    emit("detect.dictionary", { UUID: parsed, WFInput: attachment(json) }, line);
+    const result = uuid();
+    emit("getvalueforkey", { UUID: result, WFInput: attachment(localRef(parsed, "Dictionary", "object-ref")), WFDictionaryKey: "__value", WFGetDictionaryValueType: "Value" }, line);
+    return result;
+  }
   function visit(nodes: IRNode[]): void {
     for (const node of nodes) {
       if (node.kind === "action") {
@@ -210,6 +241,25 @@ export function emitWorkflow(ir: IRNode[], { name, settings = {} }: { name: stri
           emit("number", { UUID: uuid(), WFNumberActionNumber: 0 }, node.line);
           emit("conditional", { UUID: id, GroupingIdentifier: group, WFControlFlowMode: 2 }, node.line);
         }
+      } else if (node.kind === "assemble-dictionary") {
+        const parts: (string | OutputRef)[] = ["{"];
+        // All expressions have already been evaluated in source order by the
+        // frontend. Reverse only JSON fragments: this native parser keeps the
+        // first duplicate key, so later TS fields must occur first here.
+        for (const part of [...node.parts].reverse()) {
+          if (part.kind === "entry") parts.push("," + JSON.stringify(part.key) + ":", jsonValue(part.value, node.line));
+          else {
+            const contents = replace(jsonContainer(part.value, node.line), String.raw`\A\s*\{([\s\S]*)\}\s*\z`, ",$1", node.line);
+            parts.push(replace(contents, String.raw`\A,\s*\z`, "", node.line));
+          }
+        }
+        parts.push("}");
+        const joined = uuid();
+        emit("gettext", { UUID: joined, WFTextActionText: text({ kind: "text", parts }) }, node.line);
+        const json = replace(localRef(joined, "Text"), String.raw`\A\{,`, "{", node.line);
+        const id = uuid();
+        emit("detect.dictionary", { UUID: id, WFInput: attachment(json) }, node.line);
+        refs.set(node.id, id);
       } else if (node.kind === "dictionary") {
         const dynamic = node.entries.filter(([, value]) => dynamicContainer(value));
         const fixed = node.entries.filter(([, value]) => !dynamicContainer(value));
@@ -244,13 +294,7 @@ export function emitWorkflow(ir: IRNode[], { name, settings = {} }: { name: stri
           emit("getvalueforkey", { UUID: id, WFInput: attachment(localRef(parsed, "Dictionary", "object-ref")), WFDictionaryKey: "__value", WFGetDictionaryValueType: "Value" }, node.line);
           refs.set(node.id, id);
         } else {
-          let json: OutputRef;
-          if (node.input.kind === "object-ref" || node.input.kind === "list-ref") json = jsonContainer(node.input, node.line);
-          else {
-            const wrapped = uuid();
-            emit("dictionary", { UUID: wrapped, WFItems: dictionary([["__value", node.input]], node.line) }, node.line);
-            json = replace(jsonContainer(localRef(wrapped, "Dictionary", "object-ref"), node.line), String.raw`\A\s*\{\s*"__value"\s*:\s*([\s\S]*)\}\s*\z`, "$1", node.line);
-          }
+          const json = jsonValue(node.input, node.line);
           refs.set(node.id, refs.get(json.id)!);
         }
       } else if (node.kind === "math") {
@@ -330,7 +374,13 @@ export function emitWorkflow(ir: IRNode[], { name, settings = {} }: { name: stri
           UUID: id, WFInput: attachment(node.input),
           WFDictionaryKey: node.key, WFGetDictionaryValueType: "Value",
         }, node.line);
+      } else if (node.kind === "assemble-list") {
+        refs.set(node.id, assembleList(node.items, node.line));
       } else if (node.kind === "list") {
+        if (node.items.some(dynamicContainer)) {
+          refs.set(node.id, assembleList(node.items.map(value => ({ value, spread: false })), node.line));
+          continue;
+        }
         const id = uuid();
         refs.set(node.id, id);
         lists.set(node.id, node.items);

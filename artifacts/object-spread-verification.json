@@ -1,0 +1,181 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "validation": {
+    "typecheck": "passed: compiler, tests and all examples",
+    "tests": {
+      "passed": 509,
+      "failed": 0
+    },
+    "focusedTests": {
+      "objectSpread": 15,
+      "httpRequests": 25,
+      "total": 40
+    },
+    "plist": "Apple plutil -lint passed",
+    "signingMode": "people-who-know-me",
+    "nativeRegressionFixtures": 23
+  },
+  "change": "Support plain JSON object spreads with source-order evaluation and later-field overwrite semantics. Preserve known-literal header metadata through spreads. Reverse only serialized JSON fragments because the tested native parser keeps the first duplicate key.",
+  "verifiedShortcut": {
+    "name": "TS-Object-Spread-v2",
+    "actionCount": 197,
+    "observedOutputs": [
+      "Override: 3/N/0/Ada; original 1/1",
+      "Merge: 7/Y/ios/Lin",
+      "Defaults: 9/42",
+      "Empty: {}",
+      "Extra: 5/kept",
+      "Escapes: },\"n\":999,{; [\"\"]; N",
+      "Rows: 11/17/Ada/Lin"
+    ],
+    "completion": "All seven outputs appeared in order. After final Done, the editor showed play available with no error.",
+    "importComparison": "All 197 imported actions read from the simulator database match the compiled output exactly."
+  },
+  "nativeCoverage": [
+    "Later explicit fields override source fields without changing the original",
+    "Later spread overrides earlier spread, including boolean and singleton-array fields",
+    "Runtime record spread overrides defaults and copies runtime keys",
+    "Empty object composition",
+    "Keys omitted from the declared response type remain accessible",
+    "Escaped keys and JSON-delimiter-like text preserved",
+    "Spread composition in map callbacks with nested objects"
+  ],
+  "compilerCoverage": [
+    "Ordinary fields and spread source effects occur once from left to right",
+    "Earlier spread captures survive later source reassignment",
+    "Known literal/const-alias spreads preserve HTTP header names and final values (compile/IR coverage)",
+    "Reject array, primitive and opaque spreads, opaque explicit field values, duplicate explicit keys and getters",
+    "Source fixture comparison and exact raw/catalog roundtrips"
+  ],
+  "investigations": [
+    {
+      "shortcut": "TS-Object-Spread",
+      "result": "Failed first overwrite check: Override: 1/N/1/Ada; original 1/1",
+      "finding": "Forward serialized fragments let the native parser retain original n and tags values. The final implementation reverses fragments while preserving expression evaluation order.",
+      "evidence": "artifacts/ios-object-spread-forward-order-failure.png",
+      "workflow": "dist/TS-Object-Spread.json",
+      "status": "Resolved and reverified in TS-Object-Spread-v2"
+    }
+  ],
+  "limitations": [
+    "JSON-compatible objects only, without shared object identity, descriptors, getters, prototypes or symbol semantics.",
+    "No array/primitive/opaque object spreads, property mutation or runtime schema validator.",
+    "Native key ordering and numeric precision apply.",
+    "Duplicate-key adaptation verified on iOS 26.5; other parsers/OS versions remain unverified.",
+    "HTTP header spreads require known literal names and text values; arbitrary runtime header objects remain unsupported.",
+    "Native dictionary parameter field states retain their inline-encoding restriction.",
+    "Physical devices remain unverified; full Shortcuts/TypeScript coverage is incomplete."
+  ],
+  "files": [
+    {
+      "path": "src/compiler.ts",
+      "sha256": "292d4606539c6a2d6955390a3934d483fe74295b97797caceed6fc83ef4774f0"
+    },
+    {
+      "path": "src/emitter.ts",
+      "sha256": "ade917433ccb7ecc696e2039185f968ac981707fb4ee2a6d5e17facc2c7374d0"
+    },
+    {
+      "path": "src/model.ts",
+      "sha256": "a63e1fdb63cd7b936c2860b4652c2a976e200eff3c31195a063b9e74df4e9305"
+    },
+    {
+      "path": "api/ios.d.ts",
+      "sha256": "1722beb3ad1e96bb8fad07b0523730e3d691e822dfec67e0b5c23552894e398c"
+    },
+    {
+      "path": "test/support/evaluate.ts",
+      "sha256": "ef480010dcc48123c0044885a42198f3f2b209032861cc3e3edd8209a44320e5"
+    },
+    {
+      "path": "test/object-spread.test.ts",
+      "sha256": "e74d74ac55682a1ffd3d30d3efd19315595eff0af61d422b675e27de48aa36f8"
+    },
+    {
+      "path": "test/request-json.test.ts",
+      "sha256": "7ddca5a2d00926b65e24dd679d57b753a90e7f25f5f0ade44b5af5fbaeb0e2f3"
+    },
+    {
+      "path": "test/typescript.test.ts",
+      "sha256": "86e4de13e1775e70e48ee8e4f85af32c292f80221ef8a5d021dd0c12e55080da"
+    },
+    {
+      "path": "test/toolkit.test.ts",
+      "sha256": "3ccf3ee941db0dccbc8fc984bf0bfa39b913fd75d24834c79a1751174d6ebc37"
+    },
+    {
+      "path": "examples/object-spread-test.ts",
+      "sha256": "1fac439056a3fafd847032f6ddefda52147d89234f169536388e3c655af11af0"
+    },
+    {
+      "path": "test/fixtures/ios26-object-spread-workflow.json",
+      "sha256": "143ea8c99117624d6e49dfbc99221e42c158338b64e763ef34e15d951e3591fb"
+    },
+    {
+      "path": "README.md",
+      "sha256": "a78d24b546b47a9d38edc22a927d14eca91eaf3909d99b7ea6ca88ceabe3db57"
+    },
+    {
+      "path": "package.json",
+      "sha256": "8f897939d18c7cbbab678a4710c4733ad86f00899b028e0d6a7061bf997ef262"
+    },
+    {
+      "path": "dist/TS-Object-Spread-v2.json",
+      "sha256": "1304bc321b3941f7c4699c3dfcdd909c4d76a3441b97265c2584599b8b733973"
+    },
+    {
+      "path": "dist/TS-Object-Spread-v2.unsigned.plist",
+      "sha256": "d507b4fab9dfcf4c4ec2b656de339182ee52973ee2ec3eb1b5da76de0138522f"
+    },
+    {
+      "path": "dist/TS-Object-Spread-v2.shortcut",
+      "sha256": "4f60c86fd776a9295e7c98c83de72d61a4b04e417b8c47c13af68eafea834403"
+    },
+    {
+      "path": "dist/TS-Object-Spread.json",
+      "sha256": "c29f4342aa8411d194c62541d5d822d170e73a5cbafab9fb3973adcd831a2b01"
+    },
+    {
+      "path": "dist/TS-Object-Spread.unsigned.plist",
+      "sha256": "d91c103fcb8085ed8e716431cc3b07585faf560772c15f40aab5243e1a1f449e"
+    },
+    {
+      "path": "artifacts/ios-object-spread-defaults.png",
+      "sha256": "55f812b28883940a9f7bc1d423b567d125fbb68f5eb2ab8da2de516e569eb036"
+    },
+    {
+      "path": "artifacts/ios-object-spread-empty.png",
+      "sha256": "dc276ee0138f1817eb29a8adb195d7db7a3e30a3433b0858d079f8f477f2fd4d"
+    },
+    {
+      "path": "artifacts/ios-object-spread-escapes.png",
+      "sha256": "0ad2d18d7d6dbe1b710291f8e0e75e83d4ff89f0fe205b596a0ef120f747e826"
+    },
+    {
+      "path": "artifacts/ios-object-spread-extra.png",
+      "sha256": "86da814a9e3098130f0057e5ca71e31c08173aed731aded1de9c2d4c14e2c9d2"
+    },
+    {
+      "path": "artifacts/ios-object-spread-forward-order-failure.png",
+      "sha256": "d0bd396ad64fe0678f0fe98d21597a6fef6a37f6a0604405f8c1c1346bda2e7e"
+    },
+    {
+      "path": "artifacts/ios-object-spread-merge.png",
+      "sha256": "0525ed56dbae5a086dc9658b392ac556cf681b9b64b7ccffc74c52714663c15e"
+    },
+    {
+      "path": "artifacts/ios-object-spread-override.png",
+      "sha256": "b2ff1a6a050c3d1cf99eac58329e9bfa56efbf0ad0a5622b02aec63e729f8c17"
+    },
+    {
+      "path": "artifacts/ios-object-spread-rows.png",
+      "sha256": "e8982d354f379c86269b06adaa04eca6e8b95f388ec84b8958f9ee384525c748"
+    }
+  ]
+}

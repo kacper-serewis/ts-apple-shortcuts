@@ -51,6 +51,7 @@ export interface ListNode {
   items: Value[];
   line: number;
 }
+export interface AssembleListNode { kind: "assemble-list"; id: number; items: { value: Value; spread: boolean }[]; line: number }
 export interface RepeatNode {
   kind: "repeat";
   id: number;
@@ -76,6 +77,8 @@ export interface NativeNode {
   preserveParameters?: boolean;
 }
 export interface DictionaryNode { kind: "dictionary"; id: number; entries: [string, Value][]; line: number }
+export type DictionaryPart = { kind: "entry"; key: string; value: Value } | { kind: "spread"; value: ObjectRef };
+export interface AssembleDictionaryNode { kind: "assemble-dictionary"; id: number; parts: DictionaryPart[]; line: number }
 export interface MathNode { kind: "math"; id: number; left: ScalarValue; right: ScalarValue; operator: "+" | "-" | "*" | "/" | "%" | "**"; line: number }
 export interface NumericIfNode { kind: "numeric-if"; left: ScalarValue; right: ScalarValue; operator: "===" | "!==" | "<" | "<=" | ">" | ">="; then: IRNode[]; else: IRNode[] | null; line: number }
 export interface SetNode { kind: "set"; name: string; value: Value; line: number }
@@ -88,7 +91,7 @@ export interface YieldNode { kind: "yield"; value?: Value; line: number }
 export interface JsonNode { kind: "json"; operation: "parse" | "stringify"; id: number; input: Value; line: number }
 export type StringMethod = "trim" | "trimStart" | "trimEnd" | "toUpperCase" | "toLowerCase" | "concat" | "startsWith" | "endsWith" | "includes";
 export interface StringNode { kind: "string"; method: StringMethod; id: number; input: ScalarValue; args: ScalarValue[]; line: number }
-export type IRNode = ActionNode | IfNode | ListNode | RepeatNode | FieldNode | NativeNode | DictionaryNode | MathNode | NumericIfNode | SetNode | GetNode | ReturnNode | RepeatCountNode | MenuNode | IndexNode | YieldNode | JsonNode | StringNode;
+export type IRNode = ActionNode | IfNode | ListNode | AssembleListNode | RepeatNode | FieldNode | NativeNode | DictionaryNode | AssembleDictionaryNode | MathNode | NumericIfNode | SetNode | GetNode | ReturnNode | RepeatCountNode | MenuNode | IndexNode | YieldNode | JsonNode | StringNode;
 
 export interface NativeAction extends PlistDictionary {
   WFWorkflowActionIdentifier: string;

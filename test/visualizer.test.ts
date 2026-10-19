@@ -61,7 +61,7 @@ test("the in-memory browser host compiles like the Node host", () => {
   const host = memoryHost(files, readCatalog());
   // UUIDs are random per compilation; compare everything else.
   const normalize = (value: unknown) => JSON.stringify(value).replace(/[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}/g, "UUID");
-  for (const example of ["control-flow-test.ts", "catalog-actions.ts", "http-json.ts"]) {
+  for (const example of ["control-flow-test.ts", "catalog-actions.ts", "http-json.ts", "object-spread-test.ts", "array-composition-test.ts", "array-copy-test.ts", "array-join-test.ts", "array-offset-test.ts", "text-replace-test.ts", "text-replace-all-test.ts"]) {
     const source = readFileSync(new URL(`../../examples/${example}`, import.meta.url), "utf8");
     assert.equal(normalize(compile(source, { host }).workflow), normalize(compile(source).workflow), example);
   }

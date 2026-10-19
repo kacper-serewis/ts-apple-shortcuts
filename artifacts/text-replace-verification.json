@@ -1,0 +1,328 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "validation": {
+    "typecheck": "passed: compiler, tests and all examples",
+    "tests": {
+      "passed": 619,
+      "failed": 0
+    },
+    "metadataTests": 4,
+    "focusedTests": 15,
+    "dynamicTemplateCases": 238,
+    "constantTemplateCases": 51,
+    "browserBuild": "npm run build:site passed",
+    "browserNodeParityExamples": 9,
+    "plist": "Apple plutil -lint passed",
+    "signingMode": "people-who-know-me",
+    "nativeRegressionFixtures": 27
+  },
+  "change": "Lower String.replace with literal text search and replacement templates to native actions. Capture receiver/search/replacement in order; replace the first match only. Parse constant templates at compile time and dynamic templates through native dollar-separated segments.",
+  "reference": "https://tc39.es/ecma262/multipage/text-processing.html#sec-getsubstitution",
+  "verifiedShortcut": {
+    "name": "TS-Text-Replace",
+    "actionCount": 469,
+    "observedOutputs": [
+      "First: Xba/aaaaaa",
+      "Templates: a$ca;abca;aaca;acaca;a$&ca;a$bca;a$1ca;aa/b/caca;",
+      "Empty: \"!\"/\"!abcabc\"; missing abc",
+      "Escapes: \"x.*[]\\\\$:$1:\\\\:😀\\ny\"",
+      "Snapshot: a!ba/changed/z; helpers a$&ca|abca|aaca"
+    ],
+    "completion": "All five outputs appeared in order. After final Done, the editor showed play available without error.",
+    "importComparison": "All 469 imported actions read from the simulator database match the compiled output exactly."
+  },
+  "nativeCoverage": [
+    "Only the first match changes; replacement output is not rescanned",
+    "Dynamic dollar, match, prefix and suffix tokens; paired/triple dollars and literal numeric capture references",
+    "Empty input/search and no-match return",
+    "Literal regex metacharacters, backslash, emoji and newline",
+    "Receiver and search captured before replacement argument effects",
+    "Independent helper/map invocation locals"
+  ],
+  "compilerCoverage": [
+    "238 dynamic input/search/template combinations compared with JavaScript through lowered IR",
+    "51 constant-template cases compared with JavaScript",
+    "Receiver, search and replacement evaluate once in source order",
+    "Unsupported coercion, RegExp, callbacks, optional calls and argument spreads rejected",
+    "Node/browser-memory host equivalence",
+    "Source fixture comparison and exact raw/catalog roundtrips"
+  ],
+  "probes": [
+    {
+      "name": "TS-Replace-Primitives",
+      "actionCount": 47,
+      "source": "artifacts/text-replace-primitives-probe.ts",
+      "splitObservations": [
+        {
+          "input": "",
+          "separator": "|",
+          "output": [
+            ""
+          ]
+        },
+        {
+          "input": "a",
+          "separator": "|",
+          "output": [
+            "a"
+          ]
+        },
+        {
+          "input": "|a||b|",
+          "separator": "|",
+          "output": [
+            "",
+            "a",
+            "",
+            "b",
+            ""
+          ]
+        },
+        {
+          "input": "$$&",
+          "separator": "$",
+          "output": [
+            "",
+            "",
+            "&"
+          ]
+        },
+        {
+          "input": "$$$",
+          "separator": "$",
+          "output": [
+            "",
+            "",
+            "",
+            ""
+          ]
+        }
+      ],
+      "invalidCountObservation": "Count received a text-token-string parameter and returned zero for all five samples, including abc. Those counts are not evidence of character-count semantics; the attachment probe below corrected the parameter encoding.",
+      "importComparison": "All 47 imported actions match the compiler output."
+    },
+    {
+      "name": "TS-Text-Characters",
+      "actionCount": 33,
+      "source": "artifacts/text-count-attachment-probe.ts",
+      "countInputs": [
+        "",
+        "abc",
+        "😀",
+        "é",
+        "👨‍👩‍👧‍👦"
+      ],
+      "observedCounts": [
+        0,
+        3,
+        1,
+        1,
+        1
+      ],
+      "characterSplitInputs": [
+        "",
+        "ab",
+        "😀",
+        "é"
+      ],
+      "observedCharacterSplits": [
+        [],
+        [
+          "a",
+          "b"
+        ],
+        [
+          "😀"
+        ],
+        [
+          "é"
+        ]
+      ],
+      "finding": "Tested native Characters counting and Every Character splitting retain whole grapheme clusters; they cannot directly supply JS UTF-16 boundaries for empty-search replaceAll.",
+      "importComparison": "All 33 imported actions match the compiler output."
+    }
+  ],
+  "limitations": [
+    "Only replace is implemented in this milestone; replaceAll remains pending.",
+    "Text search/replacement only; no RegExp arguments, replacement callbacks, implicit coercion or omitted replacement argument.",
+    "Native plist/Unicode restrictions apply.",
+    "Dynamic templates add native looping and text-processing overhead.",
+    "Physical devices remain unverified; full Shortcuts/TypeScript coverage is incomplete."
+  ],
+  "files": [
+    {
+      "path": "src/compiler.ts",
+      "sha256": "5018e378135ec05651d5aed8cfa5f566046b2e3da849d291527f61b680d45f89"
+    },
+    {
+      "path": "src/text-replace.ts",
+      "sha256": "7d339d960005d4b5c616067230125f704b31e937f3b5754d315f426024e23d9f"
+    },
+    {
+      "path": "test/support/evaluate.ts",
+      "sha256": "9842261642139d9d61a6f0a09435615d03b1bdd4fee6d05bf0b98b1be0a2148e"
+    },
+    {
+      "path": "test/text-replace.test.ts",
+      "sha256": "510a998f5ec9c55255395c02af442fb7cd26134ec5b85131fc48406889b4d0b6"
+    },
+    {
+      "path": "test/typescript.test.ts",
+      "sha256": "bb0ac0563bee91b8b7d2ecda1fe12c5d7590771c2532faf1d105590bb293c508"
+    },
+    {
+      "path": "test/toolkit.test.ts",
+      "sha256": "e52d598862b5f0a94d51f3404c049cb6c227654303a63cb18f34013277673429"
+    },
+    {
+      "path": "test/visualizer.test.ts",
+      "sha256": "558a09976912e7b6a48c78c15efb1f1b0ae2ca181d12d4dd159879166a47be0d"
+    },
+    {
+      "path": "examples/text-replace-test.ts",
+      "sha256": "98b064df1bfe28a140cfd543220ed5a1c851d324be9d8dd30b8eca17e2e27cd0"
+    },
+    {
+      "path": "test/fixtures/ios26-text-replace-workflow.json",
+      "sha256": "7d05f32a9400248c868c9f24c21464f0ccbd3d68fa1e7e16455a4110b99c996a"
+    },
+    {
+      "path": "README.md",
+      "sha256": "153c231156241560cc4caa2055338f0c7569dc73ed0b6a0a4de0546b42206796"
+    },
+    {
+      "path": "package.json",
+      "sha256": "161a424045b91eeac83c9146bfb787e6c913be1527ae56cb76ef17d629da036c"
+    },
+    {
+      "path": "artifacts/text-replace-primitives-probe.ts",
+      "sha256": "0d9422fde0691ed3d41745be6c9dc97c5aa242e19eec6a9518b4bc9ac97a2e85"
+    },
+    {
+      "path": "artifacts/text-count-attachment-probe.ts",
+      "sha256": "e57b00fde99e13c9f5d27ac9dbdfcf2d80bac77115e2b721a8378c94a006c8ae"
+    },
+    {
+      "path": "dist/TS-Text-Replace.json",
+      "sha256": "7f92c78f664c2eb04f86f0f39a39b461915bdbbf66c8f7408087e47811c1f227"
+    },
+    {
+      "path": "dist/TS-Text-Replace.unsigned.plist",
+      "sha256": "0b34c9c86e023fc30db28451dab3cefabd89a79e54bebcbfcf98629593acb2a3"
+    },
+    {
+      "path": "dist/TS-Text-Replace.shortcut",
+      "sha256": "c7489fd8b3a1df61399b03e94082663a6d7ab44e537bda41b7289c375e11968a"
+    },
+    {
+      "path": "dist/TS-Replace-Primitives.json",
+      "sha256": "05a575755d0f3ba4d54b6c607e887145181640263959c0639d3e3055e930245c"
+    },
+    {
+      "path": "dist/TS-Replace-Primitives.unsigned.plist",
+      "sha256": "0d038d9bade99f781970f588f1c7e182de1c1d091cd1e09dc8f5a8b64301cb51"
+    },
+    {
+      "path": "dist/TS-Replace-Primitives.shortcut",
+      "sha256": "c675533e3c360920948776f847da7ef9eea06c721d96513e0361b939e920d263"
+    },
+    {
+      "path": "dist/TS-Text-Characters.json",
+      "sha256": "2cb352b1b456158fbab89ddc1b230d61751cd63106fae130abb51a4e24e0e191"
+    },
+    {
+      "path": "dist/TS-Text-Characters.unsigned.plist",
+      "sha256": "5fc9ad43a5c0129a5f058959828baa73f709570de5645bd93973f994e7a22a6d"
+    },
+    {
+      "path": "dist/TS-Text-Characters.shortcut",
+      "sha256": "31415ff1323219a5afed5b61e8cebbe7f3b1bef9646082fde7c756b51f9c9946"
+    },
+    {
+      "path": "artifacts/ios-text-replace-empty.png",
+      "sha256": "f81cf7ddf72f12257c8bbaccd336aa1e870820bf70ea36458da69ad354e8d2c5"
+    },
+    {
+      "path": "artifacts/ios-text-replace-escapes.png",
+      "sha256": "a9f1bc4c484173febf7018300d8bcaa8980f86fa5720e35209fa7712c405b466"
+    },
+    {
+      "path": "artifacts/ios-text-replace-first.png",
+      "sha256": "c83943bd393227b78b56ca57214326e8519a75184d318c42fb59b7988fbfe8b7"
+    },
+    {
+      "path": "artifacts/ios-text-replace-snapshot.png",
+      "sha256": "7050485b3d1d2d05313fda0dfabda58adad278929c29c772f09897ecfc74ce65"
+    },
+    {
+      "path": "artifacts/ios-text-replace-templates.png",
+      "sha256": "8fca0598c42f11f3c4a9fbece555a5fc69c86302cb2329399dba1f6d0a980a30"
+    },
+    {
+      "path": "artifacts/ios-text-primitives-combining.png",
+      "sha256": "b4caa088f9a333f4211c84e1756f97c56434ab5a1db986ed0f8a4ded690713c7"
+    },
+    {
+      "path": "artifacts/ios-text-primitives-count-ascii.png",
+      "sha256": "cbb6b619e3e6f0302d5b891d2c31d43eb17225dd52a7daff8475bf0317388e1a"
+    },
+    {
+      "path": "artifacts/ios-text-primitives-count-emoji.png",
+      "sha256": "eb492b9a963284f671098222a785016c48ade732d1c887501fb188c74840908b"
+    },
+    {
+      "path": "artifacts/ios-text-primitives-count-empty.png",
+      "sha256": "22c4edc197fad0b1c2d8366ba9dc13e9327e3515920555fccc26f72ee16569eb"
+    },
+    {
+      "path": "artifacts/ios-text-primitives-family.png",
+      "sha256": "58910699d2f03ac49944a7119d9d8926bef4f1a45e3f53c0280d0898242743a1"
+    },
+    {
+      "path": "artifacts/ios-text-primitives-split-dollar-pair.png",
+      "sha256": "bae0212577eb674a32e24160f7d60185cf9ad46c1308844e8bfd79311a47abd0"
+    },
+    {
+      "path": "artifacts/ios-text-primitives-split-dollar-triple.png",
+      "sha256": "5e91d5c7bdcca94e8619919ceb88ba6845a3bf5ad29b55086d79ff908313bbf5"
+    },
+    {
+      "path": "artifacts/ios-text-primitives-split-empty-items.png",
+      "sha256": "da9e1deb2bd0ee826cdee4578129c2105190722aaed04fca55710def356c98a0"
+    },
+    {
+      "path": "artifacts/ios-text-primitives-split-empty.png",
+      "sha256": "2ec94ab64638264202c475e41fa6d4ac45d0973c5917c40831b6c4c39e599639"
+    },
+    {
+      "path": "artifacts/ios-text-primitives-split-one.png",
+      "sha256": "01689c2bd8cd56f9804be1c431d1a7bc230c218da88eb72adafc1a729dceb4c5"
+    },
+    {
+      "path": "artifacts/ios-text-characters-ascii.png",
+      "sha256": "a2b2f8cb794204b8ccee9c92952de271103b6cd287318e48e637bfe6bccf762e"
+    },
+    {
+      "path": "artifacts/ios-text-characters-combining.png",
+      "sha256": "55cabacaba3bffd213e61ec6774dfd464666da699a99653ec6c9170439841bbc"
+    },
+    {
+      "path": "artifacts/ios-text-characters-counts.png",
+      "sha256": "c3e93945add56d8dc42b3bac1e194b1f6ce5bb9d0ba9b1279a630c504b242d7f"
+    },
+    {
+      "path": "artifacts/ios-text-characters-emoji.png",
+      "sha256": "831e35661cf218d2ffa3ed90d9d2e488667b33d33e9db9ef26a2d47c88e12c32"
+    },
+    {
+      "path": "artifacts/ios-text-characters-empty.png",
+      "sha256": "f017e66a8aee678cfa9849b68e30553e53114cd3c64c9b05ec9750498e8df8b6"
+    }
+  ]
+}

@@ -58,8 +58,10 @@ test("dictionary helper serializes typed HTTP headers and JSON body without send
   assert.deepEqual(parse(build(workflow)), workflow);
 });
 
-test("dynamic containers in array literals are rejected instead of silently coercing to text", () => {
-  assert.throws(() => list('const data = await getJson<{ name: string }>("https://offline.invalid"); const values = [data]; await quickLook(values);'), /embedding a dynamic object/);
+test("dynamic objects in array literals use native JSON construction instead of text coercion", () => {
+  const actions = list('const data = await getJson<{ name: string }>("https://offline.invalid"); const values = [data]; await quickLook(values);');
+  assert.equal(params(actions, "detect.dictionary").length, 1);
+  assert.equal(params(actions, "getvalueforkey").at(-1)?.WFDictionaryKey, "__value");
 });
 
 test("native action outputs accept explicit number, boolean, object and list types", () => {
@@ -195,7 +197,7 @@ test("wrapper outputs retain number, list and opaque content types", () => {
 });
 
 test("import -> TypeScript -> workflow preserves complete tested workflows byte-for-byte as JSON", () => {
-  for (const name of ["ios26-visible-workflow", "ios26-loops-workflow", "ios26-http-workflow", "ios26-toolkit-workflow", "ios26-toolkit-edges-workflow", "ios26-functions-workflow", "ios26-control-flow-workflow", "ios26-array-methods-workflow", "ios26-switch-numeric-workflow", "ios26-dictionaries-workflow", "ios26-catalog-actions-workflow", "ios26-text-comparisons-workflow", "ios26-switch-text-workflow", "ios26-dynamic-text-workflow", "ios26-array-search-workflow", "ios26-flow-callbacks-workflow", "ios26-dynamic-objects-workflow", "ios26-json-conversion-workflow", "ios26-request-json-workflow", "ios26-string-methods-workflow"]) {
+  for (const name of ["ios26-visible-workflow", "ios26-loops-workflow", "ios26-http-workflow", "ios26-toolkit-workflow", "ios26-toolkit-edges-workflow", "ios26-functions-workflow", "ios26-control-flow-workflow", "ios26-array-methods-workflow", "ios26-switch-numeric-workflow", "ios26-dictionaries-workflow", "ios26-catalog-actions-workflow", "ios26-text-comparisons-workflow", "ios26-switch-text-workflow", "ios26-dynamic-text-workflow", "ios26-array-search-workflow", "ios26-flow-callbacks-workflow", "ios26-dynamic-objects-workflow", "ios26-json-conversion-workflow", "ios26-request-json-workflow", "ios26-string-methods-workflow", "ios26-math-workflow", "ios26-array-composition-workflow", "ios26-object-spread-workflow", "ios26-array-copy-workflow", "ios26-array-join-workflow", "ios26-array-offset-workflow", "ios26-text-replace-workflow", "ios26-text-replace-all-workflow"]) {
     const workflow = JSON.parse(readFileSync(new URL(`../../test/fixtures/${name}.json`, import.meta.url), "utf8"));
     assert.deepEqual(compile(workflowToTypeScript(workflow)).workflow, workflow);
   }

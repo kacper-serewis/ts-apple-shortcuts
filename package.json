@@ -38,7 +38,15 @@
     "build:dynamic-objects": "npm run build && node lib/src/cli.js examples/dynamic-objects-test.ts",
     "build:json": "npm run build && node lib/src/cli.js examples/json-conversion-test.ts",
     "build:request-json": "npm run build && node lib/src/cli.js examples/request-json-test.ts",
-    "build:strings": "npm run build && node lib/src/cli.js examples/string-methods-test.ts"
+    "build:strings": "npm run build && node lib/src/cli.js examples/string-methods-test.ts",
+    "build:math": "npm run build && node lib/src/cli.js examples/math-test.ts",
+    "build:array-composition": "npm run build && node lib/src/cli.js examples/array-composition-test.ts",
+    "build:object-spread": "npm run build && node lib/src/cli.js examples/object-spread-test.ts",
+    "build:array-copy": "npm run build && node lib/src/cli.js examples/array-copy-test.ts",
+    "build:array-join": "npm run build && node lib/src/cli.js examples/array-join-test.ts",
+    "build:array-offset": "npm run build && node lib/src/cli.js examples/array-offset-test.ts",
+    "build:text-replace": "npm run build && node lib/src/cli.js examples/text-replace-test.ts",
+    "build:text-replace-all": "npm run build && node lib/src/cli.js examples/text-replace-all-test.ts"
   },
   "dependencies": {
     "plist": "^5.0.0",

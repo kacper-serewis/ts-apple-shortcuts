@@ -235,15 +235,22 @@ export default async function main(): Promise<number> {
 | Strings, finite numbers, booleans | Text/number/boolean values |
 | Templates and text/number `+` | Native text tokens; UTF-16 attachment positions |
 | String `trim` / `trimStart` / `trimEnd`, case conversion, `concat`, `startsWith` / `endsWith` / `includes` | Native text actions; literal case-sensitive search and ECMAScript whitespace trimming |
+| String `replace(search, replacement)` | First literal match; JavaScript replacement templates with captured input values |
+| String `replaceAll(search, replacement)` | Every non-overlapping literal match; original prefix/suffix per match; see empty-search Unicode limit below |
 | `+`, `-`, `*`, `/`, `%`, `**`, unary `-` on numbers | Calculate actions, including scientific operands |
+| `Math.abs/sign/min/max/floor/ceil/trunc/round/pow/sqrt` and eight Math constants | Native calculations and numeric conditions; finite-number subset |
 | `const`, initialized `let`, lexical blocks | Immutable references or scoped native variables |
 | `=`, `+=`, `-=`, `*=`, `/=`, statement `++`/`--` on `let` | Read/assign native variables; reads snapshot their value |
 | Object literals, named fields and static string brackets | Dictionary construction and Get Dictionary Value |
 | Existing objects and flat lists as object literal fields | Native JSON composition preserves container shape, including empty/single-item lists |
+| `{ ...base, field: value, ...overrides }` | Copy JSON fields; later entries win without modifying the source |
 | `JSON.stringify`, `stringifyJson`, typed `parseJson<T>` | Native JSON text conversion with scalar/object/flat-array roots |
 | Dictionary helpers with runtime keys | Native lookup, immutable update, all keys and all values |
 | Object/array destructuring in declarations, loop bindings and parameters | Dictionary fields and list indices; source evaluated once |
 | Homogeneous arrays, object arrays and arrays inside dictionary fields | Native List/Dictionary values; see the matrix limitation below |
+| Existing objects in arrays and `[first, ...items, last]` | Native JSON composition preserves flat list order, empty segments and object fields |
+| Array `slice(start?, end?)` and `concat(...items)` | Native range selection with normalized bounds; JSON-compatible concatenation |
+| Array `join(separator?)` | Native text accumulation; preserves empty entries and renders booleans as true/false |
 | `items[index]`, `items.length` | Literal or computed zero-based index → one-based native index; Count Items |
 | Nested `for (const item of items)` | Repeat with Each, preserving outer-item references |
 | Unlabeled `break` / `continue` in `for…of` | Scoped guards skip remaining loop body actions or iterations |
@@ -504,17 +511,61 @@ zero-based position even if the callback reassigns its index parameter. Empty
 lists return `false`, `true` and `-1`, respectively, without calling the callback.
 
 `includes` and `indexOf` search homogeneous lists of text, numbers or booleans.
-Both receiver and search value are evaluated once, in that order. Text matching
+The receiver, search value and optional start position evaluate once, in that
+order, including for empty arrays and ignored results. Text matching
 is exact, including empty text and regex-like characters. Object identity and
-mixed-category lists are unsupported. An optional `fromIndex` must currently be
-a constant finite number (a constant alias also works): fractions truncate toward
-zero, negative positions count from the end, and out-of-range starts follow
-JavaScript behavior. Runtime start positions produce a compile error.
+mixed-category lists are unsupported. An optional `fromIndex` accepts finite
+constants or runtime numbers: fractions truncate toward zero, negative positions
+count from the end, and out-of-range starts follow JavaScript behavior. A start
+before the beginning searches the whole list; a start at/past its length returns
+`false` or `-1`. Later argument effects cannot replace the already-captured
+receiver or search value. Native calculations normalize runtime starts; constant
+starts keep their existing shorter compilation. NaN/Infinity, explicit undefined,
+implicit numeric coercion and argument spreads remain unsupported.
 
 Shortcuts still traverses the remaining guarded iterations after finding a result;
 it does not invoke additional callbacks or comparisons. This preserves effects
 but adds native loop overhead for long lists. Run `npm run build:array-search`
 for the simulator-verified example in `examples/array-search-test.ts`.
+Run `npm run build:array-offset` for runtime start positions in
+`examples/array-offset-test.ts`.
+
+## Calculate with Math
+
+```ts
+const rounded = [1.2, -1.8, 2.5].map(n => Math.round(n));
+const largest = rounded.reduce((best, n) => Math.max(best, n), -100);
+const area = Math.PI * Math.pow(3, 2);
+await showResult(`${largest}; ${Math.round(area)}`);
+```
+
+Supported global functions are `Math.abs`, `Math.sign`, `Math.min`, `Math.max`,
+`Math.floor`, `Math.ceil`, `Math.trunc`, `Math.round`, `Math.pow` and `Math.sqrt`.
+They compile to native Calculate actions and numeric conditions. Calls are
+synchronous, support chaining/composition, and evaluate arguments once from left
+to right. `min`/`max` accept one or more numeric arguments. Other functions accept
+one argument, except `pow(base, exponent)`. Static bracket calls such as
+`Math["sqrt"](81)` also work.
+
+The constants `Math.E`, `Math.PI`, `Math.LN2`, `Math.LN10`, `Math.LOG2E`,
+`Math.LOG10E`, `Math.SQRT1_2` and `Math.SQRT2` become numeric literals. Local
+variables, parameters, helpers and imports named `Math` shadow the intrinsic.
+Function aliases, computed member names, argument spreads, optional access,
+implicit number coercion and other Math methods are not supported yet.
+
+Rounding follows floor/ceiling/truncation rules; `round` resolves halfway cases
+toward positive infinity, including `Math.round(-1.5) === -1`. The compiler uses
+integer/remainder decomposition instead of native default rounding or adding
+`0.5` to the input. Positive and negative cases were verified on iOS; adjacent
+floating-point and large-value cases also have compiler/IR regression coverage.
+
+This is a **finite-number subset**, subject to native numeric precision, range
+and formatting. IEEE-754 equivalence for every value, `NaN`, infinities and
+signed zero are not promised. Empty `min()`/`max()` calls and known negative
+`sqrt` inputs are rejected. Runtime inputs must produce finite valid results;
+domain/overflow failures follow native behavior rather than JS special values.
+There is no runtime domain validator. Run `npm run build:math` for the
+simulator-verified example in `examples/math-test.ts`.
 
 ## Transform and search text
 
@@ -540,7 +591,7 @@ Search is literal and case-sensitive: regex characters in the needle are
 escaped, and an empty needle matches even an empty receiver. Accents and Unicode
 normalization forms remain distinct. Search currently accepts one text argument;
 optional position/end-position arguments and RegExp arguments are unsupported.
-String `indexOf`, `slice`, `substring`, `split`, `replace`, and `length` are not
+String `indexOf`, `slice`, `substring`, `split`, and `length` are not
 implemented yet; explicit `splitText`/`replaceText` actions remain available.
 `concat` accepts text arguments without implicit coercion or argument spreads.
 
@@ -553,6 +604,61 @@ promised. Literal strings retain the compiler's plist character restrictions.
 
 Run `npm run build:strings` for `examples/string-methods-test.ts`, which was
 executed on the iOS simulator.
+
+## Replacing the first text match
+
+```ts
+const once = "aba".replace("a", "X"); // Xba
+const retained = "abc".replace("b", "[$&]"); // a[b]c
+const literal = "abc".replace("b", "$1"); // a$1c
+```
+
+`replace(search, replacement)` accepts text for both arguments, including runtime
+values. It replaces only the first literal, case-sensitive match. An empty search
+matches at the beginning; no match returns the original text. Receiver, search
+and replacement evaluate once, in that order, and later argument effects cannot
+change the captured earlier values.
+
+Replacement text implements the string-search forms of
+[ECMAScript GetSubstitution](https://tc39.es/ecma262/multipage/text-processing.html#sec-getsubstitution):
+`$$` is a literal dollar sign, `$&` inserts the matched text, `$` followed by a
+backtick inserts the text before the match, and `$'` inserts the text after it.
+Numeric and named capture references remain literal because a text search has no
+capture groups. Backslashes are literal too. Replacement output is never scanned
+again for replacement tokens or additional matches.
+
+Constant templates are parsed during compilation; dynamic templates use native
+split/loop/text actions with explicit dollar-pair handling. Regex escaping is
+internal, so metacharacters in the search remain literal. RegExp search arguments,
+replacement callbacks, implicit coercion, missing replacement arguments and optional
+calls are unsupported. Native plist/Unicode restrictions still apply. Dynamic
+templates add native loop overhead. Run `npm run build:text-replace` for
+`examples/text-replace-test.ts`.
+
+`replaceAll(search, replacement)` uses the same text-only arguments and substitution
+tokens, replacing all non-overlapping matches. Each match's prefix and suffix refer
+to the **original input**, even after earlier substitutions change the result length.
+Receiver and arguments evaluate once, in order. A literal search omits the unused
+empty/nonempty branch from the generated workflow.
+
+```ts
+const all = "aba".replaceAll("a", "X"); // XbX
+const nonOverlapping = "aaaaa".replaceAll("aa", "X"); // XXa
+const boundaries = "e\u0301".replaceAll("", "!"); // !e!́!
+```
+
+Empty searches insert at every UTF-16 boundary for BMP text, including between
+base letters and combining accents. Native character counting uses graphemes, so
+the compiler first converts each Unicode scalar to an ASCII marker before counting.
+For supplementary characters such as emoji, an empty search with an inserting
+replacement would require splitting surrogate pairs: this currently displays an
+unsupported-operation alert and stops the shortcut. Empty or `$&`-only replacement
+templates are no-ops and still work on that text. Nonempty searches support complete
+emoji. RegExp/callback replacements and implicit coercion remain unsupported.
+
+Run `npm run build:text-replace-all` for `examples/text-replace-all-test.ts`.
+Native execution evidence and the Unicode guard probe are recorded in
+`artifacts/text-replace-all-verification.json`.
 
 ## Convenient action functions
 
@@ -649,8 +755,8 @@ The additional serialization actions also increase workflow size and runtime.
 Use `attachment(payload)` for native parameters that accept a dictionary variable.
 The `dictionary(...)` helper specifically builds a native parameter field state;
 it still requires an inline-encodable literal and does not accept these dynamically
-constructed objects. Embedding a dynamic container in an array literal remains
-unsupported.
+constructed objects. Existing objects can also be embedded in array literals,
+as described below.
 
 Runtime nested arrays such as `number[][]`, mixed array nesting and recursive
 array types are rejected when embedded in an object. The native matrix probe also
@@ -661,6 +767,134 @@ in `artifacts/dynamic-matrix-native-failure.log` and
 `artifacts/dynamic-matrix-diagnostic.ts`; full matrix support remains unfinished.
 
 Run `npm run build:dynamic-objects` for `examples/dynamic-objects-test.ts`.
+
+## Copy and update objects with spreads
+
+```ts
+interface Result { name: string; score: number; tags: string[] }
+const response = await getJson<Result>(url);
+const updated = { ...response, score: response.score + 1, tags: [] };
+const envelope = { ...updated, status: "ready" };
+await showResult(`${envelope.name}: ${envelope.score}`);
+```
+
+Object spreads copy fields from existing JSON objects. Ordinary fields and spread
+sources evaluate once, from left to right. Later fields/spreads overwrite earlier
+ones without changing the source. An empty object contributes no fields. Actual
+JSON keys are copied, including keys omitted from the declared TypeScript shape;
+use `getDictionaryValue<T>` to read such runtime keys. Booleans, flat arrays,
+nested objects and escaped keys/values retain their JSON value types. Spreads
+also work inside array callbacks and composed arrays.
+
+These operations reconstruct JSON data using native actions. Shared object
+identity, property descriptors, getters, prototypes, symbol keys, and object
+property mutation are outside this subset. Array/primitive/opaque spreads are
+rejected. TypeScript's own duplicate-property diagnostics still apply. Native key
+order and numeric precision remain in effect. Last-write-wins behavior is verified
+on iOS 26.5; the compiler accounts for that parser's first-duplicate-key behavior
+by reversing only the serialized fragments, after evaluating expressions.
+
+HTTP headers can use spreads of known object literals and their `const` aliases,
+provided the final header names remain static and values are text. Headers from
+arbitrary runtime objects are still unsupported. A spread result is a constructed
+dictionary variable; pass it with `attachment(...)` to native parameters that
+accept variables. The `dictionary(...)` field-state helper retains its existing
+inline-encoding restriction.
+
+Run `npm run build:object-spread` for `examples/object-spread-test.ts`.
+
+## Compose arrays from existing data
+
+```ts
+interface Row { name: string; score: number }
+const remote = await getJson<Row[]>(url);
+const first = { name: "Ada", score: 7 };
+const all = [first, ...remote, { name: "Sam", score: 9 }];
+const copy = [...all];
+await showResult(copy.reduce((sum, row) => sum + row.score, 0));
+```
+
+Array literals accept existing JSON-compatible objects from helper functions,
+actions, parsed JSON and variables. Array spreads append the elements of a typed
+flat list at that position. Multiple spreads, ordinary elements and empty lists
+can be combined. Receiver expressions and elements evaluate once, from left to
+right; an earlier spread retains its value when a later expression reassigns the
+source variable. Readonly tuples can be spread into a new array.
+
+Native JSON composition preserves object fields, booleans, empty strings, escaped
+text, empty lists and singleton lists. Result types still support indexing,
+field access, loops and array methods. The resulting arrays can be dictionary
+fields or spread again. This constructs JSON values; it does not preserve JS
+object identity or provide shared-reference mutation semantics. Native number
+precision and key ordering apply, and the conversion adds actions and runtime.
+Static literals that need no composition keep their existing native encoding.
+
+Spreads require flat JSON-compatible lists. String iteration, opaque files/app
+entities, array holes, arrays of arrays, and spreads in function arguments are
+unsupported. This does not change the native matrix limitation described above.
+Native `dictionary(...)` parameter field state still requires inline-encodable
+containers; pass a composed value using `attachment(...)` where the action accepts
+a variable. Run `npm run build:array-composition` for the simulator-verified
+example in `examples/array-composition-test.ts`.
+
+## Array copies and ranges
+
+```ts
+const values = [0, 1, 2, 3, 4];
+const middle = values.slice(1, 4); // [1, 2, 3]
+const tail = values.slice(-2); // [3, 4]
+const copy = values.slice();
+const combined = middle.concat(tail, 9); // [1, 2, 3, 3, 4, 9]
+```
+
+`slice(start?, end?)` accepts finite numeric constants or runtime values. Bounds
+truncate toward zero, negative bounds count from the end, and out-of-range bounds
+are clamped. The end is exclusive. Empty or reversed ranges produce an empty list
+without running an invalid native range action. Static bounds are simplified at
+compile time; runtime selection uses Shortcuts' Get Items from List action.
+
+`concat(...items)` copies the receiver and appends each scalar/object or the
+elements of each array argument. Empty lists and a call with no arguments are
+supported. Receiver and argument expressions evaluate once, from left to right;
+later variable reassignment leaves the captured values intact. Typed object
+fields, booleans, empty strings and escaped text survive composition.
+
+Both methods require flat arrays; arrays of arrays remain unsupported. `concat`
+uses JSON composition and requires JSON-compatible items. It does not reproduce
+JavaScript shared-object identity, prototypes or custom spreadability. `slice`
+passes native contents through directly; opaque native content arrays have
+compiler coverage but have not been exercised with files on the simulator.
+Explicit `undefined`, NaN/Infinity, argument spreads and optional calls are not
+supported. These array methods do not add string `slice` support. Run
+`npm run build:array-copy` for `examples/array-copy-test.ts`.
+
+## Joining arrays into text
+
+```ts
+const names = [{ name: "Ada" }, { name: "Lin" }];
+const message = names.map(person => person.name).join(" / "); // Ada / Lin
+const flags = [false, true].join(); // false,true
+const fields = ["", "a", "", "b", ""].join("|"); // |a||b|
+```
+
+`join(separator?)` accepts homogeneous text, number or boolean arrays, including
+readonly arrays. An omitted separator defaults to a comma; a supplied separator
+must be text and may be computed at runtime. Empty arrays and singleton empty
+strings produce empty text. Leading, trailing and consecutive empty entries
+retain their separators. Separators are literal: dollar signs, backslashes,
+emoji and newlines are preserved. The receiver evaluates before the separator,
+each exactly once, even for empty arrays or unused results. A separator expression
+that reassigns the source variable does not change the captured receiver.
+
+The implementation accumulates text in a native loop, adding a separator only
+after the first item. Numbers and booleans use native JSON scalar conversion so
+booleans become `true`/`false` and numbers avoid locale-specific formatting. Native
+numeric precision and exponent notation still apply; this is not a complete
+JavaScript number-to-string implementation. Repeated text accumulation adds
+runtime cost for large arrays. Object coercion, mixed-type arrays, nested arrays,
+null/undefined items, array holes, implicit separator coercion and optional calls
+remain unsupported. Run `npm run build:array-join` for the simulator-verified
+example in `examples/array-join-test.ts`.
 
 ## JSON text conversion
 
@@ -743,7 +977,8 @@ export default async function main(): Promise<void> {
 
 Options must be an inline object. The method is an uppercase literal or constant
 alias; omitting it selects GET. GET cannot have a `json` body. Header names must
-be static, with text values; an object literal or its `const` alias is accepted.
+be static, with text values; object literals, their `const` aliases and spreads
+of those known literals are accepted.
 URL and option values are evaluated once, in source order. Defaults are
 `Accept: application/json` and, when `json` is present,
 `Content-Type: application/json`. Explicit headers override these defaults
@@ -995,17 +1230,17 @@ a full JS engine. Unsupported constructs produce errors with source locations.
 - No arbitrary npm imports, function values, classes, closures outside
   supported inline callbacks, general promises or `try/catch`.
 - No ordinary `for`, `while`, labeled jumps, destructuring assignments, array
-  spreads/holes, object property mutation or other array methods such as `.sort()`.
+  holes, argument spreads, object property mutation or other array methods such as `.sort()`.
 - List indexing requires a valid nonnegative integer at runtime. Out-of-range
   behavior follows Shortcuts, not JavaScript's `undefined`; dynamic bounds are not checked.
 - `let` reassignment must preserve its value category. Helper, array-method,
   menu and repeat callbacks have local returns; only main returns stop the shortcut.
 - Boolean/opaque values do not implicitly interpolate into text. Use conditions
   for booleans or explicit native `text(...)` conversion where appropriate.
-- Object literals can contain dynamic/API objects and flat lists. Dynamic
-  containers inside array literals and native dictionary parameter states remain
-  unsupported. Arrays of arrays are not runtime-supported yet; see the matrix
-  limitation under object composition.
+- Object literals can contain dynamic/API objects and flat lists. Arrays can
+  contain existing JSON objects and spreads of flat lists. Dynamic containers
+  inside native dictionary parameter states remain unsupported. Arrays of arrays
+  are not runtime-supported yet; see the matrix limitation under object composition.
 - Nullable values, optional chaining, runtime schema
   validation and automatic credentials management are not implemented.
 - Runtime repeat counts should be finite integers. Positive fractional counts use
@@ -1019,7 +1254,11 @@ outputs and JSON features are intended for `.ts`/`.mts`.
 ## Verification
 
 `npm run typecheck` checks compiler, tests and all examples. `npm test` currently
-passes **449 tests**. Historical native fixtures remain preserved. Comparisons
+passes **646 tests**. `npm run test:metadata` passes four metadata tests, and
+`npm run build:site` builds the browser visualizer. The in-memory browser compiler
+and Node compiler produce equivalent workflows for the new object/list composition,
+copy, join, runtime lookup and text replacement examples as well as existing control-flow/catalog/HTTP
+examples. Historical native fixtures remain preserved. Comparisons
 against newly compiled source explicitly account for the change from Match Text
 to Replace Text in generated text equality; unrelated actions remain unchanged.
 New native fixtures separately verify that replacement route. Raw workflow import
@@ -1028,6 +1267,58 @@ Source is never executed or fetched during compilation.
 
 On 2026-10-19, the iPhone 17e iOS 26.5 simulator ran:
 
+- `text-replace-all-test`: non-overlapping matches, missing matches, six dynamic
+  templates with original prefix/suffix, empty input, combining-accent boundaries,
+  emoji, literal regex characters and argument snapshots all passed. All five
+  outputs appeared; all 762 imported actions match the compiler output exactly.
+  `TS-Replace-All-Guard` showed the unsupported surrogate-splitting alert and
+  stopped before the subsequent result action; all 53 actions match the output.
+  Evidence: `artifacts/text-replace-all-verification.json`.
+- `TS-Text-Replace`: first-match replacement, eight dynamic substitution templates,
+  empty searches, no-match input, literal regex characters, backslashes, emoji
+  and newline all passed. Argument capture and helper/map calls also passed.
+  All five results appeared and all 469 imported actions match the compiler output.
+  Native splitting retained empty replacement segments, including consecutive
+  dollar signs, in a separate probe. Evidence: `artifacts/text-replace-verification.json`.
+- `TS-Array-Offsets`: runtime negative/fractional and out-of-range starts worked
+  for `includes` and `indexOf` on numeric, text and boolean lists. Empty lists
+  returned **-1/N**; receiver and needle captures survived argument effects
+  (**2; source 9; needle 9**). Nested helper calls produced **0,2,-1**. All five
+  outputs appeared and all 470 imported actions match the compiler output.
+  Evidence: `artifacts/array-offset-verification.json`.
+- `TS-Array-Join`: empty entries retained their separators (**|a||b|**), empty
+  and singleton lists produced the correct text, numbers used decimal dots,
+  and booleans produced **false,true,false**. Nested helpers/map calls and
+  receiver capture also passed. All six outputs appeared and all 342 imported
+  actions match the compiler output. The 46-action `TS-Join-Escapes` probe used
+  JSON to make trailing newlines and newline separators observable; both results
+  passed. Evidence: `artifacts/array-join-verification.json`.
+- `TS-Array-Copy`: `slice` handled runtime negative/fractional bounds, clamping,
+  empty/reversed ranges and omitted bounds. `concat` preserved empty/singleton
+  arrays, typed objects, booleans and escaped text. Reassigning the source left
+  both copies intact (**[2,3]/[1,2,3]/[9]**). All six results appeared and all
+  607 imported actions match the compiler output. Evidence:
+  `artifacts/array-copy-verification.json`.
+- `TS-Object-Spread-v2`: later fields and spreads overwrite earlier values while
+  preserving the source, arrays, booleans and nested objects. Defaults produced
+  **9/42**, empty copies produced **{}**, and undeclared JSON fields remained
+  readable (**5/kept**). Escaped keys/values and `map` composition also passed.
+  All seven results appeared and all 197 imported actions match the compiler
+  output. The first native probe exposed the parser's duplicate-key behavior;
+  the final implementation reverses serialized fragments to handle it. Evidence:
+  `artifacts/object-spread-verification.json`.
+- `TS-Array-Composition`: a helper object retained its fields in a singleton array;
+  mixed object/spread construction produced **Rows: 3/Ada/Lin/Sam; sum 6**.
+  Numeric arrays remained **[]/[42]/[0,2,4,6]**, booleans remained **[false,true]**,
+  and empty text, JSON-like delimiters, quotes, backslashes, newline and emoji
+  survived. Dictionary nesting and copying also passed. All seven results appeared
+  and all 537 imported actions match the compiler output. Evidence:
+  `artifacts/array-composition-verification.json`.
+- `TS-Math`: all ten Math functions ran, including positive/negative fractions,
+  halfway rounding, zero, minimum/maximum, powers and square roots. Eight scaled
+  constants produced **3142/2718/693/2303/1443/434/707/1414**; `map`/`reduce`
+  produced **Arrays: 1/-2/3; max 3**. All seven results appeared and all 383
+  imported actions match the compiler output. Evidence: `artifacts/math-verification.json`.
 - `TS-String-Methods`: all nine string methods ran successfully, including empty
   inputs, ECMAScript whitespace, Unicode case conversion, and 13 pairs tested
   with each of `startsWith`, `endsWith` and `includes`. Chained transformations

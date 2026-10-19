@@ -7,7 +7,8 @@ import { nodeHost } from "./hosts/node-host.js";
 import type { CompileHost } from "./hosts/host.js";
 import { staticPlist, propertyName, isDictionary, unwrap, plistData, plistDate } from "./native.js";
 import { emitWorkflow } from "./emitter.js";
-import type { ActionName, Compilation, IRNode, ListRef, ObjectRef, OutputRef, ScalarValue, StringMethod, TextValue, Value, NativeParameter, PlistDictionary } from "./model.js";
+import { lowerTextReplace, lowerTextReplaceAll } from "./text-replace.js";
+import type { ActionName, Compilation, DictionaryPart, IRNode, ListRef, ObjectRef, OutputRef, ScalarValue, StringMethod, TextValue, Value, NativeParameter, PlistDictionary } from "./model.js";
 
 export interface Position { line: number; column: number }
 export class CompileError extends Error {
@@ -426,18 +427,31 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     }
     if (ts.isObjectLiteralExpression(node)) {
       const keys = new Set<string>();
-      const entries: [string, Value][] = node.properties.map(property => {
-        if (!ts.isPropertyAssignment(property) && !ts.isShorthandPropertyAssignment(property)) fail("Object literals support plain properties only.", property);
+      const known = new Map<string, Value>();
+      let allKnown = true;
+      const parts: DictionaryPart[] = node.properties.map(property => {
+        if (ts.isSpreadAssignment(property)) {
+          const input = value(property.expression, scopes, output);
+          if (input.kind !== "object-ref") fail("Object spreads require a typed JSON object; arrays, primitives and opaque native content are unsupported.", property);
+          const entries = dictionaryLiterals.get(input.id);
+          if (!entries) allKnown = false;
+          else for (const [key, item] of entries) known.set(key, item);
+          return { kind: "spread", value: input };
+        }
+        if (!ts.isPropertyAssignment(property) && !ts.isShorthandPropertyAssignment(property)) fail("Object literals support plain properties and object spreads only.", property);
         const key = propertyName(property.name, fail);
         literal(key, property);
         if (keys.has(key)) fail("Duplicate object key.", property);
         keys.add(key);
-        return [key, value(ts.isShorthandPropertyAssignment(property) ? property.name : property.initializer, scopes, output)];
+        const input = value(ts.isShorthandPropertyAssignment(property) ? property.name : property.initializer, scopes, output);
+        known.set(key, input);
+        return { kind: "entry", key, value: input };
       });
       const id = nextId++;
-      output.push({ kind: "dictionary", id, entries, line: position(node).line });
+      if (parts.some(part => part.kind === "spread")) output.push({ kind: "assemble-dictionary", id, parts, line: position(node).line });
+      else output.push({ kind: "dictionary", id, entries: [...known], line: position(node).line });
       jsonTypes.set(id, checker.getTypeAtLocation(node));
-      dictionaryLiterals.set(id, entries);
+      if (allKnown) dictionaryLiterals.set(id, [...known]);
       return { kind: "object-ref", id, outputName: "Dictionary" };
     }
     if (ts.isElementAccessExpression(node)) {
@@ -494,11 +508,20 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     }
     if (ts.isArrayLiteralExpression(node)) {
       const items = node.elements.map(element => {
-        if (ts.isSpreadElement(element) || ts.isOmittedExpression(element)) fail("Array spreads and holes are not supported.", element);
-        return value(element, scopes, output);
+        if (ts.isOmittedExpression(element)) fail("Array holes are not supported.", element);
+        if (ts.isSpreadElement(element)) {
+          const input = value(element.expression, scopes, output);
+          if (input.kind !== "list-ref") fail("Array spreads require a typed list; string and other iterables are not supported.", element);
+          if (input.arrayDepth !== undefined && input.arrayDepth !== 1) fail("Array spreads require flat lists; arrays of arrays are not supported yet.", element);
+          const itemType = checker.getIndexTypeOfType(jsonTypes.get(input.id)!, ts.IndexKind.Number);
+          if (itemType && (itemType.isUnion() ? itemType.types : [itemType]).some(type => type.getProperty("__nativeContent"))) fail("Array spreads require JSON-compatible items, not opaque native content.", element);
+          return { value: input, spread: true };
+        }
+        return { value: value(element, scopes, output), spread: false };
       });
       const id = nextId++;
-      output.push({ kind: "list", id, items, line: position(node).line });
+      if (items.some(item => item.spread)) output.push({ kind: "assemble-list", id, items, line: position(node).line });
+      else output.push({ kind: "list", id, items: items.map(item => item.value), line: position(node).line });
       return typedRef(checker.getTypeAtLocation(node), id, "List", node);
     }
     if (ts.isTemplateExpression(node)) {
@@ -664,17 +687,17 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     const negative = choose(fraction, "<", num(-0.5), calc(integer, "-", num(1)), integer);
     return choose(fraction, ">=", num(0.5), calc(integer, "+", num(1)), negative);
   }
-  function stringMethodName(expr: ts.CallExpression): StringMethod | undefined {
+  function stringMethodName(expr: ts.CallExpression): StringMethod | "replace" | "replaceAll" | undefined {
     const access = unwrap(expr.expression);
     if (!ts.isPropertyAccessExpression(access)) return undefined;
     const method = access.name.text;
-    if (!["trim", "trimStart", "trimEnd", "toUpperCase", "toLowerCase", "concat", "startsWith", "endsWith", "includes"].includes(method)) return undefined;
+    if (!["trim", "trimStart", "trimEnd", "toUpperCase", "toLowerCase", "concat", "startsWith", "endsWith", "includes", "replace", "replaceAll"].includes(method)) return undefined;
     // includes and concat also exist on arrays; dispatch from the checked receiver type.
     if (["includes", "concat"].includes(method)) {
       const type = checker.getTypeAtLocation(access.expression);
       if (!(type.isUnion() ? type.types : [type]).every(t => !!(t.flags & ts.TypeFlags.StringLike))) return undefined;
     }
-    return method as StringMethod;
+    return method as StringMethod | "replace" | "replaceAll";
   }
   function stringMethod(expr: ts.CallExpression, scopes: Scope[], output: IRNode[]): Value {
     const access = unwrap(expr.expression) as ts.PropertyAccessExpression;
@@ -682,7 +705,8 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     if (expr.questionDotToken || access.questionDotToken) fail("Optional string method calls are not supported.", expr);
     if (expr.typeArguments?.length || expr.arguments.some(ts.isSpreadElement)) fail("String methods do not support type arguments or argument spreads.", expr);
     const predicate = ["startsWith", "endsWith", "includes"].includes(method);
-    if (method !== "concat" && expr.arguments.length !== (predicate ? 1 : 0)) fail(predicate ? `${method} requires one text argument; position arguments are not supported yet.` : `${method} takes no arguments.`, expr);
+    const replacementMethod = method === "replace" || method === "replaceAll";
+    if (method !== "concat" && expr.arguments.length !== (replacementMethod ? 2 : predicate ? 1 : 0)) fail(replacementMethod ? `${method} requires a text search value and text replacement.` : predicate ? `${method} requires one text argument; position arguments are not supported yet.` : `${method} takes no arguments.`, expr);
     const input = value(access.expression, scopes, output);
     if (category(input) !== "text") fail("String methods require a text receiver.", access.expression);
     const args = expr.arguments.map(argument => {
@@ -690,12 +714,17 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
       if (category(item) !== "text") fail("String method arguments must be text; implicit conversion and RegExp arguments are not supported.", argument);
       return item as ScalarValue;
     });
+    if (replacementMethod) {
+      const lowered = (method === "replaceAll" ? lowerTextReplaceAll : lowerTextReplace)(input as TextValue | OutputRef, args[0] as TextValue | OutputRef, args[1] as TextValue | OutputRef, () => nextId++, position(expr).line);
+      output.push(...lowered.nodes);
+      return lowered.value;
+    }
     const id = nextId++;
     output.push({ kind: "string", method, id, input: input as ScalarValue, args, line: position(expr).line });
     return { kind: "ref", id, outputName: predicate ? "If Result" : "Text", ...(predicate ? { valueType: "boolean" as const } : {}) };
   }
   function arrayMethodName(expr: ts.CallExpression): string | undefined {
-    return ts.isPropertyAccessExpression(expr.expression) && ["map", "filter", "reduce", "forEach", "some", "every", "findIndex", "includes", "indexOf"].includes(expr.expression.name.text) ? expr.expression.name.text : undefined;
+    return ts.isPropertyAccessExpression(expr.expression) && ["map", "filter", "reduce", "forEach", "some", "every", "findIndex", "includes", "indexOf", "concat", "slice", "join"].includes(expr.expression.name.text) ? expr.expression.name.text : undefined;
   }
   function jsonOperation(expr: ts.CallExpression, scopes: Scope[]): "parse" | "stringify" | undefined {
     const target = unwrap(expr.expression);
@@ -795,6 +824,8 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     const method = access.name.text;
     const line = position(expr).line;
     if (expr.questionDotToken || access.questionDotToken) fail("Optional array method calls are not supported.", expr);
+    if (method === "join") return arrayJoin(expr, scopes, output);
+    if (method === "concat" || method === "slice") return arrayCopy(expr, scopes, output);
     if (method === "includes" || method === "indexOf") return arrayLookup(expr, scopes, output);
     if (method === "forEach" && needsValue) fail("forEach has no return value.", expr);
     if (expr.arguments.length !== (method === "reduce" ? 2 : 1)) fail(method === "reduce" ? "reduce requires a callback and an initial value." : `${method} requires one callback; thisArg is not supported.`, expr);
@@ -889,31 +920,152 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     if (search) output.push({ kind: "get", id: resultId, name: search.result, line });
     return result;
   }
+  function arrayJoin(expr: ts.CallExpression, scopes: Scope[], output: IRNode[]): Value {
+    const access = expr.expression as ts.PropertyAccessExpression;
+    if (expr.typeArguments?.length || expr.arguments.length > 1 || expr.arguments.some(ts.isSpreadElement)) fail("join accepts one optional text separator, without type arguments or argument spreads.", expr);
+    const input = value(access.expression, scopes, output);
+    if (input.kind !== "list-ref") fail("join requires a typed array.", access.expression);
+    if (input.arrayDepth !== undefined && input.arrayDepth !== 1) fail("join requires a flat array; nested arrays are unsupported.", expr);
+    const separator = expr.arguments.length ? value(expr.arguments[0], scopes, output) : { kind: "text" as const, parts: [","] };
+    if (category(separator) !== "text") fail("join separator must be text; implicit conversion is not supported.", expr);
+    const line = position(expr).line, loopId = nextId++;
+    const itemType = checker.getIndexTypeOfType(jsonTypes.get(input.id)!, ts.IndexKind.Number)!;
+    const item = typedRef(itemType, loopId, "Repeat Item", expr);
+    if (item.kind !== "ref" || !["text", "number", "boolean"].includes(category(item))) fail("join requires homogeneous text, number or boolean items; object conversion is not supported.", expr);
+    const resultId = nextId++, firstId = nextId++, previousId = nextId++;
+    const name = `ts_${resultId}_joined`, firstName = `ts_${resultId}_join_first`;
+    output.push({ kind: "set", name, value: { kind: "text", parts: [""] }, line });
+    output.push({ kind: "set", name: firstName, value: { kind: "boolean", value: true }, line });
+    const body: IRNode[] = [];
+    let itemText: OutputRef = item;
+    if (category(item) !== "text") {
+      // JSON scalar encoding supplies true/false and locale-independent numbers.
+      const id = nextId++;
+      body.push({ kind: "json", operation: "stringify", id, input: item, line });
+      itemText = { kind: "ref", id, outputName: "Text" };
+    }
+    body.push({ kind: "get", name, id: previousId, line });
+    body.push({ kind: "get", name: firstName, id: firstId, line });
+    body.push({ kind: "numeric-if", left: { kind: "ref", id: firstId, outputName: "Variable", valueType: "boolean" }, operator: "===", right: { kind: "boolean", value: true },
+      then: [{ kind: "set", name, value: { kind: "text", parts: [itemText] }, line }],
+      else: [{ kind: "set", name, value: { kind: "text", parts: [
+        { kind: "ref", id: previousId, outputName: "Variable" },
+        ...(separator.kind === "text" ? separator.parts : [separator as OutputRef]), itemText,
+      ] }, line }], line });
+    body.push({ kind: "set", name: firstName, value: { kind: "boolean", value: false }, line });
+    output.push({ kind: "repeat", id: loopId, input, body, line });
+    output.push({ kind: "get", name, id: resultId, line });
+    return { kind: "ref", id: resultId, outputName: "Variable" };
+  }
+  function arrayCopy(expr: ts.CallExpression, scopes: Scope[], output: IRNode[]): Value {
+    const access = expr.expression as ts.PropertyAccessExpression;
+    const method = access.name.text;
+    if (expr.typeArguments?.length || expr.arguments.some(ts.isSpreadElement)) fail("Array copy methods do not support type arguments or argument spreads.", expr);
+    if (method === "slice" && expr.arguments.length > 2) fail("slice accepts optional start and end numbers.", expr);
+    const input = value(access.expression, scopes, output);
+    if (input.kind !== "list-ref") fail(`${method} requires a typed array.`, access.expression);
+    if (input.arrayDepth !== undefined && input.arrayDepth !== 1) fail(`${method} requires a flat array; arrays of arrays are unsupported.`, expr);
+    const line = position(expr).line;
+    if (method === "concat") {
+      const values = [input, ...expr.arguments.map(argument => value(argument, scopes, output))];
+      for (const item of values) {
+        if (item.kind !== "list-ref") continue;
+        if (item.arrayDepth !== undefined && item.arrayDepth !== 1) fail("concat requires flat JSON-compatible arrays.", expr);
+        const type = checker.getIndexTypeOfType(jsonTypes.get(item.id)!, ts.IndexKind.Number);
+        if (type && (type.isUnion() ? type.types : [type]).some(t => t.getProperty("__nativeContent"))) fail("concat requires JSON-compatible items, not opaque native content.", expr);
+      }
+      const id = nextId++;
+      output.push({ kind: "assemble-list", id, items: values.map(value => ({ value, spread: value.kind === "list-ref" })), line });
+      return typedRef(checker.getTypeAtLocation(expr), id, "List", expr);
+    }
+    // Evaluate both bounds before calculating against the captured receiver.
+    const supplied = expr.arguments.map(argument => numeric(argument, scopes, output));
+    const lengthId = nextId++;
+    output.push({ kind: "native", id: lengthId, identifier: "is.workflow.actions.count", parameters: { kind: "parameter-object", entries: [
+      ["Input", { kind: "parameter-value", value: input, encoding: "attachment" }], ["WFCountType", { kind: "literal", value: "Items" }],
+    ] }, line });
+    const length: ScalarValue = { kind: "ref", id: lengthId, outputName: "Count", valueType: "number" };
+    const num = (value: number): ScalarValue => ({ kind: "number", value });
+    const calc = (left: ScalarValue, operator: "+" | "-" | "%", right: ScalarValue): ScalarValue => {
+      const id = nextId++; output.push({ kind: "math", id, left, right, operator, line });
+      return { kind: "ref", id, outputName: "Calculation Result", valueType: "number" };
+    };
+    const choose = (left: ScalarValue, operator: "<" | ">", right: ScalarValue, yes: ScalarValue, no: ScalarValue): ScalarValue => {
+      const name = `ts_${nextId++}_bound`, id = nextId++;
+      output.push({ kind: "numeric-if", left, right, operator, then: [{ kind: "set", name, value: yes, line }], else: [{ kind: "set", name, value: no, line }], line });
+      output.push({ kind: "get", name, id, line });
+      return { kind: "ref", id, outputName: "Variable", valueType: "number" };
+    };
+    const bound = (value: ScalarValue): ScalarValue => {
+      if (value.kind === "number") {
+        const n = Math.trunc(value.value);
+        if (n === 0) return num(0);
+        if (n > 0) return choose(num(n), ">", length, length, num(n));
+        const relative = calc(length, "+", num(n));
+        return choose(relative, "<", num(0), num(0), relative);
+      }
+      const integer = calc(value, "-", calc(value, "%", num(1)));
+      const relative = choose(integer, "<", num(0), calc(length, "+", integer), integer);
+      return choose(relative, "<", num(0), num(0), choose(relative, ">", length, length, relative));
+    };
+    const start = supplied[0] ? bound(supplied[0]) : num(0);
+    const end = supplied[1] ? bound(supplied[1]) : length;
+    const nativeStart = start.kind === "number" ? num(start.value + 1) : calc(start, "+", num(1));
+    const selectionId = nextId++, emptyId = nextId++, resultId = nextId++;
+    const resultName = `ts_${resultId}_slice`;
+    const selection = cloneRef(input, selectionId, "Items from List");
+    const empty = cloneRef(input, emptyId, "List");
+    output.push({ kind: "numeric-if", left: start, operator: "<", right: end, then: [
+      { kind: "native", id: selectionId, identifier: "is.workflow.actions.getitemfromlist", parameters: { kind: "parameter-object", entries: [
+        ["WFInput", { kind: "parameter-value", value: input, encoding: "attachment" }],
+        ["WFItemSpecifier", { kind: "literal", value: "Items in Range" }],
+        ["WFItemRangeStart", { kind: "parameter-value", value: nativeStart, encoding: "auto" }],
+        ["WFItemRangeEnd", { kind: "parameter-value", value: end, encoding: "auto" }],
+      ] }, line }, { kind: "set", name: resultName, value: selection, line },
+    ], else: [{ kind: "list", id: emptyId, items: [], line }, { kind: "set", name: resultName, value: empty, line }], line });
+    output.push({ kind: "get", id: resultId, name: resultName, line });
+    return typedRef(checker.getTypeAtLocation(expr), resultId, "Variable", expr);
+  }
   function arrayLookup(expr: ts.CallExpression, scopes: Scope[], output: IRNode[]): Value {
     const access = expr.expression as ts.PropertyAccessExpression;
     const method = access.name.text;
     const line = position(expr).line;
-    if (expr.arguments.length < 1 || expr.arguments.length > 2) fail(`${method} requires a search value and optional constant fromIndex.`, expr);
+    if (expr.arguments.length < 1 || expr.arguments.length > 2) fail(`${method} requires a search value and optional numeric fromIndex.`, expr);
+    if (expr.typeArguments?.length || expr.arguments.some(ts.isSpreadElement)) fail("Array lookup methods do not support type arguments or argument spreads.", expr);
     const input = value(access.expression, scopes, output);
     if (input.kind !== "list-ref") fail(`${method} requires a typed array.`, access.expression);
     const needle = value(expr.arguments[0], scopes, output);
     if (!["text", "number", "boolean"].includes(category(needle))) fail(`${method} supports scalar text, number or boolean values; object identity is not supported.`, expr.arguments[0]);
     const suppliedStart = expr.arguments[1] ? numeric(expr.arguments[1], scopes, output) : { kind: "number" as const, value: 0 };
-    if (suppliedStart.kind !== "number") fail(`${method} fromIndex must be a constant number; runtime offsets are not supported yet.`, expr.arguments[1]);
-    const start = Math.trunc(suppliedStart.value);
+    const start = suppliedStart.kind === "number" ? Math.trunc(suppliedStart.value) : undefined;
     const loopId = nextId++;
     const itemType = checker.getIndexTypeOfType(jsonTypes.get(input.id)!, ts.IndexKind.Number)!;
     const item = itemType.flags & ts.TypeFlags.Never ? cloneRef(needle, loopId, "Repeat Item") : typedRef(itemType, loopId, "Repeat Item", expr);
     if (category(item) !== category(needle)) fail(`${method} requires the search value to have the array's scalar value category.`, expr);
-    let minimum: ScalarValue = { kind: "number", value: start };
-    if (start < 0) {
+    let minimum: ScalarValue = start === undefined ? suppliedStart : { kind: "number", value: start };
+    if (start === undefined) {
+      // Preserve the captured argument and truncate toward zero before applying
+      // negative indexing. All arguments have already evaluated in source order.
+      const fractionId = nextId++, integerId = nextId++;
+      output.push({ kind: "math", id: fractionId, left: minimum, operator: "%", right: { kind: "number", value: 1 }, line });
+      output.push({ kind: "math", id: integerId, left: minimum, operator: "-", right: { kind: "ref", id: fractionId, outputName: "Calculation Result", valueType: "number" }, line });
+      minimum = { kind: "ref", id: integerId, outputName: "Calculation Result", valueType: "number" };
+    }
+    if (start === undefined || start < 0) {
       const lengthId = nextId++;
       output.push({ kind: "native", id: lengthId, identifier: "is.workflow.actions.count", parameters: { kind: "parameter-object", entries: [
         ["Input", { kind: "parameter-value", value: input, encoding: "attachment" }], ["WFCountType", { kind: "literal", value: "Items" }],
       ] }, line });
       const offsetId = nextId++;
       output.push({ kind: "math", id: offsetId, left: { kind: "ref", id: lengthId, outputName: "Count", valueType: "number" }, operator: "+", right: minimum, line });
-      minimum = { kind: "ref", id: offsetId, outputName: "Calculation Result", valueType: "number" };
+      const relative: ScalarValue = { kind: "ref", id: offsetId, outputName: "Calculation Result", valueType: "number" };
+      if (start === undefined) {
+        const id = nextId++, name = `ts_${id}_lookup_start`;
+        output.push({ kind: "numeric-if", left: minimum, operator: "<", right: { kind: "number", value: 0 },
+          then: [{ kind: "set", name, value: relative, line }], else: [{ kind: "set", name, value: minimum, line }], line });
+        output.push({ kind: "get", id, name, line });
+        minimum = { kind: "ref", id, outputName: "Variable", valueType: "number" };
+      } else minimum = relative;
     }
     const resultName = `ts_${nextId++}_lookup_result`;
     const doneName = `ts_${nextId++}_lookup_done`;

@@ -23,7 +23,7 @@ declare module "@js-shortcuts/ios" {
     | { readonly method: "POST" | "PUT" | "PATCH" | "DELETE"; readonly json?: string | number | boolean | object }
   );
   /** Native HTTP request with a JSON response. Use an inline options object and a constant method.
-   * Headers have static names and text values; a literal or const alias is supported.
+   * Headers have static names and text values; literals, const aliases and spreads of known literals are supported.
    * json is serialized on-device. Defaults: Accept application/json; Content-Type application/json
    * when json is present. Explicit headers override defaults case-insensitively.
    * T declares the object/array response shape; no status, schema validation or retry layer is added.

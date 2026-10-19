@@ -1,0 +1,142 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "validation": {
+    "typecheck": "passed: compiler, tests and all examples",
+    "tests": {
+      "passed": 530,
+      "failed": 0
+    },
+    "focusedTests": 20,
+    "dynamicBoundCases": 363,
+    "plist": "Apple plutil -lint passed",
+    "signingMode": "people-who-know-me",
+    "nativeRegressionFixtures": 24
+  },
+  "change": "Compile array slice to guarded native range selection with finite bound truncation, negative offsets and clamping. Compile concat to JSON-compatible list composition. Preserve receiver/argument evaluation order and captured values.",
+  "verifiedShortcut": {
+    "name": "TS-Array-Copy",
+    "actionCount": 607,
+    "observedOutputs": [
+      "Ranges: [1,2,3];[2,3];[0,1,2,3,4];[];[];[3];",
+      "Copies: [0,1,2,3,4]/[4]/[]/[]",
+      "Concat: []/[42]/[0,1,2,3]",
+      "Rows: 2/Lin/Sam; sum 5",
+      "Values: [false,true,false]; [\"\",\"😀\",\"quote\\\"\\\\\\n\"]",
+      "Independent: [2,3]/[1,2,3]/[9]"
+    ],
+    "completion": "All six outputs appeared in order. After final Done, the editor showed play available with no error.",
+    "importComparison": "All 607 imported actions read from the simulator database match the compiled output exactly."
+  },
+  "nativeCoverage": [
+    "Runtime positive, negative, fractional, clamped and reversed slice bounds",
+    "Omitted bounds, empty and singleton slices",
+    "Empty, singleton and multiple concat arguments",
+    "Typed JSON object fields after slice/concat",
+    "Boolean values, empty text, emoji, quote, backslash and newline",
+    "Both copies remain unchanged after source reassignment"
+  ],
+  "compilerCoverage": [
+    "363 dynamic bound combinations compared with JavaScript on three array lengths",
+    "Receiver and argument effects occur once from left to right",
+    "Earlier receiver and bound captures survive later reassignment",
+    "Opaque native content slice compiles without JSON conversion (compile-only)",
+    "Reject nested arrays, nonnumeric bounds, optional calls, argument spreads and opaque concat",
+    "Source fixture comparison and exact raw/catalog roundtrips"
+  ],
+  "limitations": [
+    "Flat arrays only; native matrix limitation remains.",
+    "Finite numeric bounds only; no undefined, NaN or Infinity semantics.",
+    "Concat requires JSON-compatible items and does not preserve shared JS object identity.",
+    "Opaque native content slicing has compile-only coverage; files were not tested.",
+    "Native numeric precision and value conversion apply.",
+    "Physical devices remain unverified; full Shortcuts/TypeScript coverage is incomplete."
+  ],
+  "files": [
+    {
+      "path": "src/compiler.ts",
+      "sha256": "7221ec395f14bcb12e3db60b90fb415c29d6ad568179fd91257fcbf5f4220f7c"
+    },
+    {
+      "path": "src/emitter.ts",
+      "sha256": "ade917433ccb7ecc696e2039185f968ac981707fb4ee2a6d5e17facc2c7374d0"
+    },
+    {
+      "path": "src/model.ts",
+      "sha256": "a63e1fdb63cd7b936c2860b4652c2a976e200eff3c31195a063b9e74df4e9305"
+    },
+    {
+      "path": "test/support/evaluate.ts",
+      "sha256": "c462d9efc21cca3d8d1e848748d22f049da8de878f19802805acea82a7bebca2"
+    },
+    {
+      "path": "test/array-copy.test.ts",
+      "sha256": "7291e399e07cc2054ddaabab92ae304e78b56b314a35a99d074da0a0b86e0e31"
+    },
+    {
+      "path": "test/typescript.test.ts",
+      "sha256": "3981ebb7c7c69624890a8c4aa09844124c50de5b8cb54d6116942c14421f38d7"
+    },
+    {
+      "path": "test/toolkit.test.ts",
+      "sha256": "1c07a66957de565f21a74865297dd04ee8c01b8dd2f7b92ac85755ff4ddb96f0"
+    },
+    {
+      "path": "examples/array-copy-test.ts",
+      "sha256": "824c7955d9bbb20505077a6c5489007cd8dbed9e4f757460f3ff9aa8d4bac25d"
+    },
+    {
+      "path": "test/fixtures/ios26-array-copy-workflow.json",
+      "sha256": "815dcf7a7f63fc650a6cd35d868d207b047c1c9e2678180a0e7d3bdc45e9d03e"
+    },
+    {
+      "path": "README.md",
+      "sha256": "108610179c0d769089041348b0d25f1b82e686c0ce715b2694ff3fc475e9273d"
+    },
+    {
+      "path": "package.json",
+      "sha256": "34f7a733d53c8643cf3b3577fb0dcbc72cb9a77b42bf84b7de3488eb7a029080"
+    },
+    {
+      "path": "dist/TS-Array-Copy.json",
+      "sha256": "778613c9a7750d0384a5fe6ef187afb6a6a37898c551291f0175c8f9eda26f97"
+    },
+    {
+      "path": "dist/TS-Array-Copy.unsigned.plist",
+      "sha256": "1a68c784dc458a57f00a3b41984d4a768e8a3aa86ced90545cff30b5dfe0b6c5"
+    },
+    {
+      "path": "dist/TS-Array-Copy.shortcut",
+      "sha256": "af29ae9282c3ad511ca6540b7accc0ff119980793111dbf3ad6912626b4253b1"
+    },
+    {
+      "path": "artifacts/ios-array-copy-concat.png",
+      "sha256": "2601749179ee569c44c31e6c24f9b58d8df3a54eb3927d0c64a624fbb3414fc2"
+    },
+    {
+      "path": "artifacts/ios-array-copy-copies.png",
+      "sha256": "4a130aec86e8101823dd4f020ddd9585e9da1d5446653f38be3ab3db4044b294"
+    },
+    {
+      "path": "artifacts/ios-array-copy-independent.png",
+      "sha256": "4cadbb872f9e19370cc3b2210c196832154a2d875aab8bf1ec998c097fca6f5e"
+    },
+    {
+      "path": "artifacts/ios-array-copy-ranges.png",
+      "sha256": "a71d4c1f8d0de2c90fef7079f77f8b3dcac59dddc9cae0a69e4c9aa949b44d1e"
+    },
+    {
+      "path": "artifacts/ios-array-copy-rows.png",
+      "sha256": "2ad94886c765ca101c1d3636c166fc50307842c2285f924c00f2028ce492940e"
+    },
+    {
+      "path": "artifacts/ios-array-copy-values.png",
+      "sha256": "3392c5029d5123c8701a56642bd1f69c789e7f73f1966e13c8a75585cbfad725"
+    }
+  ]
+}

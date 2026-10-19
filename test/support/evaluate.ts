@@ -11,6 +11,7 @@ export function evaluate(code: string, answers: number[] = [], menuChoices: stri
   const variables = new Map<string, unknown>();
   const seen: unknown[] = [];
   const collections: unknown[][] = [];
+  const stopShortcut = Symbol("Stop Shortcut");
   const result = (v: Value): any => v.kind === "number" || v.kind === "boolean" ? v.value
     : v.kind === "text" ? v.parts.map(p => typeof p === "string" ? p : result(p)).join("")
     : refs.get(v.id);
@@ -29,7 +30,9 @@ export function evaluate(code: string, answers: number[] = [], menuChoices: stri
         case "set": variables.set(node.name, result(node.value)); break;
         case "get": assert.ok(variables.has(node.name), `Uninitialized ${node.name}`); refs.set(node.id, variables.get(node.name)); break;
         case "list": refs.set(node.id, node.items.map(result)); break;
+        case "assemble-list": refs.set(node.id, node.items.flatMap(item => item.spread ? result(item.value) : [result(item.value)])); break;
         case "dictionary": refs.set(node.id, Object.fromEntries(node.entries.map(([key, value]) => [key, result(value)]))); break;
+        case "assemble-dictionary": refs.set(node.id, Object.fromEntries(node.parts.flatMap(part => part.kind === "entry" ? [[part.key, result(part.value)]] : Object.entries(result(part.value))))); break;
         case "json": refs.set(node.id, node.operation === "parse" ? JSON.parse(result(node.input)) : JSON.stringify(result(node.input))); break;
         case "string": refs.set(node.id, (String.prototype[node.method] as (...args: string[]) => unknown).apply(result(node.input), node.args.map(result))); break;
         case "field": refs.set(node.id, result(node.input)[node.key]); break;
@@ -64,6 +67,44 @@ export function evaluate(code: string, answers: number[] = [], menuChoices: stri
           seen.push(result(node.argument));
           break;
         case "native":
+          if (node.identifier === "is.workflow.actions.exit") throw stopShortcut;
+          if (node.identifier === "is.workflow.actions.alert") {
+            assert.equal(node.parameters.kind, "parameter-object");
+            if (node.parameters.kind !== "parameter-object") throw new Error("Expected alert parameters");
+            const message = node.parameters.entries.find(([key]) => key === "WFAlertActionMessage")![1];
+            assert.equal(message.kind, "literal");
+            if (message.kind === "literal") seen.push(message.value);
+            break;
+          }
+          if (node.identifier === "is.workflow.actions.text.split" || node.identifier === "is.workflow.actions.text.replace") {
+            assert.equal(node.parameters.kind, "parameter-object");
+            if (node.parameters.kind !== "parameter-object") throw new Error("Expected text parameters");
+            const params = new Map(node.parameters.entries);
+            const read = (key: string): any => { const p = params.get(key)!; return p.kind === "literal" ? p.value : p.kind === "parameter-value" ? result(p.value) : undefined; };
+            if (node.identifier.endsWith(".split")) {
+              assert.equal(read("WFTextSeparator"), "Custom");
+              refs.set(node.id, read("text").split(read("WFTextCustomSeparator")));
+            } else {
+              assert.equal(read("WFReplaceTextRegularExpression"), true);
+              assert.equal(read("WFReplaceTextCaseSensitive"), true);
+              const pattern = read("WFReplaceTextFind").replaceAll("\\A", "^").replaceAll("\\z", "$(?![\\s\\S])");
+              const template: string = read("WFReplaceTextReplace");
+              // ICU uses backslash quoting and $n groups, not JS replacement tokens.
+              refs.set(node.id, read("WFInput").replace(new RegExp(pattern, "gu"), (...args: any[]) =>
+                template.replace(/\\([\s\S])|\$(\d+)/g, (_: string, quoted: string | undefined, group: string) => quoted ?? args[Number(group)] ?? "")));
+            }
+            break;
+          }
+          if (node.identifier === "is.workflow.actions.getitemfromlist") {
+            assert.equal(node.parameters.kind, "parameter-object");
+            if (node.parameters.kind !== "parameter-object") throw new Error("Expected range parameters");
+            const params = new Map(node.parameters.entries);
+            const read = (key: string): any => { const p = params.get(key)!; return p.kind === "literal" ? p.value : p.kind === "parameter-value" ? result(p.value) : undefined; };
+            assert.equal(read("WFItemSpecifier"), "Items in Range");
+            const start = read("WFItemRangeStart"), end = read("WFItemRangeEnd"), input = read("WFInput");
+            assert.ok(Number.isInteger(start) && start >= 1 && start <= end && end <= input.length, "Invalid native range must be guarded");
+            refs.set(node.id, input.slice(start - 1, end)); break;
+          }
           if (node.identifier === "is.workflow.actions.downloadurl" && onRequest) {
             refs.set(node.id, onRequest(node, result));
             break;
@@ -95,7 +136,16 @@ export function evaluate(code: string, answers: number[] = [], menuChoices: stri
             const input = node.parameters.entries.find(([key]) => key === "Input")![1];
             assert.equal(input.kind, "parameter-value");
             if (input.kind !== "parameter-value") throw new Error("Expected count input");
-            refs.set(node.id, result(input.value).length);
+            const countType = node.parameters.entries.find(([key]) => key === "WFCountType")?.[1];
+            const value = result(input.value);
+            if (countType?.kind === "literal" && countType.value === "Characters") {
+              // iOS counts graphemes, as verified by TS-Text-Characters. This
+              // catches accidental reliance on JS UTF-16 length in lowering.
+              assert.equal(input.encoding, "attachment");
+              refs.set(node.id, [...new Intl.Segmenter("en", { granularity: "grapheme" }).segment(value)].length);
+            } else {
+              refs.set(node.id, value.length);
+            }
             break;
           }
           assert.equal(node.identifier, "is.workflow.actions.ask");
@@ -107,7 +157,7 @@ export function evaluate(code: string, answers: number[] = [], menuChoices: stri
       }
     }
   }
-  visit(ir);
+  try { visit(ir); } catch (error) { if (error !== stopShortcut) throw error; }
   return seen;
 }
 
