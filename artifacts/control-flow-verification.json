@@ -1,0 +1,73 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "validation": {
+    "typecheck": "passed: compiler, tests and examples",
+    "tests": {
+      "passed": 169,
+      "failed": 0
+    },
+    "signingMode": "people-who-know-me"
+  },
+  "shortcut": "TS-Control-Flow",
+  "actionCount": 106,
+  "observedOutputs": [
+    "Som: 5",
+    "Genest: 11,13,eind1;eind2;",
+    "Index: nul/twee",
+    "Selectie: twee;nul;"
+  ],
+  "completion": "All four result dialogs appeared in order. Main then reached the explicit native Stop This Shortcut action; no error dialog appeared.",
+  "files": [
+    {
+      "path": "examples/control-flow-test.ts",
+      "sha256": "62df7f4fee4d179e3cad51b2f7636b684ad24431d9c0b5f19042b24067ddbc2f"
+    },
+    {
+      "path": "test/fixtures/ios26-control-flow-workflow.json",
+      "sha256": "bfaa7e48e4a350fb333acbac88e2248002122813ac0f5320a2f7f3ef93319bd1"
+    },
+    {
+      "path": "dist/TS-Control-Flow.shortcut",
+      "sha256": "0e46c98abf3fe4200dab46ddd6a72c9bbe4de216c01a3ef44367a2533f7c9aec"
+    },
+    {
+      "path": "dist/TS-Control-Flow.unsigned.plist",
+      "sha256": "1c261fa806d37ce03b20190cd6f13747335702123888ba9657d74b71ac56b201"
+    },
+    {
+      "path": "dist/TS-Control-Flow.json",
+      "sha256": "f7b303a93349252db9e18037c31179b82e4d07c7eb16955a2245647145cfa32c"
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "artifacts/ios-control-sum.png",
+      "sha256": "111903442cfb833418506d8c35de57c0f8e21a8fea37feba02a4b249352716a0"
+    },
+    {
+      "path": "artifacts/ios-control-nested.png",
+      "sha256": "082fe5fada9e57aaf4efd0bd0d3bf9fb31e2f3a7b0cc3488bce9e7bf9f3064de"
+    },
+    {
+      "path": "artifacts/ios-control-index.png",
+      "sha256": "43ed6012597781b41e85de14ac820dcefb001e9d3ae456a96b1a8ba159d39dc4"
+    },
+    {
+      "path": "artifacts/ios-control-selection.png",
+      "sha256": "0fe79240c5cf30ff6b05a6c7d2e3eb362f6c878c272c116717dd1e5488f35990"
+    }
+  ],
+  "limitations": [
+    "Only this combined example was executed on the iOS 26.5 simulator.",
+    "Break skips remaining native Repeat bodies via guards; it does not immediately terminate the native Repeat action.",
+    "Dynamic indices are not bounds-checked and must be valid nonnegative integers; invalid runtime indices follow native Shortcuts behavior.",
+    "Only unlabeled break/continue in for-of loops are currently supported. General for/while loops and labeled jumps remain unsupported.",
+    "The full Shortcuts catalog and all TypeScript constructs remain unverified."
+  ]
+}

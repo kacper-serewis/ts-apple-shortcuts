@@ -1,0 +1,84 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "validation": {
+    "typecheck": "passed: compiler, tests and examples",
+    "tests": {
+      "passed": 194,
+      "failed": 0
+    },
+    "signingMode": "people-who-know-me"
+  },
+  "shortcut": "TS-Arrays-Test",
+  "actionCount": 161,
+  "observedOutputs": [
+    "Map: 4; 10,43",
+    "Filter/reduce: 3; 96",
+    "Objecten: Kacper/10",
+    "ForEach: 0:1;2:3;3:4;",
+    "Leeg: 0/0/9",
+    "Lege tekst: 2"
+  ],
+  "completion": "All six result dialogs appeared in order. Main reached the explicit native Stop This Shortcut action; no error dialog appeared.",
+  "files": [
+    {
+      "path": "examples/array-methods-test.ts",
+      "sha256": "122ac6a4d58c4dbd87ec60d86843b91c892462c2dd95532c855bb6fbe33da10d"
+    },
+    {
+      "path": "test/fixtures/ios26-array-methods-workflow.json",
+      "sha256": "3df52abf02efe39dacc671b3756961bc289dcc0cd5ed1ac398e935ce98873dc5"
+    },
+    {
+      "path": "dist/TS-Arrays-Test.shortcut",
+      "sha256": "d604b5839634ba7531154d6ad70ad20e8797d8e291605fe6699227fbbefe89c1"
+    },
+    {
+      "path": "dist/TS-Arrays-Test.unsigned.plist",
+      "sha256": "279f65665fe59a171d5ce55beaa081ac337ffeb829a8370b150d3f154310b597"
+    },
+    {
+      "path": "dist/TS-Arrays-Test.json",
+      "sha256": "33394278bdd6c2df0abf5b7e1b0b6f23f406c0d244a6cb7e6d17832716c5fac3"
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "artifacts/ios-arrays-map.png",
+      "sha256": "536903e9c3a308557744ee9817f106e2f8d34edd33b9c90c1a81dd6186089a14"
+    },
+    {
+      "path": "artifacts/ios-arrays-filter-reduce.png",
+      "sha256": "c7b912af899ad7eb3b5ba91cc9d51f648d374b20f4cdfdb9a928b33a4970b065"
+    },
+    {
+      "path": "artifacts/ios-arrays-objects.png",
+      "sha256": "0985ddf5a12a1369fde4e2bf7868c0defd5c5b29c86b6c6e613820606abe8085"
+    },
+    {
+      "path": "artifacts/ios-arrays-foreach.png",
+      "sha256": "521410c8696c4be30c12e40cc4ed825a4f9d0ad21f7dbd28fba206e658faf138"
+    },
+    {
+      "path": "artifacts/ios-arrays-empty.png",
+      "sha256": "6a17410b765931d9f45bd60e4c54fc3cf52daa7bfde20c46674cfabb9e55cac4"
+    },
+    {
+      "path": "artifacts/ios-arrays-empty-text.png",
+      "sha256": "2f7833e28225d0e43230866871e688afec5dfbbcf5807f684cc60910dc85337d"
+    }
+  ],
+  "limitations": [
+    "Only this combined example was executed on the iOS 26.5 simulator.",
+    "Additional semantic tests use an IR evaluator and do not independently verify native behavior.",
+    "Callbacks must be inline synchronous arrows. Function-valued and async callbacks, thisArg, defaults/rest and generic callbacks are not supported.",
+    "Map results must represent one scalar, dictionary or native item; nested-array outputs are rejected to prevent native Repeat Results flattening.",
+    "Filter requires boolean results; reduce requires an initial value and a consistent accumulator category.",
+    "The full action catalog and full TypeScript language remain unverified."
+  ]
+}

@@ -1,0 +1,311 @@
+{
+  "WFWorkflowName": "Shortcut",
+  "WFWorkflowClientVersion": "3036.0.4.2",
+  "WFWorkflowMinimumClientVersion": 900,
+  "WFWorkflowMinimumClientVersionString": "900",
+  "WFWorkflowIcon": {
+    "WFWorkflowIconStartColor": 4282601983,
+    "WFWorkflowIconGlyphNumber": 59511
+  },
+  "WFWorkflowImportQuestions": [],
+  "WFWorkflowInputContentItemClasses": [],
+  "WFWorkflowTypes": [],
+  "WFWorkflowHasShortcutInputVariables": false,
+  "WFWorkflowActions": [
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.list",
+      "WFWorkflowActionParameters": {
+        "UUID": "ID-1",
+        "WFItems": [
+          "Kacper",
+          "Ada"
+        ]
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.repeat.each",
+      "WFWorkflowActionParameters": {
+        "UUID": "ID-2",
+        "GroupingIdentifier": "ID-3",
+        "WFControlFlowMode": 0,
+        "WFInput": {
+          "Value": {
+            "Type": "ActionOutput",
+            "OutputUUID": "ID-1",
+            "OutputName": "List"
+          },
+          "WFSerializationType": "WFTextTokenAttachment"
+        }
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.list",
+      "WFWorkflowActionParameters": {
+        "UUID": "ID-4",
+        "WFItems": [
+          {
+            "WFItemType": 0,
+            "WFValue": {
+              "Value": {
+                "string": "￼/A",
+                "attachmentsByRange": {
+                  "{0, 1}": {
+                    "Type": "ActionOutput",
+                    "OutputUUID": "ID-2",
+                    "OutputName": "Repeat Item"
+                  }
+                }
+              },
+              "WFSerializationType": "WFTextTokenString"
+            }
+          },
+          {
+            "WFItemType": 0,
+            "WFValue": {
+              "Value": {
+                "string": "￼/B",
+                "attachmentsByRange": {
+                  "{0, 1}": {
+                    "Type": "ActionOutput",
+                    "OutputUUID": "ID-2",
+                    "OutputName": "Repeat Item"
+                  }
+                }
+              },
+              "WFSerializationType": "WFTextTokenString"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.repeat.each",
+      "WFWorkflowActionParameters": {
+        "UUID": "ID-5",
+        "GroupingIdentifier": "ID-6",
+        "WFControlFlowMode": 0,
+        "WFInput": {
+          "Value": {
+            "Type": "ActionOutput",
+            "OutputUUID": "ID-4",
+            "OutputName": "List"
+          },
+          "WFSerializationType": "WFTextTokenAttachment"
+        }
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.gettext",
+      "WFWorkflowActionParameters": {
+        "UUID": "ID-7",
+        "WFTextActionText": {
+          "Value": {
+            "string": "JS:￼",
+            "attachmentsByRange": {
+              "{3, 1}": {
+                "Type": "ActionOutput",
+                "OutputUUID": "ID-2",
+                "OutputName": "Repeat Item"
+              }
+            }
+          },
+          "WFSerializationType": "WFTextTokenString"
+        }
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.text.match",
+      "WFWorkflowActionParameters": {
+        "UUID": "ID-8",
+        "text": {
+          "Value": {
+            "string": "￼",
+            "attachmentsByRange": {
+              "{0, 1}": {
+                "Type": "ActionOutput",
+                "OutputUUID": "ID-7",
+                "OutputName": "Text"
+              }
+            }
+          },
+          "WFSerializationType": "WFTextTokenString"
+        },
+        "WFMatchTextPattern": "\\AJS:Kacper\\z",
+        "WFMatchTextCaseSensitive": true
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
+      "WFWorkflowActionParameters": {
+        "GroupingIdentifier": "ID-9",
+        "WFControlFlowMode": 0,
+        "WFCondition": 100,
+        "WFInput": {
+          "Type": "Variable",
+          "Variable": {
+            "Value": {
+              "Type": "ActionOutput",
+              "OutputUUID": "ID-8",
+              "OutputName": "Matches"
+            },
+            "WFSerializationType": "WFTextTokenAttachment"
+          }
+        }
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.showresult",
+      "WFWorkflowActionParameters": {
+        "UUID": "ID-10",
+        "Text": {
+          "Value": {
+            "string": "IF ￼: ￼",
+            "attachmentsByRange": {
+              "{3, 1}": {
+                "Type": "ActionOutput",
+                "OutputUUID": "ID-2",
+                "OutputName": "Repeat Item"
+              },
+              "{6, 1}": {
+                "Type": "ActionOutput",
+                "OutputUUID": "ID-5",
+                "OutputName": "Repeat Item"
+              }
+            }
+          },
+          "WFSerializationType": "WFTextTokenString"
+        }
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
+      "WFWorkflowActionParameters": {
+        "GroupingIdentifier": "ID-9",
+        "WFControlFlowMode": 1
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.showresult",
+      "WFWorkflowActionParameters": {
+        "UUID": "ID-11",
+        "Text": {
+          "Value": {
+            "string": "ELSE ￼: ￼",
+            "attachmentsByRange": {
+              "{5, 1}": {
+                "Type": "ActionOutput",
+                "OutputUUID": "ID-2",
+                "OutputName": "Repeat Item"
+              },
+              "{8, 1}": {
+                "Type": "ActionOutput",
+                "OutputUUID": "ID-5",
+                "OutputName": "Repeat Item"
+              }
+            }
+          },
+          "WFSerializationType": "WFTextTokenString"
+        }
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
+      "WFWorkflowActionParameters": {
+        "GroupingIdentifier": "ID-9",
+        "WFControlFlowMode": 2
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.repeat.each",
+      "WFWorkflowActionParameters": {
+        "UUID": "ID-12",
+        "GroupingIdentifier": "ID-6",
+        "WFControlFlowMode": 2
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.showresult",
+      "WFWorkflowActionParameters": {
+        "UUID": "ID-13",
+        "Text": {
+          "Value": {
+            "string": "Na binnenste lus: ￼",
+            "attachmentsByRange": {
+              "{18, 1}": {
+                "Type": "ActionOutput",
+                "OutputUUID": "ID-2",
+                "OutputName": "Repeat Item"
+              }
+            }
+          },
+          "WFSerializationType": "WFTextTokenString"
+        }
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.repeat.each",
+      "WFWorkflowActionParameters": {
+        "UUID": "ID-14",
+        "GroupingIdentifier": "ID-3",
+        "WFControlFlowMode": 2
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.list",
+      "WFWorkflowActionParameters": {
+        "UUID": "ID-15",
+        "WFItems": []
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.repeat.each",
+      "WFWorkflowActionParameters": {
+        "UUID": "ID-16",
+        "GroupingIdentifier": "ID-17",
+        "WFControlFlowMode": 0,
+        "WFInput": {
+          "Value": {
+            "Type": "ActionOutput",
+            "OutputUUID": "ID-15",
+            "OutputName": "List"
+          },
+          "WFSerializationType": "WFTextTokenAttachment"
+        }
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.showresult",
+      "WFWorkflowActionParameters": {
+        "UUID": "ID-18",
+        "Text": {
+          "Value": {
+            "string": "FOUT: lege lijst bevat ￼",
+            "attachmentsByRange": {
+              "{23, 1}": {
+                "Type": "ActionOutput",
+                "OutputUUID": "ID-16",
+                "OutputName": "Repeat Item"
+              }
+            }
+          },
+          "WFSerializationType": "WFTextTokenString"
+        }
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.repeat.each",
+      "WFWorkflowActionParameters": {
+        "UUID": "ID-19",
+        "GroupingIdentifier": "ID-17",
+        "WFControlFlowMode": 2
+      }
+    },
+    {
+      "WFWorkflowActionIdentifier": "is.workflow.actions.showresult",
+      "WFWorkflowActionParameters": {
+        "UUID": "ID-20",
+        "Text": "Klaar: lege lijst overgeslagen"
+      }
+    }
+  ]
+}

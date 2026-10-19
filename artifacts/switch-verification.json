@@ -1,0 +1,126 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "validation": {
+    "typecheck": "passed: compiler, tests and all examples",
+    "tests": {
+      "passed": 251,
+      "failed": 0
+    },
+    "plist": "Apple plutil -lint passed",
+    "signingMode": "people-who-know-me",
+    "nativeRegressionFixtures": 9
+  },
+  "verifiedShortcut": {
+    "name": "TS-Switch-Numeric",
+    "actionCount": 151,
+    "observedOutputs": [
+      "Loop: 1;2;D;eind;3;eind;",
+      "Functie: twee"
+    ],
+    "completion": "Both result dialogs appeared in order. Main stopped without an error and returned to the Shortcuts library.",
+    "importComparison": "All 151 actions read from the simulator database match the compiled workflow exactly."
+  },
+  "compilerCoverage": [
+    "First-match selection and source-order fallthrough",
+    "Default before, between or after cases",
+    "Discriminant evaluated once; case expressions stop after the first match",
+    "Numeric/boolean cases and static text cases",
+    "Nested switches, lexical scope, initialization checks and invalid jumps",
+    "Break/continue targets across switch and for-of boundaries",
+    "Helper/array-callback returns and repeated calls"
+  ],
+  "unresolvedFailure": {
+    "shortcut": "TS-Switch-Test",
+    "actionCount": 199,
+    "status": "Unexpected Match Text input prompt prevented the first expected result; this workflow is not device-verified.",
+    "reproduction": "TS-Match-Probe also fails on its first literal-only matchText(\"JS:open\", \"\\AJS:open\\z\"), without any switch or loop. Equivalent source is examples/match-text-diagnostic.ts.",
+    "log": "artifacts/match-text-intent-failure.log captures TS-Match-Silent, the variant with ShowWhenRun=false: the native intent receives text=JS:open, then returns WFIntentExecutorErrorDomain Code=101 with NeedsValue and text=<null>.",
+    "unsuccessfulChecks": [
+      "Direct repeat-item text tokens",
+      "A named native variable, including selecting it again in the Shortcuts editor",
+      "Additional WFInput attachment",
+      "ShowWhenRun=false",
+      "Simulator reboot followed by rerunning TS-Switch-Test"
+    ],
+    "conclusion": "Native intent resolution fails on this simulator. The root cause is unresolved; no speculative serialization change was made.",
+    "scope": "This affects current device verification of matchText, strict text conditions and text switches. Prior successful device records are historical; the current failure remains open."
+  },
+  "limitations": [
+    "Only the numeric example completed on iOS in this milestone.",
+    "Boolean cases and additional semantics are checked by compiler/IR tests, not independently on-device.",
+    "Text cases require static strings. Dynamic text cases, object-identity comparisons and labeled jumps are unsupported.",
+    "The full TypeScript language and full native action catalog are not verified."
+  ],
+  "files": [
+    {
+      "path": "src/compiler.ts",
+      "sha256": "384ad2961aa07542f3317b43c358e22274995ece9a40fa1fd697be98dad6bf47"
+    },
+    {
+      "path": "examples/switch-test.ts",
+      "sha256": "d3a25e25a15a426d313837efb4137218fa1c60d1094133c3ae03fab9797ba4c8"
+    },
+    {
+      "path": "examples/switch-numeric-test.ts",
+      "sha256": "45e2e92e26848a1d07545a5e845207fc5eb078d1bf24861c7c57ad6956959b70"
+    },
+    {
+      "path": "examples/match-text-diagnostic.ts",
+      "sha256": "bbae2d56e691db6e208455f662e366226aeb49c56356484ffee1c90c4c41f09a"
+    },
+    {
+      "path": "test/switch.test.ts",
+      "sha256": "bf1c911ddd06ea30ac7138f9f8c9792ee2cbcd0b760e5388c3a519c150e3a919"
+    },
+    {
+      "path": "test/fixtures/ios26-switch-numeric-workflow.json",
+      "sha256": "1f7720967118228ee765fbfb6a48bc5c08349937e2c960a735c80266e3d1da01"
+    },
+    {
+      "path": "dist/TS-Switch-Numeric.shortcut",
+      "sha256": "d8039c9060f9ec966b58843108c8c01b1769df57b29cc3220f9f968947ca8616"
+    },
+    {
+      "path": "dist/TS-Switch-Numeric.unsigned.plist",
+      "sha256": "63a1381319971255304c5d980f7391225d2eeb41da9b0cedc836d87db613f4cb"
+    },
+    {
+      "path": "dist/TS-Switch-Numeric.json",
+      "sha256": "998394f812e563ad2b847ce4333f4047f1cf96df690af399da7200f3a8c45319"
+    },
+    {
+      "path": "dist/TS-Switch-Test.json",
+      "sha256": "c52ad5e5881bfc5b290ca167f109df7170797d5be659a301a98f85884b388a0f"
+    },
+    {
+      "path": "dist/TS-Match-Probe.json",
+      "sha256": "b42a0a6358fb85d5eeb54e2e8b80a76eedde2fa92351823c22e79ad347589f4c"
+    },
+    {
+      "path": "dist/TS-Match-Silent.json",
+      "sha256": "8831b42be32af880c199bc3bd0159f4597417cd6ac1110fd4fdb60f8583a7502"
+    },
+    {
+      "path": "artifacts/match-text-intent-failure.log",
+      "sha256": "b2b0d46d51f4dfb5b8195c681f542c18752cce33bedbc0a270817a86395d3f80"
+    },
+    {
+      "path": "artifacts/ios-switch-numeric-loop.png",
+      "sha256": "25a433acfbf42f0f48f8d2211ff088d8f37e890cb138eba10276661e937de2f5"
+    },
+    {
+      "path": "artifacts/ios-switch-numeric-return.png",
+      "sha256": "c6dbe71e5d8cd359f734924b797949585a307e5d9370b0e674ca062ef4c2968b"
+    },
+    {
+      "path": "artifacts/ios-switch-unexpected-prompt.png",
+      "sha256": "1a92580204955a6d9f0156b5aff78fddbc355724dee6a02fa05753ca165e4409"
+    }
+  ]
+}

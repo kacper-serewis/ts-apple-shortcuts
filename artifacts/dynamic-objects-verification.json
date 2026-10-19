@@ -1,0 +1,216 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "validation": {
+    "typecheck": "passed: compiler, tests and all examples",
+    "tests": {
+      "passed": 386,
+      "failed": 0
+    },
+    "focusedTests": 16,
+    "plist": "Apple plutil -lint passed",
+    "signingMode": "people-who-know-me",
+    "nativeRegressionFixtures": 17
+  },
+  "change": "Object literals can contain existing JSON dictionaries and flat lists. Native JSON serialization composes container fragments, preserving list cardinality and escaping. Static inline literals keep their prior encoding. Array-depth metadata prevents unsupported dynamic matrix fields from entering the flat-list serializer.",
+  "verifiedShortcut": {
+    "name": "TS-Dynamic-Objects-v3",
+    "actionCount": 221,
+    "observedOutputs": [
+      "Ada/7; ts/ios",
+      {
+        "version": 1,
+        "payload": {
+          "tags": [
+            "ts",
+            "ios"
+          ],
+          "title": "nieuw",
+          "active": false,
+          "person": {
+            "name": "Ada",
+            "score": 7,
+            "enabled": true
+          }
+        }
+      },
+      {
+        "items": [],
+        "empty": {},
+        "ok": true
+      },
+      {
+        "items": [
+          42
+        ],
+        "empty": {},
+        "ok": true
+      },
+      {
+        "items": [
+          2,
+          4
+        ],
+        "empty": {},
+        "ok": true
+      },
+      {
+        "quote\"\\\n": {
+          "flags": [
+            false
+          ],
+          "single": [
+            ""
+          ],
+          "rows": [
+            {
+              "n": 9
+            }
+          ],
+          "strings": [
+            "",
+            "quote\"\\\n{}[]"
+          ]
+        },
+        "ok": true
+      }
+    ],
+    "outputFormat": "The first result is text. The five following dialogs displayed JSON; parsed objects are recorded here without relying on native key ordering.",
+    "completion": "All six expected results appeared in order; after the final Done, the editor showed play available and no error.",
+    "importComparison": "All 221 imported actions read from the simulator database match the compiled output exactly."
+  },
+  "nativeCoverage": [
+    "Helper-returned dictionaries and array-method lists embedded in object literals",
+    "Multiple object wrapper levels with named field and list index access",
+    "Empty objects, empty lists, singleton and multi-item numeric lists",
+    "Boolean fields, singleton boolean/text/object lists and empty string entries",
+    "Quotes, backslashes, newlines, braces and brackets in keys and values"
+  ],
+  "compilerCoverage": [
+    "Fields evaluated once in source order, including awaited actions and captured-variable mutation",
+    "Repeated helper results and mapping objects with dynamic metadata",
+    "Native attachment references the final reconstructed dictionary",
+    "No network requests or source execution during API input compilation",
+    "Balanced groups, defined output UUIDs and complete source maps",
+    "JSON-fragment extraction preserves scalar and nested JSON values",
+    "All previous native fixtures retain their expectations; new fixture raw/catalog roundtrips pass",
+    "Reject dynamic matrices after parameters, helper returns, variables or field reads; reject mixed/recursive array nesting"
+  ],
+  "investigations": [
+    {
+      "name": "TS-Dynamic-Objects",
+      "result": "Direct Set Dictionary Value fails for an empty list: No Value Provided for items."
+    },
+    {
+      "name": "TS-Dynamic-Objects-v2",
+      "result": "Skipping the empty setter preserves [], but a singleton list becomes the scalar 42. The final JSON composition preserves both shapes."
+    },
+    {
+      "name": "TS-Dynamic-Matrix / v2 / v3",
+      "result": "Unresolved. Nested array literal processing crashes BackgroundShortcutRunner before object composition. The tested direct-array state variant and recursive JSON backend did not fix it and were removed. Dynamic nested array embedding is explicitly rejected; the pre-existing nested-literal failure outside this path remains documented."
+    }
+  ],
+  "limitations": [
+    "Data must be JSON-compatible. Native numeric precision and dictionary ordering apply.",
+    "JSON composition adds native actions and serialization work.",
+    "Dynamic containers in array literals or native dictionary(...) parameter field states remain unsupported; use attachment() where the action accepts a dictionary variable.",
+    "Dynamic nested/mixed/recursive arrays in object literals are rejected. Direct nested array literals can still compile elsewhere but have a known native runtime failure.",
+    "The direct setDictionaryValue wrapper retains native empty/singleton-list behavior; the new object construction handles those cases explicitly.",
+    "Physical devices, other OS versions, real HTTP requests and every Shortcuts capability remain unverified."
+  ],
+  "files": [
+    {
+      "path": "src/compiler.ts",
+      "sha256": "988b61e1f759fd5320002b90daedbbd5ff8769e97cffc15744d381498f10f224"
+    },
+    {
+      "path": "src/emitter.ts",
+      "sha256": "f189ad73edd0b866d698bf1557ffc1b28e24a3a108a19720d375a8f106a23af7"
+    },
+    {
+      "path": "src/model.ts",
+      "sha256": "70659217a60c8fa6b1263e5c222ca5b22ec9bb838dbec0c5e702bf3330ff5bfe"
+    },
+    {
+      "path": "examples/dynamic-objects-test.ts",
+      "sha256": "6b846434136c7c461a7cd11c96636da181121eb86f96b90e5499e40d7feb6afa"
+    },
+    {
+      "path": "test/dynamic-objects.test.ts",
+      "sha256": "ee870cda698a5c3932f215159c40d1026ae28f17b4f99656e42c1c24074e61a5"
+    },
+    {
+      "path": "test/typescript.test.ts",
+      "sha256": "010e6613402c63741c7c5d54d9955dc18b43ed3d798439ba6dfe265fd77a22b9"
+    },
+    {
+      "path": "test/toolkit.test.ts",
+      "sha256": "3ea3721f6a28262b8e6474e648982cc171d538457fbf60124a1127310a590701"
+    },
+    {
+      "path": "test/fixtures/ios26-dynamic-objects-workflow.json",
+      "sha256": "bc68d3aa5aa4ede79b57ff0bc51f02841bc5f5ead74b70d48e1a57d23c91df5f"
+    },
+    {
+      "path": "dist/TS-Dynamic-Objects-v3.json",
+      "sha256": "96bd193d6ba5096bc316033daef457d00e5436699e003967b81071d774842582"
+    },
+    {
+      "path": "dist/TS-Dynamic-Objects-v3.unsigned.plist",
+      "sha256": "383ad1941e245bce2bb6ff159cf0d48a360077cc71482f7c2485a60d5139e4dc"
+    },
+    {
+      "path": "dist/TS-Dynamic-Objects-v3.shortcut",
+      "sha256": "eb6b629e445c6f42b201b60a02987d5417f3a26f45b95dba340d8d59da17542b"
+    },
+    {
+      "path": "artifacts/dynamic-matrix-diagnostic.ts",
+      "sha256": "c85b04ff25dcaee0e929e5f110f0868e34bb2f0765ebfe7e206c91119d05e449"
+    },
+    {
+      "path": "artifacts/dynamic-matrix-native-failure.log",
+      "sha256": "c2205d1cdf7c083b3eafc77c1686cb500d84fd1c4c411b57b79e5912a99a3d51"
+    },
+    {
+      "path": "artifacts/ios-dynamic-objects-empty-failure.png",
+      "sha256": "012f88c4e541e7fd282670b5309210131d657a5ebacd1a50c661882e44de0704"
+    },
+    {
+      "path": "artifacts/ios-dynamic-objects-empty.png",
+      "sha256": "318b2a66da261b026f65fe4204d9342c910dde92519c27b4b98de37687b61f63"
+    },
+    {
+      "path": "artifacts/ios-dynamic-objects-envelope.png",
+      "sha256": "e7d4a78f8ac17b7b84312a7b6f8a0381ce15cf6b6f87e2a23280ae2be594af89"
+    },
+    {
+      "path": "artifacts/ios-dynamic-objects-escaping.png",
+      "sha256": "4722e9f0bfaf8e30f3645d3aa554ee5246a57f409986568477d3614ef8b91276"
+    },
+    {
+      "path": "artifacts/ios-dynamic-objects-fields.png",
+      "sha256": "070674b4c00b4cd802a2e09b472af9c365171800a5705f0cf6b9fd843739dd62"
+    },
+    {
+      "path": "artifacts/ios-dynamic-objects-many.png",
+      "sha256": "3bfe33d50f19ea9d2571f166b86730c9c60f71cc10dc426ee0491bc38dd585e9"
+    },
+    {
+      "path": "artifacts/ios-dynamic-objects-matrix-failure.png",
+      "sha256": "774f0faf8ffa05e67bf2fd50fb9869eade09d7b6b813c057e799cd1dbef805ee"
+    },
+    {
+      "path": "artifacts/ios-dynamic-objects-single-failure.png",
+      "sha256": "977b5a26fb958a1e66dba008d67e0fdd33e392191f68fec4718b230cd8d82c12"
+    },
+    {
+      "path": "artifacts/ios-dynamic-objects-single.png",
+      "sha256": "46a78174c4ff201d5a8a316a673984d9710408454aa60eed24f446bfbcd9a4ff"
+    }
+  ]
+}

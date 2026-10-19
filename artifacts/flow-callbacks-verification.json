@@ -1,0 +1,143 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "validation": {
+    "typecheck": "passed: compiler, tests and all examples",
+    "tests": {
+      "passed": 369,
+      "failed": 0
+    },
+    "focusedTests": 23,
+    "plist": "Apple plutil -lint passed",
+    "signingMode": "people-who-know-me",
+    "nativeRegressionFixtures": 16
+  },
+  "change": "Native Repeat Count callbacks support an optional zero-based index. Repeat and menu callbacks support local void returns, including from nested loops or switches, and awaited action returns. Each invocation has isolated return state and repeat counters.",
+  "verifiedShortcut": {
+    "name": "TS-Flow-Callbacks",
+    "actionCount": 112,
+    "runs": [
+      {
+        "menuChoice": "Vroeg stoppen",
+        "observedOutputs": [
+          "Index: 0:10;2:12;3:13;",
+          "Genest: 00;02;eind;10;12;eind;",
+          "Menu: start;",
+          "Na menu; leeg: 0"
+        ]
+      },
+      {
+        "menuChoice": "Doorgaan",
+        "observedOutputs": [
+          "Index: 0:10;2:12;3:13;",
+          "Genest: 00;02;eind;10;12;eind;",
+          "Menu: start;klaar;",
+          "Na menu; leeg: 0"
+        ]
+      }
+    ],
+    "completion": "Both runs displayed all four expected results in order and returned to the editor with play available, without an error.",
+    "importComparison": "All 112 imported actions read from the simulator database match the compiled output exactly."
+  },
+  "nativeCoverage": [
+    "Zero-based repeat indices remain independent of callback parameter mutation",
+    "Early return skips one iteration and the counter still advances",
+    "Nested repeats isolate counters and return state",
+    "Menu return from a nested for-of skips the remainder of the selected branch",
+    "Both menu branches continue after the menu",
+    "A zero-count repeat invokes no callback"
+  ],
+  "compilerCoverage": [
+    "Count evaluated once before callback scope, including an awaited count action",
+    "Parameter shadowing leaves outer variables unchanged",
+    "Return state resets for repeat invocations with and without an index parameter",
+    "Nested loops and switches respect callback returns; nested callbacks keep separate frames",
+    "return await action preserves effects and skipped prompts do not execute",
+    "Helpers and menu/repeat callbacks return to the correct caller",
+    "Invalid callback parameters, generic callbacks, value returns and cross-callback jumps are rejected",
+    "All prior native workflow expectations are preserved; the new fixture roundtrips through raw and catalog TypeScript"
+  ],
+  "limitations": [
+    "Native flow callbacks remain inline async arrows with braced bodies and void results.",
+    "No default/rest/optional index parameters, generic callbacks, function references or expression-bodied callbacks.",
+    "Runtime repeat counts should be finite integers; positive fractions retain native rounding behavior.",
+    "Local return does not break the entire repeat. Native nested loops still traverse remaining guarded iterations.",
+    "Ordinary for/while loops and complete TypeScript/Shortcuts coverage remain unfinished.",
+    "Physical devices and other OS versions were not tested."
+  ],
+  "files": [
+    {
+      "path": "src/compiler.ts",
+      "sha256": "f3e25f3af15f6af34ade63eef27cef35d68dedbad9ef114baca6590abfbf046b"
+    },
+    {
+      "path": "api/ios.d.ts",
+      "sha256": "ba7eaca803f3347cd508e291f76691399401d1b73be036303082fc6d5bb312e5"
+    },
+    {
+      "path": "test/support/evaluate.ts",
+      "sha256": "8b0662a5c6e7d7d54a9f05c34f3db410da1de6c5eee3f3cd82384c31b50a3e7d"
+    },
+    {
+      "path": "examples/flow-callbacks-test.ts",
+      "sha256": "9da94b23b6fb47dfeadd93e157502762db1cd8ad90d89fd38347860c61631328"
+    },
+    {
+      "path": "test/flow-callbacks.test.ts",
+      "sha256": "ad80dad452e32b6b68bf738c5d67aa11c51fef63bdaf91339951b0aae6929280"
+    },
+    {
+      "path": "test/typescript.test.ts",
+      "sha256": "e0ef424210b0aae0a94afbe8aa68f7dc65295862d72c08a9efa01f552121a3ef"
+    },
+    {
+      "path": "test/toolkit.test.ts",
+      "sha256": "1cecacb24737edb6fbff1be3ecadee6071179c3d227a56a08221205cf2ccafcc"
+    },
+    {
+      "path": "test/fixtures/ios26-flow-callbacks-workflow.json",
+      "sha256": "549fcde9ddeffc55687ecb4f5c73d12a91ea1f4abc8790f46eafcd979a928ebb"
+    },
+    {
+      "path": "dist/TS-Flow-Callbacks.json",
+      "sha256": "e0acfc290f5cdd57587e2dd9ed781c29112f635417bfd3c8b2485650b6a7613e"
+    },
+    {
+      "path": "dist/TS-Flow-Callbacks.unsigned.plist",
+      "sha256": "7f9fabc77a1c6cd8f5c64f523c8bb5ac53c3012de2238dc92e26f10773d4ee38"
+    },
+    {
+      "path": "dist/TS-Flow-Callbacks.shortcut",
+      "sha256": "e955b1c32462def9313371ff239ac04e58bbc8422a5e28e8a3aed4001449f742"
+    },
+    {
+      "path": "artifacts/ios-flow-callbacks-after-continue.png",
+      "sha256": "0aaf64dff78194c0644a5fb8f91f32ed6f1c175d9fb534bd27bd343db08571b6"
+    },
+    {
+      "path": "artifacts/ios-flow-callbacks-after-early.png",
+      "sha256": "0aaf64dff78194c0644a5fb8f91f32ed6f1c175d9fb534bd27bd343db08571b6"
+    },
+    {
+      "path": "artifacts/ios-flow-callbacks-continue.png",
+      "sha256": "815467fcc2241e511d4cbb0846d0b6433ccfea4e615947f7c5aa7820ef7f645f"
+    },
+    {
+      "path": "artifacts/ios-flow-callbacks-early.png",
+      "sha256": "0ae04fd592edae2e59d3b2f31850550e21eb2e9e7a12f2d25d4f730210b688d1"
+    },
+    {
+      "path": "artifacts/ios-flow-callbacks-index.png",
+      "sha256": "a1a668140b6a77bfc02df3e28fa31147260086d2cdecd8d461cb753ba3dad399"
+    },
+    {
+      "path": "artifacts/ios-flow-callbacks-nested.png",
+      "sha256": "73f3c0d20eb43f3252bb4b9e3230a38c51ce518f85f44c95150435446722d7c2"
+    }
+  ]
+}

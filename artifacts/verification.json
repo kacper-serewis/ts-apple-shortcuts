@@ -1,0 +1,37 @@
+{
+  "date": "2026-10-19",
+  "device": "iPhone 17e simulator",
+  "os": "iOS 26.5",
+  "file": "dist/JS-Test-v2.shortcut",
+  "sha256": "39f51ae5a6e47218eeca4d6706c96e910eac6f90c32089a0ae16fb88aa661cd6",
+  "source": "test/fixtures/verified-source.js.txt",
+  "sourceSha256": "0acf3253868c283d601f00e35fd59e28835bdb71bdd1b9cb38fdd649ad4a0857",
+  "signingMode": "people-who-know-me",
+  "compilerTests": {
+    "passed": 22,
+    "failed": 0
+  },
+  "cases": [
+    {
+      "input": "Kacper",
+      "observed": "✅ IF werkt: Hoi Kacper!",
+      "passed": true
+    },
+    {
+      "input": "Ada",
+      "observed": "✅ ELSE werkt: Welkom Ada!",
+      "passed": true
+    },
+    {
+      "input": "kacper",
+      "observed": "✅ ELSE werkt: Welkom kacper!",
+      "passed": true
+    }
+  ],
+  "limitations": [
+    "Physical device not tested",
+    "Speech and notifications not runtime-tested",
+    "Public signing returned NSURLErrorDomain 500/502"
+  ],
+  "originalSource": "examples/visible-test.js"
+}

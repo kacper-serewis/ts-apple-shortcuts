@@ -1,0 +1,159 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "validation": {
+    "typecheck": "passed: compiler, tests and all examples",
+    "tests": {
+      "passed": 449,
+      "failed": 0
+    },
+    "focusedTests": 16,
+    "plist": "Apple plutil -lint passed",
+    "signingMode": "people-who-know-me",
+    "nativeRegressionFixtures": 20
+  },
+  "change": "Support synchronous TypeScript string trim/trimStart/trimEnd, toUpperCase/toLowerCase, concat, startsWith/endsWith/includes through native text actions.",
+  "verifiedShortcut": {
+    "name": "TS-String-Methods",
+    "actionCount": 318,
+    "observedOutputs": [
+      "Trim: \"Ada\"; \"x  \"; \"  x\"",
+      "Whitespace: Y/Y/Y",
+      "Empty: \"\"/\"\"/\"\"/\"\"",
+      "Case: STRASSE İ ΟΣ É; straße i̇ ος é",
+      "ADA/ts/😀",
+      "Search: YYY;NNN;YYY;YNY;NYY;NNY;NNN;NNN;NNY;YNY;NNN;NNN;NNY;",
+      "Arrays: ts/ios/js; Y"
+    ],
+    "completion": "All seven outputs appeared in order. After final Done, the editor showed play available with no error.",
+    "importComparison": "All 318 imported actions read from the simulator database match the compiled output exactly."
+  },
+  "nativeCoverage": [
+    "ECMAScript whitespace including BOM, NBSP, line separators and ideographic space; NEL and zero-width space retained",
+    "All trim variants preserve intended leading/trailing/internal content",
+    "Empty text through trimming and casing",
+    "Unicode casing: sharp s, dotted capital I, Greek final sigma and accents",
+    "Chained trim/case/concat",
+    "13 dynamic receiver/needle pairs for each predicate: empty text, empty needles, different case, longer needle, newline, emoji, distinct normalization forms, marker collision attempt and regex metacharacters",
+    "map/filter, boolean operators and array includes remain composable"
+  ],
+  "compilerCoverage": [
+    "Receiver and arguments evaluated once in source order, including receiver snapshot before argument mutation",
+    "Ignored and awaited calls preserve effects",
+    "Trim pattern compared against JavaScript for code units U+0001 through U+FFFF",
+    "Emitted runtime escaping and anchored patterns compared against JS predicates across a cross-product of strings",
+    "Reject optional calls, unsupported position arguments, RegExp, nontext arguments, forged receiver type and argument spreads",
+    "Source fixture comparison and exact raw/catalog import roundtrips"
+  ],
+  "investigations": [
+    "Native automation briefly timed out while the search result was being observed. The same live snapshot handle later completed; runner logs and the visible result both confirmed the expected search output. No shortcut restart was needed.",
+    "An old negative test rejecting string includes failed because this feature is now supported. Its unsupported-string-method case now uses indexOf; positive includes coverage is provided by the new tests."
+  ],
+  "limitations": [
+    "Search currently accepts one text argument; optional position/end-position is not supported.",
+    "String length/indexOf/slice/substring/split/replace remain unsupported; explicit action wrappers cover some of these operations.",
+    "No implicit argument coercion, RegExp needles, locale-specific casing methods or argument spreads.",
+    "Unicode casing uses native OS tables; equivalence across all Unicode versions and locales is not established.",
+    "Literal strings still obey plist representability constraints.",
+    "Physical devices and other OS versions remain unverified; full Shortcuts/TypeScript coverage is incomplete."
+  ],
+  "files": [
+    {
+      "path": "src/compiler.ts",
+      "sha256": "f75a2c2c3d396625638ec954128a320ee0632eba9a465d514485bc5f386aba3a"
+    },
+    {
+      "path": "src/emitter.ts",
+      "sha256": "cdb3bf4b49e5dc614a3f897b26663ad9b6b9fdc95e7da3e48e0cdbd4f909c116"
+    },
+    {
+      "path": "src/model.ts",
+      "sha256": "3d3ade436086fdbbb14f46fc0d4f781bcec25288c7ad8acadd545e1d949861bb"
+    },
+    {
+      "path": "test/support/evaluate.ts",
+      "sha256": "4c10d9899c1f2c4fe159fec9f0ac2056e4850d6f2944a6d5577db8aa4706dec2"
+    },
+    {
+      "path": "test/string-methods.test.ts",
+      "sha256": "02c2e5b0c1e9147d106a42efd6e7f31caac536aedf90ec7448c6e269b37dbc17"
+    },
+    {
+      "path": "test/array-search.test.ts",
+      "sha256": "67cb327238e23b5df3510acfbc454cdeceee4e8fd119bc21334f3ff93999b891"
+    },
+    {
+      "path": "test/typescript.test.ts",
+      "sha256": "8b7a539aa10ab4108c952357f67c3f128aa901650f77d052e8c2f9a324fca9cd"
+    },
+    {
+      "path": "test/toolkit.test.ts",
+      "sha256": "6b200c866e9953e6236b8576db2ac64a1e8fea844babcb295a81b257c9305a7d"
+    },
+    {
+      "path": "examples/string-methods-test.ts",
+      "sha256": "4d440428d49a0e50f8074f7c6dc73a7163f25248ff991d6309aa646fed12a35a"
+    },
+    {
+      "path": "test/fixtures/ios26-string-methods-workflow.json",
+      "sha256": "9d2d17f689b46d78b774ffc4e26a8dfbb38b0be8fd31b9b7a20fa1f8d8046913"
+    },
+    {
+      "path": "README.md",
+      "sha256": "46c43b0874de583111727baefd190b904818e605d985ef4acf177bf50d42b8e1"
+    },
+    {
+      "path": "package.json",
+      "sha256": "a3e23d0ed019b7a3a54bac554ba9c4cda71c8be07385b332c6730ac75f578e1c"
+    },
+    {
+      "path": "dist/TS-String-Methods.json",
+      "sha256": "03dbd5cbb545c83a46d5d5d26e812b866dce4ce8fd8ce808c3ff9dae52736e56"
+    },
+    {
+      "path": "dist/TS-String-Methods.unsigned.plist",
+      "sha256": "3a8797d179729d0884a4196520d820508cd001cf134327833fc8667b0f08cb82"
+    },
+    {
+      "path": "dist/TS-String-Methods.shortcut",
+      "sha256": "6d456b4a9f0a5c91d0ae734249774ba43444ba081ff227a291e8d181d6ff810c"
+    },
+    {
+      "path": "artifacts/string-methods-search-native.log",
+      "sha256": "7ec3c8ab14ac5e6c95feb14cd8c4542f3503f58145cf709319161d67e87fcd31"
+    },
+    {
+      "path": "artifacts/ios-string-methods-arrays.png",
+      "sha256": "29aeec2eb2767589590dfd42cadc358b76c38b9dd84e2741bc6443cc0780ab93"
+    },
+    {
+      "path": "artifacts/ios-string-methods-case.png",
+      "sha256": "4d9ef2acf303dbabed330dfca4621cf71f3d522d7e6e254619b7e6d90fdd72a8"
+    },
+    {
+      "path": "artifacts/ios-string-methods-concat.png",
+      "sha256": "22f9ca764c02d8eced4b1cf7214fea7a4c60ae025cc9186551ab2f939f1c9f26"
+    },
+    {
+      "path": "artifacts/ios-string-methods-empty.png",
+      "sha256": "20b32b28854ccc8b9db706f8ea171edf8fd838219befac9710d87ab2c7859f7f"
+    },
+    {
+      "path": "artifacts/ios-string-methods-search.png",
+      "sha256": "3b20dde16acacd3fef205e4a1d3f78c6c5ee9ba396e9e3969b508f5680bca75e"
+    },
+    {
+      "path": "artifacts/ios-string-methods-trim.png",
+      "sha256": "51a48e2c37fe5ce5d706f74d999f1174b5029e7c591d5bd87b337d0f60ede7a8"
+    },
+    {
+      "path": "artifacts/ios-string-methods-whitespace.png",
+      "sha256": "bb08c251b2f93db7d6999266c75f133a3c382d91fb877ec262e96d1dec5c635b"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{"method": "GET", "path": "/echo?case=get", "accept": "application/json", "contentType": "", "marker": "", "rawBody": "", "received": null}
+{"method": "POST", "path": "/echo?case=post", "accept": "application/json", "contentType": "application/json", "marker": "ts-2", "rawBody": "{\"enabled\":false,\"tags\":[\"ts\"],\"person\":{\"name\":\"Ada\",\"score\":7}}", "received": {"enabled": false, "tags": ["ts"], "person": {"name": "Ada", "score": 7}}}
+{"method": "PUT", "path": "/echo?case=put", "accept": "application/json", "contentType": "application/json", "marker": "", "rawBody": "[]", "received": []}
+{"method": "PATCH", "path": "/echo?case=patch", "accept": "application/json; profile=test", "contentType": "application/vnd.test+json", "marker": "", "rawBody": "[42]", "received": [42]}
+{"method": "DELETE", "path": "/echo?case=delete", "accept": "application/json", "contentType": "application/json", "marker": "", "rawBody": "\"quote\\\"\\\\\\n😀\"", "received": "quote\"\\\n😀"}
+{"method": "GET", "path": "/array", "accept": "application/json", "contentType": "", "marker": "", "rawBody": "", "received": null}

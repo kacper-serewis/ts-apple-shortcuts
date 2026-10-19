@@ -1,0 +1,113 @@
+import assert from "node:assert/strict";
+import { compile } from "../../src/compiler.js";
+import type { IRNode, NativeNode, ScalarValue, Value } from "../../src/model.js";
+
+/** Evaluate the executable IR subset for pure control-flow programs. Tests assert source-level
+ * behavior, not generated instruction counts; native serialization is separately tested on iOS.
+ */
+export function evaluate(code: string, answers: number[] = [], menuChoices: string[] = [], onRequest?: (node: NativeNode, read: (value: Value) => any) => unknown): unknown[] {
+  const { ir } = compile(code);
+  const refs = new Map<number, unknown>();
+  const variables = new Map<string, unknown>();
+  const seen: unknown[] = [];
+  const collections: unknown[][] = [];
+  const result = (v: Value): any => v.kind === "number" || v.kind === "boolean" ? v.value
+    : v.kind === "text" ? v.parts.map(p => typeof p === "string" ? p : result(p)).join("")
+    : refs.get(v.id);
+  const condition = (left: ScalarValue, op: string, right: unknown) => {
+    const a = result(left), b = right;
+    switch (op) {
+      case "===": return a === b; case "!==": return a !== b;
+      case ">": return a > (b as number); case ">=": return a >= (b as number);
+      case "<": return a < (b as number); case "<=": return a <= (b as number);
+      default: throw new Error(`Unknown comparison ${op}`);
+    }
+  };
+  function visit(nodes: IRNode[]): void {
+    for (const node of nodes) {
+      switch (node.kind) {
+        case "set": variables.set(node.name, result(node.value)); break;
+        case "get": assert.ok(variables.has(node.name), `Uninitialized ${node.name}`); refs.set(node.id, variables.get(node.name)); break;
+        case "list": refs.set(node.id, node.items.map(result)); break;
+        case "dictionary": refs.set(node.id, Object.fromEntries(node.entries.map(([key, value]) => [key, result(value)]))); break;
+        case "json": refs.set(node.id, node.operation === "parse" ? JSON.parse(result(node.input)) : JSON.stringify(result(node.input))); break;
+        case "string": refs.set(node.id, (String.prototype[node.method] as (...args: string[]) => unknown).apply(result(node.input), node.args.map(result))); break;
+        case "field": refs.set(node.id, result(node.input)[node.key]); break;
+        case "index": refs.set(node.id, result(node.input)[typeof node.index === "number" ? node.index : result(node.index)]); break;
+        case "math": {
+          const a = result(node.left), b = result(node.right);
+          refs.set(node.id, node.operator === "+" ? a + b : node.operator === "-" ? a - b : node.operator === "*" ? a * b : node.operator === "/" ? a / b : node.operator === "%" ? a % b : a ** b);
+          break;
+        }
+        case "numeric-if": visit(condition(node.left, node.operator, result(node.right)) ? node.then : node.else ?? []); break;
+        case "if": visit(condition(node.left, node.operator, typeof node.right === "string" ? node.right : result(node.right)) ? node.then : node.else ?? []); break;
+        case "repeat": {
+          const collected: unknown[] = [];
+          collections.push(collected);
+          for (const item of result(node.input)) { refs.set(node.id, item); visit(node.body); }
+          collections.pop();
+          if (node.resultId !== undefined) refs.set(node.resultId, collected);
+          break;
+        }
+        case "yield": if (node.value) collections.at(-1)!.push(result(node.value)); break;
+        case "repeat-count": for (let i = 0; i < result(node.count); i++) visit(node.body); break;
+        case "menu": {
+          assert.ok(menuChoices.length, "Unexpected menu");
+          const title = menuChoices.shift();
+          const branch = node.cases.find(item => item.title === title);
+          assert.ok(branch, `Unknown menu selection ${title}`);
+          visit(branch.body);
+          break;
+        }
+        case "action":
+          assert.equal(node.action, "showResult");
+          seen.push(result(node.argument));
+          break;
+        case "native":
+          if (node.identifier === "is.workflow.actions.downloadurl" && onRequest) {
+            refs.set(node.id, onRequest(node, result));
+            break;
+          }
+          if (["is.workflow.actions.getvalueforkey", "is.workflow.actions.setvalueforkey"].includes(node.identifier)) {
+            assert.equal(node.parameters.kind, "parameter-object");
+            if (node.parameters.kind !== "parameter-object") throw new Error("Expected dictionary parameters");
+            const parameters = new Map(node.parameters.entries);
+            const read = (key: string): any => {
+              const p = parameters.get(key)!;
+              if (p.kind === "literal") return p.value;
+              assert.equal(p.kind, "parameter-value");
+              if (p.kind !== "parameter-value") throw new Error("Expected dictionary value parameter");
+              return result(p.value);
+            };
+            if (node.identifier === "is.workflow.actions.setvalueforkey") {
+              refs.set(node.id, { ...read("WFDictionary"), [read("WFDictionaryKey")]: read("WFDictionaryValue") });
+            } else {
+              const dictionary = read("WFInput");
+              const mode = read("WFGetDictionaryValueType");
+              refs.set(node.id, mode === "All Keys" ? Object.keys(dictionary) : mode === "All Values" ? Object.values(dictionary)
+                : read("WFDictionaryKey").split(".").reduce((item: any, key: string) => item[key], dictionary));
+            }
+            break;
+          }
+          if (node.identifier === "is.workflow.actions.count") {
+            assert.equal(node.parameters.kind, "parameter-object");
+            if (node.parameters.kind !== "parameter-object") throw new Error("Expected count parameters");
+            const input = node.parameters.entries.find(([key]) => key === "Input")![1];
+            assert.equal(input.kind, "parameter-value");
+            if (input.kind !== "parameter-value") throw new Error("Expected count input");
+            refs.set(node.id, result(input.value).length);
+            break;
+          }
+          assert.equal(node.identifier, "is.workflow.actions.ask");
+          assert.ok(answers.length, "Unexpected extra prompt");
+          refs.set(node.id, answers.shift());
+          break;
+        case "return": throw new Error("A helper return must not stop the containing shortcut");
+        default: throw new Error(`Unsupported test evaluator node ${JSON.stringify(node)}`);
+      }
+    }
+  }
+  visit(ir);
+  return seen;
+}
+

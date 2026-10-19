@@ -1,0 +1,134 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "validation": {
+    "typecheck": "passed: compiler, tests, examples",
+    "tests": {
+      "passed": 119,
+      "failed": 0
+    },
+    "signingMode": "people-who-know-me"
+  },
+  "runs": [
+    {
+      "name": "TS-Toolkit-v3",
+      "source": "examples/toolkit-test.ts",
+      "fixture": "test/fixtures/ios26-toolkit-workflow.json",
+      "outputs": [
+        "Native TS: Ada, 7, Amsterdam",
+        "Boolean + vergelijking werkt",
+        "Totaal: 30; tweede tag: ios",
+        "TypeScript naar Shortcuts",
+        "Menu: eerste tak",
+        "Menu: tweede tak"
+      ],
+      "notes": "Ran twice to select both menu cases. Stop and Output completed without an error; its returned value was not independently captured.",
+      "screenshots": [
+        {
+          "path": "artifacts/ios-toolkit-condition.png",
+          "sha256": "c19e2f353e47162a678f6d36999b8d92cd63d30f72544dabb0d95efb0d6ef30f"
+        },
+        {
+          "path": "artifacts/ios-toolkit-total.png",
+          "sha256": "12d664b135fc2e071bb301bdb7ecfba929623244e1237be7d8a0676b5594b46c"
+        },
+        {
+          "path": "artifacts/ios-toolkit-menu-first.png",
+          "sha256": "e4e91af2d086b82751ee8a71039b64c2fbf8b403e4e0765ee7a228b150cb08ca"
+        },
+        {
+          "path": "artifacts/ios-toolkit-menu-second.png",
+          "sha256": "4154236bbe0f0e8dc39a8699059adf3281a3b47a514957f02a8227c5d170e23d"
+        }
+      ],
+      "files": [
+        {
+          "path": "examples/toolkit-test.ts",
+          "sha256": "9ea0d17d00e34df24138e2fd2b263886e95054eb034a8a813268de2023b11e26"
+        },
+        {
+          "path": "test/fixtures/ios26-toolkit-workflow.json",
+          "sha256": "177955410b0acaeab714ca7115d111e688998a3b94df4bae0e74f85713f6da0d"
+        },
+        {
+          "path": "dist/TS-Toolkit-v3.shortcut",
+          "sha256": "ca925fb0dad58d33194db7bc6a9da20e8c4f374820680733a73c29e14c9a0faa"
+        },
+        {
+          "path": "dist/TS-Toolkit-v3.unsigned.plist",
+          "sha256": "01b1c6573efd57913c06d90b4288d84b7697bac9b748384da52f6821f6198cac"
+        },
+        {
+          "path": "dist/TS-Toolkit-v3.json",
+          "sha256": "abc9427d4339a75b96d38fdd6d8258010c67f034889008c8a27b5763703715bf"
+        }
+      ]
+    },
+    {
+      "name": "TS-Toolkit-Edges",
+      "source": "examples/toolkit-edge-test.ts",
+      "fixture": "test/fixtures/ios26-toolkit-edges-workflow.json",
+      "outputs": [
+        "Rekenen: 18, 3, 1, 81, -9",
+        "Ternary: ja",
+        "Objectlijst: Ada",
+        "Objectlijst: Kacper",
+        "Lengte: 2; nul herhalingen: 0"
+      ],
+      "notes": "The Ask Number action on the right of true || was skipped. Explicit return completed.",
+      "screenshots": [
+        {
+          "path": "artifacts/ios-toolkit-math.png",
+          "sha256": "35b4c8313701f9ce539211d639d4555168795ed1c6f2d01b5a739b02caf7e064"
+        },
+        {
+          "path": "artifacts/ios-toolkit-ternary.png",
+          "sha256": "1e8f3994252876ce2e3df607df0fd0f65630cea5c1f62cc493176b28c1245594"
+        },
+        {
+          "path": "artifacts/ios-toolkit-object-list.png",
+          "sha256": "b6054d783095eb2b39bc52d648e692133a065173b15c0da65573cb3aaf3a1fc5"
+        },
+        {
+          "path": "artifacts/ios-toolkit-zero-repeat.png",
+          "sha256": "cd239bd62722e68879ee3549415b7e1844ca3a71b4b997d1a400966222dab8da"
+        }
+      ],
+      "files": [
+        {
+          "path": "examples/toolkit-edge-test.ts",
+          "sha256": "b285477a01b035bd0cc7320391c2cc4ba4ae790cfd672581f5d6e67232b7008b"
+        },
+        {
+          "path": "test/fixtures/ios26-toolkit-edges-workflow.json",
+          "sha256": "aec375022079b89c9dce3c912c36920448f6a306cba00295ad9e3dd999d6bc08"
+        },
+        {
+          "path": "dist/TS-Toolkit-Edges.shortcut",
+          "sha256": "2266a559566e0d6d79c95771f367ab8faa761bc714867b8be6efc1226f4e9696"
+        },
+        {
+          "path": "dist/TS-Toolkit-Edges.unsigned.plist",
+          "sha256": "e7d016df5c1f1c64693a7554a6ca72b31b784e318ada9633e568c2cdb554c2ab"
+        },
+        {
+          "path": "dist/TS-Toolkit-Edges.json",
+          "sha256": "e4c25d7e475d5eed186c8b581da5bf6b976cfcbf2216d2a5e97a5aabc465e902"
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "The 2585-entry action catalog is metadata, not verification of those actions on this device.",
+    "Many convenience wrappers have compiler coverage only, not device execution coverage.",
+    "Physical devices and other OS versions were not tested in this milestone.",
+    "The native HTTP POST example was compiled only; no POST request was sent.",
+    "No notifications, clipboard writes or external messages were sent by these device tests.",
+    "General TypeScript execution is unsupported; see README for the supported subset."
+  ]
+}

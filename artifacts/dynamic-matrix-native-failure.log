@@ -1,0 +1,35 @@
+2026-10-19 19:07:46.794 Df BackgroundShortcutRunner[45114:40080e] [com.apple.shortcuts:RunningLifecycle] Running action <WFListAction: 0x104380180, identifier: is.workflow.actions.list>
+2026-10-19 19:07:46.794 Df BackgroundShortcutRunner[45114:400818] [com.apple.shortcuts:WorkflowExecution] -[WFAction runWithInput:userInterface:runningDelegate:variableSource:workQueue:completionHandler:] Action <WFListAction: 0x104380180, identifier: is.workflow.actions.list> started running
+2026-10-19 19:07:46.794 Df BackgroundShortcutRunner[45114:400818] [com.apple.shortcuts:RemoteExecution] -[WFAction(Definition) requiresRemoteExecution] <WFListAction: 0x104380180, identifier: is.workflow.actions.list> definition requires remote execution on platforms: (
+)
+2026-10-19 19:07:46.794 Df BackgroundShortcutRunner[45114:400818] [com.apple.shortcuts:RemoteExecution] -[WFAction(Definition) requiresRemoteExecution] <WFListAction: 0x104380180, identifier: is.workflow.actions.list> definition doesn't require remote execution
+2026-10-19 19:07:46.794 Df BackgroundShortcutRunner[45114:400875] [com.apple.xpc:connection] [0x107cf0640] activating connection: mach=false listener=false peer=false name=com.apple.intents.intents-helper
+2026-10-19 19:07:46.794 Df BackgroundShortcutRunner[45114:40081b] [com.apple.shortcuts:WorkflowExecution] -[WFAction processParameterStates:withInput:skippingHiddenParameters:askForValuesIfNecessary:workQueue:completionHandler:]_block_invoke Action <WFListAction: 0x104380180, identifier: is.workflow.actions.list> finished processing parameter states. Values: {
+    WFItems = "<WFContentCollection: 0x107c92c80>: (\134n    \134"<WFNumberContentItem: 0x107cd2840>: 2\134",\134n    \134"<WFNumberContentItem: 0x107cd2880>: 4\134"\134n)";
+}
+2026-10-19 19:07:46.794 Df BackgroundShortcutRunner[45114:40081b] [com.apple.shortcuts:RemoteExecution] -[WFAction(Definition) requiresRemoteExecution] <WFListAction: 0x104380180, identifier: is.workflow.actions.list> definition requires remote execution on platforms: (
+)
+2026-10-19 19:07:46.794 Df BackgroundShortcutRunner[45114:40081b] [com.apple.shortcuts:RemoteExecution] -[WFAction(Definition) requiresRemoteExecution] <WFListAction: 0x104380180, identifier: is.workflow.actions.list> definition doesn't require remote execution
+2026-10-19 19:07:46.794 Df BackgroundShortcutRunner[45114:40081b] [com.apple.shortcuts:General] -[WFAction dismissPresentedContentWithCompletionHandler:] Dismissing presented content
+2026-10-19 19:07:46.794 Df BackgroundShortcutRunner[45114:40081b] [com.apple.shortcuts:Dialog] -[WFUIPresenter dismissPresentedContentForRunningContext:completionHandler:] Not reaching out to UI for dismissal, this shortcut hasn't presented any UI
+2026-10-19 19:07:46.794 Df BackgroundShortcutRunner[45114:40081b] [com.apple.shortcuts:WorkflowExecution] -[WFAction runWithInput:userInterface:runningDelegate:variableSource:workQueue:completionHandler:]_block_invoke Action <WFListAction: 0x104380180, identifier: is.workflow.actions.list> finished with output of 2 items and first item: <WFNumberContentItem: 0x107cd2840>: 2
+2026-10-19 19:07:46.794 Df BackgroundShortcutRunner[45114:40080e] [com.apple.shortcuts:RunningLifecycle] Action finished running <WFListAction: 0x104380180, identifier: is.workflow.actions.list>, error: false, output: <WFContentCollection: 0x107c91e20>: (
+    "<WFNumberContentItem: 0x107cd2840>: 2",
+    "<WFNumberContentItem: 0x107cd2880>: 4"
+).
+2026-10-19 19:07:46.795 Df BackgroundShortcutRunner[45114:40080e] [com.apple.shortcuts:RunningLifecycle] Running action <WFListAction: 0x104380300, identifier: is.workflow.actions.list>
+2026-10-19 19:07:46.795 Df BackgroundShortcutRunner[45114:40081b] [com.apple.shortcuts:WorkflowExecution] -[WFAction runWithInput:userInterface:runningDelegate:variableSource:workQueue:completionHandler:] Action <WFListAction: 0x104380300, identifier: is.workflow.actions.list> started running
+2026-10-19 19:07:46.795 Df BackgroundShortcutRunner[45114:40081b] [com.apple.shortcuts:RemoteExecution] -[WFAction(Definition) requiresRemoteExecution] <WFListAction: 0x104380300, identifier: is.workflow.actions.list> definition requires remote execution on platforms: (
+)
+2026-10-19 19:07:46.795 Df BackgroundShortcutRunner[45114:40081b] [com.apple.shortcuts:RemoteExecution] -[WFAction(Definition) requiresRemoteExecution] <WFListAction: 0x104380300, identifier: is.workflow.actions.list> definition doesn't require remote execution
+2026-10-19 19:07:46.796 Df BackgroundShortcutRunner[45114:40081b] (CoreFoundation) *** Terminating app due to uncaught exception 'NSInvalidArgumentException', reason: '*** -[__NSArrayM insertObject:atIndex:]: object cannot be nil'
+*** First throw call stack:
+(
+	0   CoreFoundation                      0x00000001804c3dec __exceptionPreprocess + 172
+	1   libobjc.A.dylib                     0x0000000180063438 objc_exception_throw + 72
+	2   CoreFoundation                      0x00000001803a16e4 -[__NSArrayM insertObject:atIndex:] + 1820
+	3   ContentKit                          0x00000001c16f79cc -[WFContentCollection addItem:] + 88
+	4   ContentKit                          0x00000001c16f7ca0 -[WFContentCollection addObject:] + 60
+	5   WorkflowKit                         0x00000001af464bc8 __89-[WFContentArrayParameterState processWithContext:userInputRequiredHandler:valueHandler:]_block_invoke + 232
+	6   IntentsFoundation                   0x00000001c1ab8e70 __98-[NSArray(IntentsFoundation) if_enumerateAsynchronouslyInSequenceOnQueue:block:completionHandler:]_block_invoke_2 + 40
+	7   lib<…>

@@ -1,0 +1,45 @@
+{
+  "name": "ts-shortcuts-prototype",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit && tsc -p examples/tsconfig.json",
+    "build": "tsc",
+    "test": "npm run build && node --test lib/test/*.test.js",
+    "build:demo": "npm run build && node lib/src/cli.js examples/visible-test.ts",
+    "build:greeting": "npm run build && node lib/src/cli.js examples/greeting.ts",
+    "build:loops": "npm run build && node lib/src/cli.js examples/loops.ts",
+    "build:http": "npm run build && node lib/src/cli.js examples/http-json.ts",
+    "build:toolkit": "npm run build && node lib/src/cli.js examples/toolkit-test.ts",
+    "build:functions": "npm run build && node lib/src/cli.js examples/functions-test.ts",
+    "build:control": "npm run build && node lib/src/cli.js examples/control-flow-test.ts",
+    "build:arrays": "npm run build && node lib/src/cli.js examples/array-methods-test.ts",
+    "build:destructuring": "npm run build && node lib/src/cli.js examples/destructuring.ts",
+    "build:switch": "npm run build && node lib/src/cli.js examples/switch-test.ts",
+    "build:switch-numeric": "npm run build && node lib/src/cli.js examples/switch-numeric-test.ts",
+    "shortcut": "tsc && node lib/src/cli.js",
+    "verify:corpus": "tsc && node scripts/verify-corpus.mjs",
+    "sign:demo": "npm run build && node lib/src/cli.js examples/visible-test.ts --sign",
+    "build:dictionaries": "npm run build && node lib/src/cli.js examples/dictionaries-test.ts",
+    "build:catalog": "npm run build && node lib/src/cli.js examples/catalog-actions.ts",
+    "build:text-comparisons": "npm run build && node lib/src/cli.js examples/text-comparisons-test.ts",
+    "build:dynamic-text": "npm run build && node lib/src/cli.js examples/dynamic-text-test.ts",
+    "build:array-search": "npm run build && node lib/src/cli.js examples/array-search-test.ts",
+    "build:flow-callbacks": "npm run build && node lib/src/cli.js examples/flow-callbacks-test.ts",
+    "build:dynamic-objects": "npm run build && node lib/src/cli.js examples/dynamic-objects-test.ts",
+    "build:json": "npm run build && node lib/src/cli.js examples/json-conversion-test.ts",
+    "build:request-json": "npm run build && node lib/src/cli.js examples/request-json-test.ts",
+    "build:strings": "npm run build && node lib/src/cli.js examples/string-methods-test.ts"
+  },
+  "dependencies": {
+    "plist": "^5.0.0",
+    "typescript": "^6.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5"
+  }
+}

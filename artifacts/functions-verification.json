@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "validation": {
+    "typecheck": "passed: compiler, tests and examples",
+    "tests": {
+      "passed": 150,
+      "failed": 0
+    },
+    "signingMode": "people-who-know-me"
+  },
+  "shortcut": "TS-Functions-Test",
+  "actionCount": 145,
+  "observedOutputs": [
+    "Totaal: 121",
+    "Eerste: 7; leeg: -1",
+    "Parameter: 11; origineel: 10",
+    "Helper: actief",
+    "Na helpers: 0"
+  ],
+  "completion": "All five result dialogs were shown in order. The final native output prompt for the known test text was allowed once; execution completed.",
+  "files": [
+    {
+      "path": "examples/functions-test.ts",
+      "sha256": "b8d549e3949692744614a7cec7602dd319fc91c90b5c19b37dfd037efff4a58a"
+    },
+    {
+      "path": "test/fixtures/ios26-functions-workflow.json",
+      "sha256": "7266283b64483c839377ac2818f64486433b93b200a7bad1beb2b23fc66460be"
+    },
+    {
+      "path": "dist/TS-Functions-Test.shortcut",
+      "sha256": "187f5209a25ef4743fe6a35921618b1aebc55fc244ecdd34a402ee4a50d5dcdb"
+    },
+    {
+      "path": "dist/TS-Functions-Test.unsigned.plist",
+      "sha256": "ff3d86c75a157a6dc33b8686361169b2123ea5fd15ce86ac11367178151866a5"
+    },
+    {
+      "path": "dist/TS-Functions-Test.json",
+      "sha256": "6e0c0f98f50be8eb1a9d0f532c96724db7889e4618e238f0d821b59289656aa8"
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "artifacts/ios-functions-nested.png",
+      "sha256": "c7b030a7c9f3d36041381b2f7a961a460b63b161fcc8b14d0f12cb7fff05c487"
+    },
+    {
+      "path": "artifacts/ios-functions-early-return.png",
+      "sha256": "f45dfefaa693726d934d19f2a64cdda0a73b4caa4b655c3b81bcc937298d7f52"
+    },
+    {
+      "path": "artifacts/ios-functions-parameters.png",
+      "sha256": "d2855e750395fa952a6900bcd5e6aaaa2ea4ba69f56598733b2f340c777959a0"
+    },
+    {
+      "path": "artifacts/ios-functions-void.png",
+      "sha256": "2af9f8769df24957b61abbad8bf18f00eee393c6b211f5c9e8995acd43a68c69"
+    },
+    {
+      "path": "artifacts/ios-functions-continued.png",
+      "sha256": "eede03ef701e68cdab1d1988e72246be908cf1bde82a5503547c46acd6cf663e"
+    }
+  ],
+  "limitations": [
+    "Only this combined helper example was run on iOS 26.5.",
+    "Additional behavior tests for nested-loop returns, object/list returns and argument ordering use an IR evaluator, not a device.",
+    "Helper early return guards remaining repeat iterations rather than ending the native Repeat action immediately.",
+    "Default/optional/rest parameters, generics, recursion, closures, nested functions and function values remain unsupported.",
+    "The full Shortcuts action catalog and all TypeScript constructs are not verified."
+  ]
+}

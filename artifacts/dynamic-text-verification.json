@@ -1,0 +1,116 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "validation": {
+    "typecheck": "passed: compiler, tests and all examples",
+    "tests": {
+      "passed": 316,
+      "failed": 0
+    },
+    "plist": "Apple plutil -lint passed",
+    "signingMode": "people-who-know-me",
+    "nativeRegressionFixtures": 14
+  },
+  "change": "Text equality and switch cases accept runtime text on either side. A native regex replacement escapes the prefixed runtime RHS, then constructs an absolute anchored pattern for the existing equality backend. Compile-time constants retain their original emitted actions.",
+  "verifiedShortcut": {
+    "name": "TS-Dynamic-Text",
+    "actionCount": 292,
+    "observedOutputs": [
+      "Dynamisch: 52/52",
+      "Verschillend: 6/6",
+      "Cases: ABMF; waarde: changed",
+      "Default na dynamische cases"
+    ],
+    "completion": "Every expected result appeared in order. After the last Done, play was available again in the shortcut editor with no error.",
+    "importComparison": "All 292 imported actions read from the simulator database match the compiled output exactly."
+  },
+  "nativeCoverage": [
+    "Runtime self-equality and inequality with extra suffix across 26 values",
+    "Empty strings, regex metacharacters, backslashes, ICU quote markers and replacement-group-like text",
+    "Composed/decomposed Unicode, emoji, LF and CRLF",
+    "Six deliberately different runtime text pairs remain unequal",
+    "Case expression effects run in order until the first match",
+    "Changing the discriminant variable inside a case expression does not change the selected value",
+    "Fallthrough runs a later body without evaluating its case expression",
+    "Default is selected after checking unmatched dynamic cases"
+  ],
+  "compilerCoverage": [
+    "Left-to-right, once-only argument evaluation with awaited helpers",
+    "LHS snapshot before RHS side effects",
+    "Composition with negation, ternaries and short-circuit Boolean operators",
+    "Literal aliases, parentheses, templates and constant concatenation use the static path",
+    "Anchored pattern wiring and runtime escape-output references",
+    "Invalid mixed-category and non-strict text comparisons are rejected",
+    "All existing native fixtures retain their previous expectations, including the explicitly documented historical equality migration"
+  ],
+  "limitations": [
+    "Direct matchText remains affected by the previously documented native intent-resolution failure; this implementation does not use it.",
+    "Only strict text equality/inequality are supported, not locale-aware sorting or relational string comparisons.",
+    "Runtime escaping adds one native Replace Text action to each dynamic comparison; repeated comparisons incur that cost.",
+    "The native example covers helper/loop/dictionary text outputs; awaited case actions are additionally covered by IR semantic tests, not a separate device prompt scenario.",
+    "Physical devices, other OS versions and every Shortcuts capability remain unverified."
+  ],
+  "files": [
+    {
+      "path": "src/compiler.ts",
+      "sha256": "4b045da9f372033044450e627861c29df93ce797eb7683d78e4fdc161e4722ef"
+    },
+    {
+      "path": "src/emitter.ts",
+      "sha256": "3883cf9a95247b441cbe4520e3eb8e3209f6e70572905e959ece1a0b84f76782"
+    },
+    {
+      "path": "src/model.ts",
+      "sha256": "cbb142b84f72ce80f9fa5102de96d83742ab9776a5960854f889e46024ebcc06"
+    },
+    {
+      "path": "examples/dynamic-text-test.ts",
+      "sha256": "34cbb6c08b96205861d38d3a2d8711d4357c8041f726c04ac62c3744f1598160"
+    },
+    {
+      "path": "test/dynamic-text.test.ts",
+      "sha256": "d1f4a9cfd2950c5e3583589171c9ff4d0b7c8bd59fe0f309885b171d8739e42e"
+    },
+    {
+      "path": "test/support/evaluate.ts",
+      "sha256": "d0e6811f0d7a12833495c4eed4eaf60bb8afa0c8e5e5b5078ef81ee6f2b4ea14"
+    },
+    {
+      "path": "test/fixtures/ios26-dynamic-text-workflow.json",
+      "sha256": "400ab30f23635c77a4f42c826d0cc481c15bad3f5108ff36438877f25e9b6002"
+    },
+    {
+      "path": "dist/TS-Dynamic-Text.json",
+      "sha256": "26a3d622b0e02b012f97c29996298f7eac5f3f822830b5cb2f40c038a1fab3e9"
+    },
+    {
+      "path": "dist/TS-Dynamic-Text.unsigned.plist",
+      "sha256": "dbb20b9e23ac8181a599042ed6db104ac31961abb46650b6808dbe2745e513e5"
+    },
+    {
+      "path": "dist/TS-Dynamic-Text.shortcut",
+      "sha256": "651e85901c3d03667c4d38455bf3b62bd461cad5fc0b5775dcee2115e1f1d359"
+    },
+    {
+      "path": "artifacts/ios-dynamic-text-cases.png",
+      "sha256": "8ad21a32b96c12c78d953a190c79239d576c59ee56f1b5d801db0950a2c964e8"
+    },
+    {
+      "path": "artifacts/ios-dynamic-text-default.png",
+      "sha256": "7820e473dfa33a76a05edf2690c1d4510a07a6a180fafa0eb90981cdc534448a"
+    },
+    {
+      "path": "artifacts/ios-dynamic-text-different.png",
+      "sha256": "4a088ec6b9fa3826a2946da6bd77452751f0e5232e48123ccb25cb0e829b9522"
+    },
+    {
+      "path": "artifacts/ios-dynamic-text-equality.png",
+      "sha256": "0b068d2dc5d763ca27bb1d3aecf0e2eb42db1deb182cc5c69589a60c995ddf9a"
+    }
+  ]
+}

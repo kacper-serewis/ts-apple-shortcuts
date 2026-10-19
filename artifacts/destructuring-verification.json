@@ -1,0 +1,50 @@
+{
+  "date": "2026-10-19",
+  "validation": {
+    "typecheck": "passed: compiler, tests and examples",
+    "tests": {
+      "passed": 220,
+      "failed": 0
+    },
+    "exampleBuild": "passed: npm run build:destructuring; 98 actions",
+    "plistValidation": "passed: Apple plutil -lint",
+    "nativeEmissionEquivalence": "Destructuring produces the same normalized workflow as explicit field/index reads.",
+    "previousDeviceFixtures": "All eight existing iOS workflow regression fixtures still pass."
+  },
+  "expectedOutputsFromIREvaluator": [
+    "Ada: 7/9, Amsterdam",
+    "Ada! uit Amsterdam",
+    "Paar: 16",
+    "Let: 4/3",
+    "Kacper: 9",
+    "0:Ada/7"
+  ],
+  "deviceExecution": false,
+  "limitations": [
+    "The new destructuring example has not been executed on a device.",
+    "IR behavior tests do not independently validate native runtime behavior.",
+    "Defaults, rest, computed keys, dotted literal keys, optional fields/elements and destructuring assignments remain unsupported."
+  ],
+  "files": [
+    {
+      "path": "examples/destructuring.ts",
+      "sha256": "3509f97a6d5f46c220b8266b9dded44608b83fbfdedf8654f87b78af5d763a15"
+    },
+    {
+      "path": "src/compiler.ts",
+      "sha256": "5f11dea01d963c2f6f7e22d0cc232cb34e35e374b2e600ae0478ae1b124271fc"
+    },
+    {
+      "path": "test/destructuring.test.ts",
+      "sha256": "1e1cba3cf4e4e94ee19f538bc1bedabddda0cec63470384357b10028b4ce0010"
+    },
+    {
+      "path": "dist/destructuring.unsigned.plist",
+      "sha256": "1e22403bd6ee948c50690c63192762e028e346a5161717cc3de419f338cdeee4"
+    },
+    {
+      "path": "dist/destructuring.json",
+      "sha256": "10747e0d7415f2abc98d5dcf80c7e01cf82bbaa022a376b1f9eda3a1177b8177"
+    }
+  ]
+}

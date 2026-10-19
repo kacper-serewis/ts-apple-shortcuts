@@ -1,0 +1,17 @@
+Timestamp               Ty Process[PID:TID]
+2026-10-19 17:37:28.258 Df BackgroundShortcutRunner[39890:368107] [com.apple.shortcuts:IntentExecution] -[WFIntentExecutor resolveIntent:withExtensionProxy:] Resolving <INIntent: 0x104fb4f00> {
+    pattern = \134AJS:open\134z;
+    text = JS:open;
+    caseSensitive = 1;
+} with extension proxy <INCExtensionProxy: 0x1088e5db0>
+2026-10-19 17:37:28.260 E  BackgroundShortcutRunner[39890:368197] [com.apple.shortcuts:IntentExecution] -[WFIntentExecutor failWithError:] Executing intent failed with error Error Domain=WFIntentExecutorErrorDomain Code=101 "(null)" UserInfo={WFIntentExecutorSlotDescriptionErrorKey=<INIntentSlotDescription: 0x104f55490>, WFIntentExecutorIntentErrorKey=<INIntent: 0x104fb5680> {
+    pattern = \134AJS:open\134z;
+    text = <null>;
+    caseSensitive = 1;
+}, WFIntentExecutorSlotResolutionResultErrorKey=<INStringResolutionResult: 0x1088e61c0> {
+    resolutionResultCode = NeedsValue;
+    resolvedValue = <null>;
+    disambiguationItems = <null>;
+    itemToConfirm = <null>;
+    unsupportedReason = 0;
+}}

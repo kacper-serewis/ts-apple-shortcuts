@@ -1,0 +1,218 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "validation": {
+    "typecheck": "passed: compiler, tests and all examples",
+    "tests": {
+      "passed": 304,
+      "failed": 0
+    },
+    "plist": "Apple plutil -lint passed for both new compiled comparison/switch workflows",
+    "signingMode": "people-who-know-me",
+    "nativeRegressionFixtures": 13
+  },
+  "change": "Generated text equality uses case-sensitive fully anchored Replace Text instead of the failing Match Text Siri intent. Prefixed nonmatches cannot equal the replacement marker. A String-coerced native condition tests the marker with is/is not.",
+  "nativeProbe": {
+    "name": "TS-Text-Equality-Probe",
+    "actionCount": 26,
+    "nativeIsResult": "YNNNNN",
+    "regexResult": "TS_MATCH;JS:Open;JS:open\n;JS:opén;JS:;JS:TS_MATCH;",
+    "interpretation": "For these inputs both native is and regex replacement distinguish case, accents and trailing newline. The compiler retains regex matching to preserve its existing strict matching rules.",
+    "importComparison": "All 26 imported actions match the compiled output."
+  },
+  "verifiedShortcuts": [
+    {
+      "name": "TS-Text-Comparisons",
+      "actionCount": 129,
+      "observedOutputs": [
+        "Exact: YNNNNN",
+        "Leeg: YNNYNYNY",
+        "Letterlijk: YNN",
+        "Unicode: YNNNNNNYNN",
+        "Marker: YNNN",
+        "1:a 22:b"
+      ],
+      "coverage": [
+        "Case-sensitive equality",
+        "Inequality and empty strings",
+        "Trailing newline and whitespace",
+        "Regex metacharacters treated literally",
+        "Composed versus decomposed accents and emoji",
+        "Marker-like user input does not produce false matches",
+        "Regex replacement with capture groups"
+      ],
+      "importComparison": "All 129 imported actions match the compiled output exactly."
+    },
+    {
+      "name": "TS-Switch-Text-Fixed",
+      "actionCount": 199,
+      "observedOutputs": [
+        "Keuze: open;voer uit;",
+        "Keuze: voer uit;",
+        "Keuze: onbekend;",
+        "Loop: 1;2;eind;",
+        "Functie: twee"
+      ],
+      "coverage": [
+        "Text case selection",
+        "Fallthrough and break",
+        "Default selection",
+        "Continue to enclosing loop",
+        "Helper return from a numeric switch"
+      ],
+      "importComparison": "All 199 imported actions match the compiled output exactly."
+    }
+  ],
+  "completion": "Both shortcuts displayed every result in order and returned to the editable shortcut with play available, without an error or Match Text input prompt.",
+  "regressionStrategy": "Historical fixture files are preserved. test/support/legacy-text-equality.ts explicitly migrates only old compiler-generated equality pairs when comparing them with newly compiled source. New on-device equality/switch fixtures verify the replacement backend directly. Raw import roundtrips preserve legacy actions without migration.",
+  "semanticChecks": "400 cross-product cases compare the emitted replacement regex with JavaScript strict equality after translating ICU absolute anchors; this is supplementary to native execution, not a claim of complete ICU/JavaScript regex equivalence.",
+  "limitations": [
+    "Direct matchText remains affected by the earlier unresolved native intent-resolution failure; it was not changed or reverified in this milestone. See artifacts/switch-verification.json and artifacts/match-text-intent-failure.log.",
+    "Text equality still requires a static right-hand side; text switch cases remain static.",
+    "replaceRegex uses native ICU regex/replacement semantics; invalid patterns follow native error behavior.",
+    "Only the listed examples ran on the simulator. Physical devices, other OS versions and all Shortcuts capabilities are not verified."
+  ],
+  "files": [
+    {
+      "path": "src/emitter.ts",
+      "sha256": "cbeb3b8e916236435a08cd71ecaf313a7ca46d9f94158e2ca4b09e4d76a0d614"
+    },
+    {
+      "path": "src/wrappers.ts",
+      "sha256": "447e8267c32df38046b36912b423078e4a0ced321052c20bdb554934d53eb342"
+    },
+    {
+      "path": "api/ios.d.ts",
+      "sha256": "5da5314eb576c275eba13b6a5e4ac14df3d04547d19d5f8cc9f7f8e23c797764"
+    },
+    {
+      "path": "examples/text-equality-probe.ts",
+      "sha256": "9676cc9cf5cfe2cc4585d3dc980e67347fe14dd71a9f864a352728b61e0de90c"
+    },
+    {
+      "path": "examples/text-comparisons-test.ts",
+      "sha256": "f91ad0128be31434185b46a9be95554a3b70d6f432dc248637673f56fafb2be0"
+    },
+    {
+      "path": "examples/switch-test.ts",
+      "sha256": "d3a25e25a15a426d313837efb4137218fa1c60d1094133c3ae03fab9797ba4c8"
+    },
+    {
+      "path": "test/text-equality.test.ts",
+      "sha256": "e4f47352651c34c3c1a7f6caa7e3603251ceb72d2e203b2f583d647cdb2e70df"
+    },
+    {
+      "path": "test/compiler.test.ts",
+      "sha256": "ab6cc38c47c03d9cc8520c0d241b915996a8b6bd0fbd1d06662ee295088e375b"
+    },
+    {
+      "path": "test/typescript.test.ts",
+      "sha256": "4c7ed1dc7d87b20f1d1b1418ea75b188f3e611c1584e44f06ba2c91b2934be8a"
+    },
+    {
+      "path": "test/support/legacy-text-equality.ts",
+      "sha256": "9ddfdb83fdf63dbe9f16d194b9625984519712867dbe87346678b5d76eb35c97"
+    },
+    {
+      "path": "test/fixtures/ios26-text-comparisons-workflow.json",
+      "sha256": "3ed97519aff7617a385d870b416dd049c5f170929ea3aa08f1c8e2f1b3fdc69c"
+    },
+    {
+      "path": "test/fixtures/ios26-switch-text-workflow.json",
+      "sha256": "fd084c8b11083d570682100dd81f35163b6212f14b76e3a6d8f19d1c0bd6bd1a"
+    },
+    {
+      "path": "dist/TS-Text-Equality-Probe.json",
+      "sha256": "702e2294562c31a54358a1adf02d325f1220c4f0b3e62642e055cfa131e5ac07"
+    },
+    {
+      "path": "dist/TS-Text-Equality-Probe.unsigned.plist",
+      "sha256": "a6a65524fe079146ce979a9b4daa8cbab9242acff7358a102f1af034a6b2a05a"
+    },
+    {
+      "path": "dist/TS-Text-Equality-Probe.shortcut",
+      "sha256": "9bd16e7fa21ad898eebaf93b09353872310b442fb7799030080e7678b2c599ac"
+    },
+    {
+      "path": "dist/TS-Text-Comparisons.json",
+      "sha256": "1337b788e0cb97d3f59016fe835e9f0d6ddf946537b676243d4e8eaa75b2bcd1"
+    },
+    {
+      "path": "dist/TS-Text-Comparisons.unsigned.plist",
+      "sha256": "359efee5bd6681d31372c98696e6056a7ea33ca8a321b9e52bc6fc9ae350b142"
+    },
+    {
+      "path": "dist/TS-Text-Comparisons.shortcut",
+      "sha256": "eff3554c653012021787b09855d78bbb1840ebe2b97d188c1defc1470a1dba9c"
+    },
+    {
+      "path": "dist/TS-Switch-Text-Fixed.json",
+      "sha256": "c3ba092a0481c319b34fae274d8a5cf0c557c30d43584e0b9ef3bf79ed937da1"
+    },
+    {
+      "path": "dist/TS-Switch-Text-Fixed.unsigned.plist",
+      "sha256": "0a2c1245eb58d17dd696970fc381d79236a221f3c727f8787f682caa8146af11"
+    },
+    {
+      "path": "dist/TS-Switch-Text-Fixed.shortcut",
+      "sha256": "76c0e2d139e6f546a0b96efebef6713b7b204b85de90a90c05d0d9df8e00c4ae"
+    },
+    {
+      "path": "artifacts/ios-text-comparisons-empty.png",
+      "sha256": "31f9d9769beff92e7969bc1ee069096af62dcd90865002ba4025dbddf2ff8081"
+    },
+    {
+      "path": "artifacts/ios-text-comparisons-exact.png",
+      "sha256": "7dbaef7cf233478ec77e4f7bde9cfc9e31e2ae939e75a133b980c51c46bb4a24"
+    },
+    {
+      "path": "artifacts/ios-text-comparisons-literal.png",
+      "sha256": "f16d03f73a4890478e4ea79e6a0eae0c6af23b74fed3149fdae2972abc2748f4"
+    },
+    {
+      "path": "artifacts/ios-text-comparisons-marker.png",
+      "sha256": "84a0668f9987a8ebd5eb4e5b19c51fa02111c30f1c8c03ca43e7fe45dcf194bc"
+    },
+    {
+      "path": "artifacts/ios-text-comparisons-regex.png",
+      "sha256": "84ec3b57507bd172e3245691dd1bd6677ab1011a88005e0359ad623e9ee6439b"
+    },
+    {
+      "path": "artifacts/ios-text-comparisons-unicode.png",
+      "sha256": "23f152a9578bedc5206e149de9d142c2f1f99286f1ef3cdae2f367b94aee4fd1"
+    },
+    {
+      "path": "artifacts/ios-text-native-condition-probe.png",
+      "sha256": "6d2eaedadafc7d7935816dc65e078eefaa1e82e3661a37c7cfa24ce44c897c5b"
+    },
+    {
+      "path": "artifacts/ios-text-regex-replacement-probe.png",
+      "sha256": "5a27f51712e1db16fbc5d81ad176b8d6049383759dbbcc967bd15931b3da5e27"
+    },
+    {
+      "path": "artifacts/ios-switch-text-default.png",
+      "sha256": "8da53db182eadd6980299005ff9faa20d43b65eb4b67cdccf72b9b8b1ae51858"
+    },
+    {
+      "path": "artifacts/ios-switch-text-loop.png",
+      "sha256": "07ac79f6226f77b092f4d3039daea192b0b3cef47b70b7e06d4c96a77ae55754"
+    },
+    {
+      "path": "artifacts/ios-switch-text-open.png",
+      "sha256": "ff1c80161441874043f7a29cd4e85be4bf67ed89626f4743b0d7a07605b55be0"
+    },
+    {
+      "path": "artifacts/ios-switch-text-return.png",
+      "sha256": "8f3607c6e994e2513c95d48df1013fe496649505633a178b36025a337750e344"
+    },
+    {
+      "path": "artifacts/ios-switch-text-run.png",
+      "sha256": "7722637162f9bf46cba416c972c8690b569fe4d962723b1309dcf52a4e6dd849"
+    }
+  ]
+}

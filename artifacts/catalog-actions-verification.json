@@ -1,0 +1,164 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "validation": {
+    "typecheck": "passed: compiler, tests and all examples",
+    "tests": {
+      "passed": 298,
+      "failed": 0
+    },
+    "plist": "Apple plutil -lint passed",
+    "signingMode": "people-who-know-me",
+    "nativeRegressionFixtures": 11
+  },
+  "catalogCoverage": {
+    "identifiers": 2585,
+    "parameterEntries": 8087,
+    "compilation": "Every catalog identifier and listed parameter key compiled in one workflow using placeholder strings; emitted identifiers and parameters were compared with the metadata. No catalog sweep actions were executed.",
+    "editor": "TypeScript language service suggested all identifiers and action-specific parameter keys.",
+    "fixtures": [
+      {
+        "path": "test/fixtures/ios26-array-methods-workflow.json",
+        "catalogCalls": 117,
+        "nativeFallbackCalls": 44
+      },
+      {
+        "path": "test/fixtures/ios26-catalog-actions-workflow.json",
+        "catalogCalls": 5,
+        "nativeFallbackCalls": 0
+      },
+      {
+        "path": "test/fixtures/ios26-control-flow-workflow.json",
+        "catalogCalls": 78,
+        "nativeFallbackCalls": 28
+      },
+      {
+        "path": "test/fixtures/ios26-dictionaries-workflow.json",
+        "catalogCalls": 47,
+        "nativeFallbackCalls": 7
+      },
+      {
+        "path": "test/fixtures/ios26-functions-workflow.json",
+        "catalogCalls": 111,
+        "nativeFallbackCalls": 34
+      },
+      {
+        "path": "test/fixtures/ios26-http-workflow.json",
+        "catalogCalls": 15,
+        "nativeFallbackCalls": 5
+      },
+      {
+        "path": "test/fixtures/ios26-loops-workflow.json",
+        "catalogCalls": 10,
+        "nativeFallbackCalls": 9
+      },
+      {
+        "path": "test/fixtures/ios26-switch-numeric-workflow.json",
+        "catalogCalls": 87,
+        "nativeFallbackCalls": 64
+      },
+      {
+        "path": "test/fixtures/ios26-toolkit-edges-workflow.json",
+        "catalogCalls": 45,
+        "nativeFallbackCalls": 23
+      },
+      {
+        "path": "test/fixtures/ios26-toolkit-workflow.json",
+        "catalogCalls": 34,
+        "nativeFallbackCalls": 14
+      },
+      {
+        "path": "test/fixtures/ios26-visible-workflow.json",
+        "catalogCalls": 5,
+        "nativeFallbackCalls": 3
+      }
+    ],
+    "source": "https://github.com/viticci/shortcuts-playground-plugin/blob/main/codex/skills/shortcuts-playground/data/toolkit-v78-first-party-parameter-keys.json",
+    "version": "ToolKit v78; iOS 27 Simulator and macOS 27; snapshot 2026-06-13T00:00:00Z"
+  },
+  "verifiedShortcut": {
+    "name": "TS-Catalog-Actions",
+    "actionCount": 5,
+    "observedOutput": "Hallo vanuit de catalogus: 14",
+    "completion": "Done returned to the editable shortcut; play was available again, with no error.",
+    "importComparison": "All 5 actions read from the simulator database match the compiled workflow exactly."
+  },
+  "compilerCoverage": [
+    "Direct literal catalog calls with aliased imports",
+    "Parameter-name checks, including JavaScript input",
+    "Typed scalar, object, list and opaque outputs",
+    "Native-equivalent reference encoding and source locations",
+    "Exact raw parameters, unknown-key escape hatch and import roundtrip",
+    "Native fallback for out-of-catalog identifiers",
+    "Lexical shadowing, unawaited/optional calls, invalid argument counts and duplicate UUID errors"
+  ],
+  "limitations": [
+    "Catalog metadata provides key hints, not required parameter/value/enum schemas.",
+    "Compilation of the catalog does not establish runtime availability or correctness.",
+    "Catalog covers iOS 27/macOS 27 metadata; the device sample ran on iOS 26.5.",
+    "Some internal flow actions and third-party apps are absent from this catalog; native() remains available.",
+    "Catalog identifiers must be literal and invoked directly; dynamic selection and action-function aliases are unsupported.",
+    "Explicit output types declare expected content and are not runtime validated.",
+    "The existing Match Text intent-resolution failure remains unresolved.",
+    "The full TypeScript language and all Shortcuts runtime capabilities are not verified."
+  ],
+  "files": [
+    {
+      "path": "api/ios.d.ts",
+      "sha256": "c57e5329c65705cad31441461b5469055b788bd690ea208078c0e72216055f73"
+    },
+    {
+      "path": "api/actions.generated.d.ts",
+      "sha256": "38a409fb261f1d03dc2ef39daa50c6690cba0af850f07469277d9a1be10504f8"
+    },
+    {
+      "path": "data/actions.json",
+      "sha256": "4623f978cde4d1c479933cb1139f5332c1c9781cee5e3d50ee780f106f5a6788"
+    },
+    {
+      "path": "src/compiler.ts",
+      "sha256": "e2939c5bbcdfff78899f2604f08ddff7d3559084e346649951b316a4024a3c6a"
+    },
+    {
+      "path": "src/catalog.ts",
+      "sha256": "bfbd967e6f301d80e3a78093fe2e1c2edf7357ab5aa6b149973f04966501f1d1"
+    },
+    {
+      "path": "examples/catalog-actions.ts",
+      "sha256": "bd7c4ea2cf06349034697d55b1146d7dc99f4a2651e26c9e8b339ad11e9ca53f"
+    },
+    {
+      "path": "test/catalog-actions.test.ts",
+      "sha256": "c2615d49b3e9a48b26a5a5a15fc3de4951879652aa34061370bfa5eaa8acfd40"
+    },
+    {
+      "path": "test/typescript.test.ts",
+      "sha256": "12b9c48569d134efdd62f648d89efc933e2a879318394538f1c88039929989f9"
+    },
+    {
+      "path": "test/fixtures/ios26-catalog-actions-workflow.json",
+      "sha256": "23e1f7454d20341f3dc3db9c02296408c8c7543284701335794caba71bd4247d"
+    },
+    {
+      "path": "dist/TS-Catalog-Actions.json",
+      "sha256": "2478117c0d3218cf703ad39c64976021fbe65f302c214b91d83b847b0379282e"
+    },
+    {
+      "path": "dist/TS-Catalog-Actions.unsigned.plist",
+      "sha256": "963ae26c18753cd321c8f849792ccf41d6bb7ccd71f0ada4c699a72318f5e7ca"
+    },
+    {
+      "path": "dist/TS-Catalog-Actions.shortcut",
+      "sha256": "880eb1852103f52e7521123cbdc2f926c0693e035593a33783c18c5ffd855e0f"
+    },
+    {
+      "path": "artifacts/ios-catalog-actions.png",
+      "sha256": "ae20938f5946af228f42dd1208afc7fe97329c29f00dd074f439a8a1de1ce2d8"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-19",
+  "device": "iPhone 17e simulator",
+  "ios": "26.5",
+  "shortcut": "TS-HTTP-Test",
+  "signingMode": "people-who-know-me",
+  "source": "examples/http-json-test.ts",
+  "checks": {
+    "typecheck": "passed",
+    "testsPassed": 83,
+    "testsFailed": 0,
+    "import": "passed",
+    "runtime": "passed"
+  },
+  "endpoints": [
+    "https://jsonplaceholder.typicode.com/todos/1",
+    "https://jsonplaceholder.typicode.com/todos?_limit=2",
+    "https://jsonplaceholder.typicode.com/users/1"
+  ],
+  "domainPermission": "Allowed native prompt for jsonplaceholder.typicode.com",
+  "observedResults": [
+    "GET: delectus aut autem",
+    "IF: delectus aut autem",
+    "ELSE: quis ut nam facilis et officia qui",
+    "GENEST: Gwenborough"
+  ],
+  "screenshots": [
+    "artifacts/ios-http-get.png",
+    "artifacts/ios-http-list-if.png",
+    "artifacts/ios-http-list-else.png",
+    "artifacts/ios-http-nested.png"
+  ],
+  "sha256": {
+    "examples/http-json-test.ts": "6b2eac218650bb9a6a23863bcdbbcc50f2720e73c11eb27baffb24b6b7a7a702",
+    "dist/TS-HTTP-Test.shortcut": "9ce74cee5c35a362acf107f692de78a8fcf30005846dd7337638f4d762c05b14",
+    "dist/TS-HTTP-Test.unsigned.plist": "21ada63c88310f68b0194ff195057b7a6e9d5912b96bed9aed315591b4a5c375",
+    "test/fixtures/ios26-http-workflow.json": "1714d37276b0d072096f7e7a357226ee26efc3a1a56521cfc66e078af046303e"
+  },
+  "limitations": [
+    "No runtime schema validation",
+    "Failure responses and offline behavior not device-tested",
+    "No physical iPhone or other iOS version tested",
+    "Simple http-json.shortcut signed but not separately run; full integration shortcut tested above"
+  ]
+}

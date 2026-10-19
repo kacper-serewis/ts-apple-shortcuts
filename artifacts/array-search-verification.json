@@ -1,0 +1,121 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "validation": {
+    "typecheck": "passed: compiler, tests and all examples",
+    "tests": {
+      "passed": 346,
+      "failed": 0
+    },
+    "plist": "Apple plutil -lint passed",
+    "signingMode": "people-who-know-me",
+    "nativeRegressionFixtures": 15
+  },
+  "change": "Lower some, every, findIndex, scalar includes and indexOf to guarded native Repeat with Each actions. Predicate callbacks stop executing after the first decisive result. Constant fromIndex supports truncation and negative offsets.",
+  "verifiedShortcut": {
+    "name": "TS-Array-Search",
+    "actionCount": 485,
+    "observedOutputs": [
+      "Some: Y; bezocht: 01",
+      "Every: N; bezocht: 123",
+      "FindIndex: 1; bezocht: 01",
+      "Leeg: N/Y/-1/N; callbacks: 0",
+      "Tekst: 0Y;-1N;1Y;",
+      "Indices: 0/2/2/-1; bool: 1"
+    ],
+    "completion": "All six expected results appeared in order. After the final Done, play was available in the shortcut editor with no error.",
+    "importComparison": "All 485 imported actions read from the simulator database match the compiled output exactly."
+  },
+  "nativeCoverage": [
+    "some/every skip later callback effects after the answer is known",
+    "findIndex returns the original position despite a changed callback index parameter",
+    "Destructured dictionary callback parameters and original-array access",
+    "Empty some/every/findIndex/includes return defaults without invoking callbacks",
+    "Dynamic text lookup treats regex characters literally and finds an empty string",
+    "Positive and negative fractional offsets, missing numeric value and boolean search"
+  ],
+  "compilerCoverage": [
+    "29 focused tests plus a new native workflow regression fixture",
+    "Nested searches, local returns, loops and reset state across repeated invocation",
+    "Receiver evaluated once and snapshotted before callback/needle effects",
+    "Receiver then needle evaluation order, including an empty input list",
+    "Original-array parameters and parameter mutations remain isolated",
+    "Constant offsets compared with JavaScript for negative, fractional and out-of-range starts",
+    "Reject async/nonboolean callbacks, thisArg, defaults, runtime offsets, identity search and mixed scalar categories",
+    "Raw and catalog-generated TypeScript preserve the new native fixture exactly"
+  ],
+  "limitations": [
+    "Callbacks must be inline synchronous arrows returning an actual boolean.",
+    "includes/indexOf support homogeneous text, number and boolean lists; object/native identity is unsupported.",
+    "fromIndex must be a constant finite number; runtime offsets are unsupported.",
+    "Native Repeat continues traversing remaining guarded iterations after a match, without invoking further callbacks or comparisons.",
+    "Physical devices, other OS versions and all Shortcuts capabilities remain unverified."
+  ],
+  "files": [
+    {
+      "path": "src/compiler.ts",
+      "sha256": "c9945d8e2d061fe84082449e816ebaacf18aed0788489145d15632a81159e579"
+    },
+    {
+      "path": "examples/array-search-test.ts",
+      "sha256": "e00aff34ee0980dc14122dd8d310b40d6877ae8a6f06de78fbe7560e62903545"
+    },
+    {
+      "path": "test/array-search.test.ts",
+      "sha256": "5eccdf644a04cf5ef8188ce52735d6b1726ebe2b0435bbef05b669fe0cbb515f"
+    },
+    {
+      "path": "test/typescript.test.ts",
+      "sha256": "a126f38cd53329542c1a218a477fbd1df3a2fe2898086e5ba69dc8978bc2d517"
+    },
+    {
+      "path": "test/toolkit.test.ts",
+      "sha256": "edb5e31b06e0d9898bf047bfb65cc1a67776ddd4a0b66b9e37de5cf71acdb822"
+    },
+    {
+      "path": "test/fixtures/ios26-array-search-workflow.json",
+      "sha256": "bc8bb9644cec8f5dc7a1ec85622c05d83383fbf5ec7d87cfd56fb72da03f60fb"
+    },
+    {
+      "path": "dist/TS-Array-Search.json",
+      "sha256": "dfe12a984cf060e8ad8ac6994fcb0a5a7ff3c290e1d1917c96a323cb03286ac3"
+    },
+    {
+      "path": "dist/TS-Array-Search.unsigned.plist",
+      "sha256": "744dfce755c39c46fcf19418e79c0ee3b5d7dfced015e3961f67d6a922dd5868"
+    },
+    {
+      "path": "dist/TS-Array-Search.shortcut",
+      "sha256": "3ee531ac98682763a0dbb74cb4bb64b21c19145bbdc48ac422d941863609707e"
+    },
+    {
+      "path": "artifacts/ios-array-search-empty.png",
+      "sha256": "071284dc88926944b937ae3b382bb2c9abbcc91d47cf7edefac1b3a9d7cd00d0"
+    },
+    {
+      "path": "artifacts/ios-array-search-every.png",
+      "sha256": "b7f875561f474e64d8f270fd511d204a66b4c20787f716e0d9978e8b4045399d"
+    },
+    {
+      "path": "artifacts/ios-array-search-index.png",
+      "sha256": "a74c450e8a19e44d2114e43063cf3bff6a8731127be4eccc7043c3b342f2b979"
+    },
+    {
+      "path": "artifacts/ios-array-search-offsets.png",
+      "sha256": "99eae053a85eeef3b12e7e75201516d39a5bc554acbefe7a601b7775192452a3"
+    },
+    {
+      "path": "artifacts/ios-array-search-some.png",
+      "sha256": "a50e86a7507464462395cfc67f482d47150da503c251a1de7e60cdc0bc94b46e"
+    },
+    {
+      "path": "artifacts/ios-array-search-text.png",
+      "sha256": "e76a281840dbb1b143ab2861fdefd083f1a34b81745a3702159c1c25c3bda62a"
+    }
+  ]
+}

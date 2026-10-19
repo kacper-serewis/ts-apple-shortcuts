@@ -1,0 +1,138 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "validation": {
+    "typecheck": "passed: compiler, tests and all examples",
+    "tests": {
+      "passed": 272,
+      "failed": 0
+    },
+    "plist": "Apple plutil -lint passed",
+    "signingMode": "people-who-know-me",
+    "nativeRegressionFixtures": 10
+  },
+  "verifiedShortcut": {
+    "name": "TS-Dictionaries-Test",
+    "actionCount": 54,
+    "observedOutputs": [
+      "Score: 9; origineel: 7",
+      "Stad: Utrecht; tags: ts/ios",
+      "Uitgeschakeld",
+      "Keys: 5; som: 5",
+      "Dotted keys: a,nested.path",
+      {
+        "tags": [
+          "ts",
+          "ios"
+        ],
+        "score": 9,
+        "enabled": 0,
+        "name": "Ada",
+        "details": {
+          "city": "Utrecht"
+        }
+      }
+    ],
+    "completion": "All six result dialogs appeared in order. After Done, main returned to the Shortcuts library without an error.",
+    "importComparison": "All 54 actions read from the simulator database match the compiled workflow exactly."
+  },
+  "compilerCoverage": [
+    "Runtime dictionary keys and native getter paths",
+    "Immutable update chains and declared output shapes",
+    "Static bracket access with required field types",
+    "Nested object/list outputs retain native token attachments",
+    "Argument evaluation once in source order",
+    "Key/value enumeration composes with loops and reduction",
+    "Invalid inputs, unknown/optional fields and dynamic brackets are rejected",
+    "Verified native workflow compiles identically and survives TypeScript import roundtrip"
+  ],
+  "limitations": [
+    "Setter keys are literal top-level names; getter dots traverse native key paths.",
+    "Boolean setter values serialize as numeric 0/1, not JSON booleans.",
+    "Generics declare expected output, without runtime schema validation.",
+    "Key order and missing-key behavior are not given JavaScript guarantees.",
+    "Dynamic container insertion has compiler/IR coverage; the device example inserts constructed object/list outputs.",
+    "Nested-list dictionaryValues flattening and missing-key behavior were not independently verified.",
+    "The existing Match Text intent-resolution failure is unresolved; see artifacts/switch-verification.json.",
+    "Full TypeScript syntax and full native action catalog are not verified."
+  ],
+  "files": [
+    {
+      "path": "api/ios.d.ts",
+      "sha256": "3ce5b5a63ed6f17ef1ab60b37c457d0b85658699bf81b3668c3478bc5c55e458"
+    },
+    {
+      "path": "src/compiler.ts",
+      "sha256": "fb39f662a338119c730db6bbcd155891057f27d533a749cfb13ce1e865ae1c74"
+    },
+    {
+      "path": "src/model.ts",
+      "sha256": "0eb656850283fd7b49030c83a9def8149821b7ba7265754f8b1ed8723a163986"
+    },
+    {
+      "path": "src/emitter.ts",
+      "sha256": "db4d5954dca4b6aa6cd52ea7e31ad897e6a3b6b25e06cedcd9806f414a6dcd33"
+    },
+    {
+      "path": "src/wrappers.ts",
+      "sha256": "84a2cbd5c4ffda33f956e7b47b63915df554959ba98c3e455bf7588f2ad3dc16"
+    },
+    {
+      "path": "examples/dictionaries-test.ts",
+      "sha256": "7a85ce5919608b65fd3d13ba7b2ffbc82f9c9fac4d7a2cdd1c6569fa29c18224"
+    },
+    {
+      "path": "test/dictionaries.test.ts",
+      "sha256": "978d7d55534f27340321d1feb6e111d1319fd2fa5e0430a9fe1becd0a57ffaaa"
+    },
+    {
+      "path": "test/support/evaluate.ts",
+      "sha256": "5ec303b98b13a20ac3da16f78d6d9ebeeeeec42f06b3706823b5bb28ed695987"
+    },
+    {
+      "path": "test/fixtures/ios26-dictionaries-workflow.json",
+      "sha256": "6ce0dedc826fe2f874356efeedc2f38a211e6a1a026ca6116ea71a24c3ffc539"
+    },
+    {
+      "path": "dist/TS-Dictionaries-Test.json",
+      "sha256": "4307c4e7b91f4a78a0826af8d170397ab8da5b9db600550564207476dc7719e2"
+    },
+    {
+      "path": "dist/TS-Dictionaries-Test.unsigned.plist",
+      "sha256": "96fcd7fc08bd902dfe2320faba694117b7497b585a55e25c04a784f367ef6c4c"
+    },
+    {
+      "path": "dist/TS-Dictionaries-Test.shortcut",
+      "sha256": "9976816c382028ee70988f7f5bdf244d8ec4cb55f4ac5cf0fcf6121c7fd6b300"
+    },
+    {
+      "path": "artifacts/ios-dictionaries-boolean.png",
+      "sha256": "affe5f415533a81bd246fef0cb6a3fe79f2576638838d1d17bb564cf97244252"
+    },
+    {
+      "path": "artifacts/ios-dictionaries-dotted.png",
+      "sha256": "905a824dd49de0c4210f89c94eb7c1eb0efe13c9f5fe1e3f100da4adcd1d7884"
+    },
+    {
+      "path": "artifacts/ios-dictionaries-json.png",
+      "sha256": "6b97c9fc85f9ed4da8b20479aeb776ec993d2e4ce68f02b1440ac2515c1c9a62"
+    },
+    {
+      "path": "artifacts/ios-dictionaries-keys.png",
+      "sha256": "b2cc4ac5e8244ba17ad08e00badd7a84b32fc76af319aff497dc93d18046b825"
+    },
+    {
+      "path": "artifacts/ios-dictionaries-nested.png",
+      "sha256": "0068710148c2964aa3b449c142d710efc85dd5e3b9a3fb92430d40f1b99b664a"
+    },
+    {
+      "path": "artifacts/ios-dictionaries-score.png",
+      "sha256": "b83be960f4c64df328ffe83c3442d6f58efdfab597a3fbbb59a010196470b864"
+    }
+  ]
+}

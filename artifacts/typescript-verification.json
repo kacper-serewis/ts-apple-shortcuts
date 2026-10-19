@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-19",
+  "tests": {
+    "passed": 31,
+    "failed": 0
+  },
+  "typecheck": "compiler, tests and examples passed",
+  "source": "examples/visible-test.ts",
+  "sourceSha256": "717c8b9c0e447f41b15a84a2e5c43808d2846a4e508f26f2e7898426becb4e02",
+  "signedFile": "dist/typescript-demo.shortcut",
+  "sha256": "49e83459e841a99de19d87b2e5f036ad65e77762b6d357ad37edb170086e9ecb",
+  "signingMode": "people-who-know-me",
+  "workflowParity": "Matches iOS 26.5-tested workflow after UUID and name normalization",
+  "fixture": "test/fixtures/ios26-visible-workflow.json",
+  "deviceRun": "Original JS-generated workflow tested; migrated TS artifact not rerun on device"
+}

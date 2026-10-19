@@ -1,0 +1,168 @@
+{
+  "checkedAt": "2026-10-19T13:27:00.589Z",
+  "directory": "/tmp/js-shortcuts-format-reference/codex/skills/shortcuts-playground/golden-shortcuts/xml",
+  "validation": "Import \u2192 TypeScript \u2192 workflow, XML roundtrip, inspection JSON roundtrip. No action execution.",
+  "passed": 19,
+  "failed": 0,
+  "results": [
+    {
+      "file": "1be4dde95b794253bf82438e201b33e7.xml",
+      "sha256": "ebe70e9e58410dae79f99f8fe1ced26a28e69585e16fae2391f1ffca07679260",
+      "actions": 7,
+      "result": "pass"
+    },
+    {
+      "file": "2e0fb675e45948aaacee7e534f910492.xml",
+      "sha256": "cb4932b624edd187e1650fe1a61ccfde12aa9960aad3c7b4610fb4367f3aa5c8",
+      "actions": 27,
+      "result": "pass"
+    },
+    {
+      "file": "332c12a0060043b388b22b806be7ab58.xml",
+      "sha256": "a02b7e6ccf605af5f33078788d932a1d32cd1e75705641e83eba29935eb988c0",
+      "actions": 118,
+      "result": "pass"
+    },
+    {
+      "file": "3dd4ee24e43f464f92adaa70a0311eaa.xml",
+      "sha256": "552674021e189a02e6627e4c701c357a6b7183ff39a0fc58b2daa71ca3b14bff",
+      "actions": 14,
+      "result": "pass"
+    },
+    {
+      "file": "4d102301c6e646faa7a8a221f4f4ec98.xml",
+      "sha256": "5623291c7354af2446c82a806cf8d19d0cf45f6bb12cb91d0708db5a188015c4",
+      "actions": 16,
+      "result": "pass"
+    },
+    {
+      "file": "51cc4e26d1044893a0c3f2f3630cf2d2.xml",
+      "sha256": "f8ef718d12d22bce354177a1ffbcc94562287d8056a3097f5de5a338be0f78e1",
+      "actions": 78,
+      "result": "pass"
+    },
+    {
+      "file": "623e7f1ca5f948e2bd53811fec63e544.xml",
+      "sha256": "3021421e2c140f7b8dc7be8d35ee424b3f31304c63775966d11348d124e8b3b5",
+      "actions": 8,
+      "result": "pass"
+    },
+    {
+      "file": "6a18b76843ac45c384ac3400f3740997.xml",
+      "sha256": "0c0050bc64041539b9df110252fd5890e70b8bfc53f31ae924eb0c8e5076b74a",
+      "actions": 81,
+      "result": "pass"
+    },
+    {
+      "file": "71f0cacb0f604b399b76c5dcb7286e7c.xml",
+      "sha256": "5c34153996f41a88a36824e25278a04d86d25efe8f8722b28e039e5bc665ae02",
+      "actions": 134,
+      "result": "pass"
+    },
+    {
+      "file": "807525ed9f974829bc8494defac923a8.xml",
+      "sha256": "cef78faaf5934e12413f9590e2528127c309fe1279f8b75eb4d7f21589f235f3",
+      "actions": 16,
+      "result": "pass"
+    },
+    {
+      "file": "8ab0d39826ab4249be58672763caa3ba.xml",
+      "sha256": "da59b169adcd551590184cdb3d77cf37f033ac60b3df1a59676b5c9bc9eb0a62",
+      "actions": 15,
+      "result": "pass"
+    },
+    {
+      "file": "91c45fd3fd3b427897d9ba485efb1227.xml",
+      "sha256": "dbeb98cf330cd2d5101a77e8d4690209f46efebef67f62c718d97d65acf64a13",
+      "actions": 38,
+      "result": "pass"
+    },
+    {
+      "file": "97be626bb25c41709d175646a7f6d8f2.xml",
+      "sha256": "14c915dc8501e7f1659213bdef65f9110a17b4970a0834f99298a00439ff2c0c",
+      "actions": 19,
+      "result": "pass"
+    },
+    {
+      "file": "ae59e10d409348f9bd33894f03f9beb4.xml",
+      "sha256": "0f44bf0b92d065bd4a3d0ec3793c40466ddf55b7a1a983b2838f64afd52b715c",
+      "actions": 23,
+      "result": "pass"
+    },
+    {
+      "file": "afa83b6be811483b9c32189c41eb9312.xml",
+      "sha256": "c41f23cf020ab77fa49b3895a5fa05cb21bf77ee4763c7d6f51c4d115b8b23fc",
+      "actions": 14,
+      "result": "pass"
+    },
+    {
+      "file": "cfdb083b857e4ac189629fa386d27cdc.xml",
+      "sha256": "3b8f3ee05774a76bfa93bcf4ca55becf5c9dfee160e50f8e3d3cc273afcdc963",
+      "actions": 6,
+      "result": "pass"
+    },
+    {
+      "file": "e01cebe192d64b2fbca80204d03d92ab.xml",
+      "sha256": "b4053dea1f7018267fa073294430a5079e31ab2ac475113a9f2e29b54d607dd7",
+      "actions": 5,
+      "result": "pass"
+    },
+    {
+      "file": "ef669bcf8bad489d9ef4b88bfaf5772f.xml",
+      "sha256": "30952f67bec793b9b234b1dc0f74e39437dab942489191e6cb6492cadcb6efd1",
+      "actions": 18,
+      "result": "pass"
+    },
+    {
+      "file": "f44f5caf5e3e48d4817e73af450c4404.xml",
+      "sha256": "9c42cb266411a77c7a5e0fc48c272dc329746817cebef549ce68c29c689f006c",
+      "actions": 19,
+      "result": "pass"
+    }
+  ],
+  "source": {
+    "repository": "https://github.com/viticci/shortcuts-playground-plugin",
+    "commit": "2de03bffe4ce8802e06d184931d9e4ec366a2ef2",
+    "directory": "codex/skills/shortcuts-playground/golden-shortcuts/xml"
+  },
+  "unitTests": {
+    "passed": 127,
+    "failed": 0,
+    "typecheck": "passed"
+  },
+  "nativeFormatVerification": "Apple plutil converted generated XML containing data/date to binary; binary import, TypeScript recompilation and inspection JSON roundtrips preserved the tested values. Subsecond dates are rejected before lossy XML conversion.",
+  "implementation": [
+    {
+      "path": "src/native.ts",
+      "sha256": "aeeeebd32263dc93f91012b90f4985fde808070174e41b4e9feee93dfcbd4647"
+    },
+    {
+      "path": "src/importer.ts",
+      "sha256": "d9a5aac15377e2bc586f0b69adf9dd466c694c04eaed8021cce2127cd9a8d1f5"
+    },
+    {
+      "path": "src/plist-codec.ts",
+      "sha256": "6297e29656023d0df10b7c0a5cce7998b16ee18d46663556ba2490a6ee08d705"
+    },
+    {
+      "path": "src/compiler.ts",
+      "sha256": "9aa506662e31f909ae5f86c300b4f40d16fddac15752c578e6369abba2c63919"
+    },
+    {
+      "path": "src/emitter.ts",
+      "sha256": "529003d8f54042a8e570ccf4d924a39deaa16782740bd8a55e5010514925ff2f"
+    },
+    {
+      "path": "src/cli.ts",
+      "sha256": "db7422e4ecc66ed1119da4c256f827cd87a605c4e018dadb79f4328805791731"
+    },
+    {
+      "path": "test/plist.test.ts",
+      "sha256": "34105287b33fa455270e4951276283973cdbae0b48cd902776046d66a0a30c3b"
+    },
+    {
+      "path": "scripts/verify-corpus.mjs",
+      "sha256": "03dfcaeb396f208955391c785128a36c4e8ee364fc46c91baf691da4755d6a65"
+    }
+  ]
+}

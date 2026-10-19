@@ -1,0 +1,40 @@
+    "<WFStringContentItem: 0x10ab563c0>: YYY;",
+    "<WFStringContentItem: 0x10ab55040>: YYY;NNN;",
+    "<WFStringContentItem: 0x10ab54e00>: YYY;NNN;YYY;",
+    "<WFStringContentItem: 0x10ab56f40>: YYY;NNN;YYY;YNY;",
+    "<WFStringContentItem: 0x10aa454c0>: YYY;NNN;YYY;YNY;NYY;",
+    "<WFStringContentItem: 0x10aa46ec0>: YYY;NNN;YYY;YNY;NYY;NNY;",
+    "<WFStringContentItem: 0x10aa46940>: YYY;NNN;YYY;YNY;NYY;NNY;NNN;",
+    "<WFStringContentItem: 0x10aa46280>: YYY;NNN;YYY;YNY;NYY;NNY;NNN;NNN;",
+    "<WFStringContentItem: 0x10aa46d40>: YYY;NNN;YYY;YNY;NYY;NNY;NNN;NNN;NNY;",
+    "<WFStringContentItem: 0x137914440>: YYY;NNN;YYY;YNY;NYY;NNY;NNN;NNN;NNY;YNY;",
+    "<WFStringContentItem: 0x137914c80>: YYY;NNN;YYY;YNY;NYY;NNY;NNN;NNN;NNY;YNY;NNN;",
+    "<WFStringContentItem: 0x1379154c0>: YYY;NNN;YYY;YNY;NYY;NNY;NNN;NNN;NNY;YNY;NNN;NNN;",
+    "<WFStringContentItem: 0x137915fc0>: YY.
+2026-10-19 19:41:37.432 Df BackgroundShortcutRunner[66014:466aa5] [com.apple.shortcuts:RunningLifecycle] Running action <WFGetVariableAction: 0x10a855200, identifier: is.workflow.actions.getvariable>
+2026-10-19 19:41:37.432 Df BackgroundShortcutRunner[66014:4679a4] [com.apple.shortcuts:WorkflowExecution] -[WFAction runWithInput:userInterface:runningDelegate:variableSource:workQueue:completionHandler:] Action <WFGetVariableAction: 0x10a855200, identifier: is.workflow.actions.getvariable> started running
+2026-10-19 19:41:37.432 Df BackgroundShortcutRunner[66014:4679a4] [com.apple.shortcuts:RemoteExecution] -[WFAction(Definition) requiresRemoteExecution] <WFGetVariableAction: 0x10a855200, identifier: is.workflow.actions.getvariable> definition requires remote execution on platforms: (
+)
+2026-10-19 19:41:37.432 Df BackgroundShortcutRunner[66014:4679a4] [com.apple.shortcuts:RemoteExecution] -[WFAction(Definition) requiresRemoteExecution] <WFGetVariableAction: 0x10a855200, identifier: is.workflow.actions.getvariable> definition doesn't require remote execution
+2026-10-19 19:41:37.432 Df BackgroundShortcutRunner[66014:4679a4] [com.apple.shortcuts:WorkflowExecution] -[WFAction processParameterStates:withInput:skippingHiddenParameters:askForValuesIfNecessary:workQueue:completionHandler:]_block_invoke Action <WFGetVariableAction: 0x10a855200, identifier: is.workflow.actions.getvariable> finished processing parameter states. Values: {
+    WFVariable = "<WFContentCollection: 0x137920c20>: (\134n    \134"<WFStringContentItem: 0x137915fc0>: YYY;NNN;YYY;YNY;NYY;NNY;NNN;NNN;NNY;YNY;NNN;NNN;NNY;\134"\134n)";
+}
+2026-10-19 19:41:37.432 Df BackgroundShortcutRunner[66014:4679a4] [com.apple.shortcuts:RemoteExecution] -[WFAction(Definition) requiresRemoteExecution] <WFGetVariableAction: 0x10a855200, identifier: is.workflow.actions.getvariable> definition requires remote execution on platforms: (
+)
+2026-10-19 19:41:37.432 Df BackgroundShortcutRunner[66014:4679a4] [com.apple.shortcuts:RemoteExecution] -[WFAction(Definition) requiresRemoteExecution] <WFGetVariableAction: 0x10a855200, identifier: is.workflow.actions.getvariable> definition doesn't require remote execution
+2026-10-19 19:41:37.432 Df BackgroundShortcutRunner[66014:4679a4] [com.apple.shortcuts:General] -[WFAction dismissPresentedContentWithCompletionHandler:] Dismissing presented content
+2026-10-19 19:41:37.433 Df BackgroundShortcutRunner[66014:467cbb] [com.apple.shortcuts:WorkflowExecution] -[WFAction runWithInput:userInterface:runningDelegate:variableSource:workQueue:completionHandler:]_block_invoke Action <WFGetVariableAction: 0x10a855200, identifier: is.workflow.actions.getvariable> finished with output of 1 items and first item: <WFStringContentItem: 0x137915fc0>: YYY;NNN;YYY;YNY;NYY;NNY;NNN;NNN;NNY;YNY;NNN;NNN;NNY;
+2026-10-19 19:41:37.433 Df BackgroundShortcutRunner[66014:466aa5] [com.apple.shortcuts:RunningLifecycle] Action finished running <WFGetVariableAction: 0x10a855200, identifier: is.workflow.actions.getvariable>, error: false, output: <WFContentCollection: 0x137920d00>: (
+    "<WFStringContentItem: 0x137915fc0>: YYY;NNN;YYY;YNY;NYY;NNY;NNN;NNN;NNY;YNY;NNN;NNN;NNY;"
+).
+2026-10-19 19:41:37.433 Df BackgroundShortcutRunner[66014:466aa5] [com.apple.shortcuts:RunningLifecycle] Running action <WFShowResultAction: 0x10a855380, identifier: is.workflow.actions.showresult>
+2026-10-19 19:41:37.433 Df BackgroundShortcutRunner[66014:4679a4] [com.apple.shortcuts:WorkflowExecution] -[WFAction runWithInput:userInterface:runningDelegate:variableSource:workQueue:completionHandler:] Action <WFShowResultAction: 0x10a855380, identifier: is.workflow.actions.showresult> started running
+2026-10-19 19:41:37.433 Df BackgroundShortcutRunner[66014:4679a4] [com.apple.shortcuts:RemoteExecution] -[WFAction(Definition) requiresRemoteExecution] <WFShowResultAction: 0x10a855380, identifier: is.workflow.actions.showresult> definition requires remote execution on platforms: (
+)
+2026-10-19 19:41:37.433 Df BackgroundShortcutRunner[66014:4679a4] [com.apple.shortcuts:RemoteExecution] -[WFAction(Definition) requiresRemoteExecution] <WFShowResultAction: 0x10a855380, identifier: is.workflow.actions.showresult> definition doesn't require remote execution
+2026-10-19 19:41:37.433 Df BackgroundShortcutRunner[66014:4679a4] [com.apple.shortcuts:WorkflowExecution] -[WFAction processParameterStates:withInput:skippingHiddenParameters:askForValuesIfNecessary:workQueue:completionHandler:]_block_invoke Action <WFShowResultAction: 0x10a855380, identifier: is.workflow.actions.showresult> finished processing parameter states. Values: {
+}
+2026-10-19 19:41:37.433 Df BackgroundShortcutRunner[66014:466aa5] [com.apple.shortcuts:RemoteExecution] -[WFAction(Definition) requiresRemoteExecution] <WFShowResultAction: 0x10a855380, identifier: is.workflow.actions.showresult> definition requires remote execution on platforms: (
+)
+2026-10-19 19:41:37.433 Df BackgroundShortcutRunner[66014:466aa5] [com.apple.shortcuts:RemoteExecution] -[WFAction(Definition) requiresRemoteExecution] <WFShowResultAction: 0x10a855380, identifier: is.workflow.actions.showresult> definition doesn't require remote execution
+2026-10-19 19:41:37.436 E  BackgroundShortcutRunner[66014:466aa5] [com.apple.shortcuts:XPCRunner] -[WFBackgroundShortcutRunner beginPersistentModeIfNeededWithRunningContext:action:attributionBehavior:] Not starting persistent mode because should not force.

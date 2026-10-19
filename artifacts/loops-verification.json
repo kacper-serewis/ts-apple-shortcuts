@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-19",
+  "device": "iPhone 17e simulator",
+  "ios": "26.5",
+  "shortcut": "TS-Loops-Test",
+  "signingMode": "people-who-know-me",
+  "source": "examples/loops-test.ts",
+  "pipeline": "TypeScript AST -> IR -> native Shortcuts; no JavaScript intermediate",
+  "checks": {
+    "typecheck": "passed",
+    "testsPassed": 56,
+    "testsFailed": 0,
+    "import": "passed",
+    "runtime": "passed"
+  },
+  "observedResults": [
+    "IF Kacper: Kacper/A",
+    "IF Kacper: Kacper/B",
+    "Na binnenste lus: Kacper",
+    "ELSE Ada: Ada/A",
+    "ELSE Ada: Ada/B",
+    "Na binnenste lus: Ada",
+    "Klaar: lege lijst overgeslagen"
+  ],
+  "screenshots": [
+    "artifacts/ios-loops-kacper-a.png",
+    "artifacts/ios-loops-ada-a.png",
+    "artifacts/ios-loops-empty.png"
+  ],
+  "sha256": {
+    "examples/loops-test.ts": "b77d60f8af7eb7fe0bbb680059aefc5640d1fa18d9f13473dcd86de94d1740a2",
+    "dist/TS-Loops-Test.shortcut": "31dc2063818bafa6c4b97d103d180093d073e86015381972366a50d71fb1bca6",
+    "dist/TS-Loops-Test.unsigned.plist": "4f1a127bee9fb0a7d77cef40238768a3b7e02aa338c2cd34eadaa5e4fb63bf4a",
+    "test/fixtures/ios26-loops-workflow.json": "9820af9effbee856b2622d2297f10c21266a07c2ed4af0fc4778b3a95f30b900"
+  },
+  "limitations": [
+    "No physical iPhone tested",
+    "Other iOS versions not tested",
+    "Simple loops.shortcut signed but not separately run; nested integration shortcut run above"
+  ]
+}

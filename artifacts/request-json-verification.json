@@ -1,0 +1,167 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "validation": {
+    "typecheck": "passed: compiler, tests and all examples",
+    "tests": {
+      "passed": 432,
+      "failed": 0
+    },
+    "focusedTests": 24,
+    "plist": "Apple plutil -lint passed",
+    "signingMode": "people-who-know-me",
+    "nativeRegressionFixtures": 19
+  },
+  "change": "Add typed requestJson<T> with GET, POST, PUT, PATCH and DELETE, source-order evaluation, case-insensitive header overrides and on-device JSON request serialization.",
+  "verifiedShortcut": {
+    "name": "TS-Request-JSON",
+    "actionCount": 168,
+    "observedOutputs": [
+      "GET: application/json",
+      "POST: ts-2; Ada/1/N",
+      "PUT: []; application/json",
+      "PATCH: [42]; application/json; profile=test; application/vnd.test+json",
+      "DELETE: \"quote\\\"\\\\\\n😀\"",
+      "Array: 2; som: 5"
+    ],
+    "completion": "All six expected results appeared in order. After final Done, the editor showed play available with no error.",
+    "importComparison": "All 168 imported actions read from the simulator database match the compiled output exactly."
+  },
+  "transport": {
+    "endpoint": "http://127.0.0.1:8765",
+    "log": "artifacts/request-json-http.jsonl",
+    "requestCount": 6,
+    "methods": [
+      "GET",
+      "POST",
+      "PUT",
+      "PATCH",
+      "DELETE",
+      "GET"
+    ],
+    "assertions": [
+      "GET requests have no body",
+      "POST preserved nested object, false, singleton text list and runtime X-Toolkit-Test header",
+      "PUT preserved empty array",
+      "PATCH preserved singleton numeric array and explicit Accept/Content-Type overrides",
+      "DELETE preserved quotes, backslash, newline and emoji",
+      "Typed array response contained two objects, sum 5"
+    ],
+    "server": "scripts/http-echo.py; stopped after verification"
+  },
+  "compilerCoverage": [
+    "Each URL and option expression evaluated once in source order",
+    "Header/body snapshots survive later option effects",
+    "Constant aliases, case-insensitive header defaults and rejection of duplicate/invalid names",
+    "Bodyless DELETE emits no request variable or automatic Content-Type (compile-only)",
+    "Reject unsupported method/options, GET body, opaque content, runtime header object, absent response type and unawaited calls",
+    "New native fixture passes source comparison and raw/catalog roundtrips"
+  ],
+  "limitations": [
+    "Explicit response type declares shape without runtime validation; responses must be JSON objects or arrays.",
+    "Options must be inline; methods and header names static.",
+    "JSON follows existing serializer constraints: no null/undefined, opaque content or arrays of arrays.",
+    "No custom status-code, retry, timeout or try/catch layer; native network behavior applies.",
+    "Local simulator verification only; physical devices, external servers and other OS versions remain unverified.",
+    "Full Shortcuts and TypeScript coverage remains incomplete."
+  ],
+  "files": [
+    {
+      "path": "src/compiler.ts",
+      "sha256": "b6fae0cf7e7bd7994bc879754ecc22b4819258a1e846a5832c98841db1271709"
+    },
+    {
+      "path": "src/emitter.ts",
+      "sha256": "4ee14a281aa1bc4670b752a89571c6d1365a08f6d6dca22440131aafa70a7f55"
+    },
+    {
+      "path": "src/model.ts",
+      "sha256": "2e30ec59cb727778303a283d4c812281524460467ff3e890766c52b1835c938a"
+    },
+    {
+      "path": "api/ios.d.ts",
+      "sha256": "772cef310567190bb0d74890c7e1fea4dd58845ba6127becad22b5cb956bc2c6"
+    },
+    {
+      "path": "test/support/evaluate.ts",
+      "sha256": "8a7ddc01d5982d3288114ce5a1f4c11f93b7df9257fac3a432553e5d806e4ac8"
+    },
+    {
+      "path": "test/request-json.test.ts",
+      "sha256": "8476989871d21c261bb60d6e74398984b66a358d255399f5377fbc93a40b9246"
+    },
+    {
+      "path": "test/typescript.test.ts",
+      "sha256": "82535d3fc4ff051978e2ac7ed72934c7952ab4ce5c8b30bd1347c6f041e182cf"
+    },
+    {
+      "path": "test/toolkit.test.ts",
+      "sha256": "6459f7c2bf375cbe9f7905b39e0b24e2f758f98a2d1e17c3e163b9304b0dc9b8"
+    },
+    {
+      "path": "examples/request-json-test.ts",
+      "sha256": "8e4f0f9ba0fe82da8da0e41fd884b2046503852cd36be78a4b2bc21bdcc1fa72"
+    },
+    {
+      "path": "scripts/http-echo.py",
+      "sha256": "35e7c6d358a5daa639cfcea25ef16c81143ce036b0d5a77e86808206b8545183"
+    },
+    {
+      "path": "test/fixtures/ios26-request-json-workflow.json",
+      "sha256": "45060888b1bae2c93a2f1a28099ebdf32422b9f173fa89e982ec55c761dcf138"
+    },
+    {
+      "path": "README.md",
+      "sha256": "fb65b93ca08d1fe44daa629b1b36ad46424d0c024f8ba2eaee1171f63a60e662"
+    },
+    {
+      "path": "package.json",
+      "sha256": "b4988f939f8aa0945c5472635a7d0e2d145a15a78e0ed873a6e0781faa93111d"
+    },
+    {
+      "path": "artifacts/request-json-http.jsonl",
+      "sha256": "aa13cac06a7581b4aa864b5a7e60cd72e12829dafee712256b761cbd3a4df0d8"
+    },
+    {
+      "path": "dist/TS-Request-JSON.json",
+      "sha256": "65e7c277e8f5a3b118233af09d76b50f08fef6b15f05de5e72991f74d794fdc1"
+    },
+    {
+      "path": "dist/TS-Request-JSON.unsigned.plist",
+      "sha256": "4b33cec768bfc3a7ae572ed22fd2ac6e2550702889ac1ca9f1d9780ee0be86f6"
+    },
+    {
+      "path": "dist/TS-Request-JSON.shortcut",
+      "sha256": "b30753d66f5f50778138c82a8ab1df217f39c5f38281eb5c73b681c4f656b544"
+    },
+    {
+      "path": "artifacts/ios-request-json-array.png",
+      "sha256": "63a334c00c1fde8cbcfff2032c6338f84942afdd07469ed52ac1e7007ab03236"
+    },
+    {
+      "path": "artifacts/ios-request-json-delete.png",
+      "sha256": "740868b5e60be203979378957e844a2c71b644cbd7d906b6d6060c2430bf8335"
+    },
+    {
+      "path": "artifacts/ios-request-json-get.png",
+      "sha256": "ab3947d5ddff6a36ae7cdfd2af2da290e972404991b6cde4a822eedbd3095abd"
+    },
+    {
+      "path": "artifacts/ios-request-json-patch.png",
+      "sha256": "f75100ce26c02f2256c81b4f15e6cb5266afcebacecba6a42a0925612fa98c4d"
+    },
+    {
+      "path": "artifacts/ios-request-json-post.png",
+      "sha256": "963e02411d631978355a62c72dde8faaeff8972eada59e91e0070906635e532c"
+    },
+    {
+      "path": "artifacts/ios-request-json-put.png",
+      "sha256": "59453f2b86f73c9dcd18ed706ab2cee833f814cf2282d55f57e2c08bc9eeaced"
+    }
+  ]
+}

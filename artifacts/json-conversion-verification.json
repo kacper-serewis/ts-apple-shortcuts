@@ -1,0 +1,155 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "validation": {
+    "typecheck": "passed: compiler, tests and all examples",
+    "tests": {
+      "passed": 407,
+      "failed": 0
+    },
+    "focusedTests": 20,
+    "plist": "Apple plutil -lint passed",
+    "signingMode": "people-who-know-me",
+    "nativeRegressionFixtures": 18
+  },
+  "change": "Add synchronous stringifyJson, typed parseJson<T> and global JSON.stringify compiler intrinsics. Serialization uses native JSON encoding; parsing uses an internal dictionary envelope and extracts the value, supporting scalar/object/flat-array roots.",
+  "verifiedShortcut": {
+    "name": "TS-JSON-Conversion",
+    "actionCount": 148,
+    "observedOutputs": [
+      "Object: Ada/7/Y",
+      "Terug: Ada; 1/ts",
+      "Array: 0; []",
+      "Array: 1; [42]",
+      "Array: 2; [2,4]",
+      "Tekst: Y; leeg: \"\"",
+      "Scalars: false/-2.5/true",
+      "Rows: 1/9; [{\"n\":9}]"
+    ],
+    "completion": "All eight expected results appeared in order. After the final Done, the editor showed play available with no error.",
+    "importComparison": "All 148 imported actions read from the simulator database match the compiled output exactly."
+  },
+  "nativeCoverage": [
+    "Typed object parsing and boolean condition",
+    "Round trip of composed objects with a singleton array field",
+    "Empty, singleton and multi-item root arrays",
+    "Text with quotes, backslash, newline and emoji; empty string serialization",
+    "Boolean and negative fractional number roots",
+    "A singleton array of objects preserves its array shape and typed fields"
+  ],
+  "compilerCoverage": [
+    "Argument evaluation once, including effects when conversion results are ignored",
+    "Composition with synchronous helpers, array callbacks and await",
+    "Lexical/import shadowing of JSON and renamed intrinsic imports",
+    "Parser receives a materialized text attachment and exposes the extracted value",
+    "Reject missing types, invalid input categories, null/nullable root types, opaque content, matrices and unsupported JSON options",
+    "All prior native fixtures retain their expectations; the new fixture raw/catalog roundtrips pass"
+  ],
+  "investigations": [
+    "A native detect.dictionary probe with plain parameter strings produced no useful parsed object; a materialized text attachment parsed the object correctly.",
+    "A directly parsed root numeric array did not produce usable array values. The final dictionary-envelope implementation was verified for arrays and scalars."
+  ],
+  "limitations": [
+    "parseJson<T> expects valid JSON and declares the result shape without runtime schema validation.",
+    "Malformed input follows native parser behavior; strict JavaScript syntax-error semantics are not promised.",
+    "Root null/undefined, opaque output types and arrays of arrays are unsupported.",
+    "No replacer/reviver, indentation, toJSON callbacks or untyped global JSON.parse.",
+    "Native key ordering, finite-number precision and JSON-compatible input requirements apply.",
+    "Physical devices, other OS versions and full Shortcuts/TypeScript coverage remain unverified."
+  ],
+  "files": [
+    {
+      "path": "src/compiler.ts",
+      "sha256": "4438f8ba1d0c78594ea08cc953e5cf17c4fee050676fca97d73c0af35b486d3b"
+    },
+    {
+      "path": "src/emitter.ts",
+      "sha256": "4ee14a281aa1bc4670b752a89571c6d1365a08f6d6dca22440131aafa70a7f55"
+    },
+    {
+      "path": "src/model.ts",
+      "sha256": "2e30ec59cb727778303a283d4c812281524460467ff3e890766c52b1835c938a"
+    },
+    {
+      "path": "api/ios.d.ts",
+      "sha256": "be679f68e9874399d067cec3b263b5351b29dce126b1be3049a26ba3935f5a9f"
+    },
+    {
+      "path": "test/support/evaluate.ts",
+      "sha256": "95aea8b878898056bfb9d742b8788ee869169cd0e49c5b627488eac45d26ac41"
+    },
+    {
+      "path": "examples/json-conversion-test.ts",
+      "sha256": "0b00281236da5aff9ab3a91519568294a0357df84f13fdb7f0edb1c56bb9b6d1"
+    },
+    {
+      "path": "test/json-conversion.test.ts",
+      "sha256": "6928c66857f77c7d755525b19cac4434eccb466f3d931ff7c500b96c9e384d28"
+    },
+    {
+      "path": "test/typescript.test.ts",
+      "sha256": "34e5f92813ef90512994cf3227dfe4d9cec3a1dd37b4f637131354a48dbee587"
+    },
+    {
+      "path": "test/toolkit.test.ts",
+      "sha256": "28632a6574b5fe52de4bff37369030be7eecf543955fb37ce07b754c067a234b"
+    },
+    {
+      "path": "test/fixtures/ios26-json-conversion-workflow.json",
+      "sha256": "029e3dfbdc912471cd9287badbb0e598e54bf16d9cf386846175dc9a26b52935"
+    },
+    {
+      "path": "dist/TS-JSON-Conversion.json",
+      "sha256": "a75a8eadd1ae8fa47e1eee93f40a593c136cb67c952002fcedcc4496669859b1"
+    },
+    {
+      "path": "dist/TS-JSON-Conversion.unsigned.plist",
+      "sha256": "0c8a67b675acf42c8a4469c3e7a65e238ea14976f44d80f8bb3b7251890d2a02"
+    },
+    {
+      "path": "dist/TS-JSON-Conversion.shortcut",
+      "sha256": "4a0ac3c11ed1fc73ac1fceb247a5cbcd52a633a8dc5858717678cca8b5a4829c"
+    },
+    {
+      "path": "artifacts/json-native-probe.ts",
+      "sha256": "627dc0dc8793d0893027e25e1fbca960cee710a4ed6758d5fbf9c8ec86035ee4"
+    },
+    {
+      "path": "artifacts/ios-json-conversion-empty.png",
+      "sha256": "cbb13518609608ab3caa9c9081b186d99341f4ed3b60609baa8d6b0a09c52348"
+    },
+    {
+      "path": "artifacts/ios-json-conversion-many.png",
+      "sha256": "c94cebc522d9d0371832088c4438cd281d14e677c697c6f64b1792a2014843c2"
+    },
+    {
+      "path": "artifacts/ios-json-conversion-object.png",
+      "sha256": "570a3e399f0a7335d47e87592c56347223561a02b210c3f9f62a0e007bd34e1d"
+    },
+    {
+      "path": "artifacts/ios-json-conversion-roundtrip.png",
+      "sha256": "cf0c625f4f0f5db224bd4864ac53f58f924cceee275e7a09a8956d6bb19aa411"
+    },
+    {
+      "path": "artifacts/ios-json-conversion-rows.png",
+      "sha256": "79c4664569875e2db074b2cad4331b464d7441d5dc006115f33078c49cb4d4a0"
+    },
+    {
+      "path": "artifacts/ios-json-conversion-scalars.png",
+      "sha256": "f0535dd178ac54b8835fec4f8e34cef847425f90685321e59e750a40e5fa4eb7"
+    },
+    {
+      "path": "artifacts/ios-json-conversion-single.png",
+      "sha256": "0175055c01c6b6eb9f07b0991098930adaf079eb62bea34b9c2cddebc93fb07f"
+    },
+    {
+      "path": "artifacts/ios-json-conversion-text.png",
+      "sha256": "4bc0eb507895d21dd50f3f6e7381ba4a132406e21d57440393cff0f1c98b16c9"
+    }
+  ]
+}
