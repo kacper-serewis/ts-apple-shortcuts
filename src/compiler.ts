@@ -217,6 +217,7 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
           return nativeCall(invocation, action.id, argument, scopes, output, needsValue, position(node).line, catalogKeys!.get(action.id), action.functionDefaults);
         }
       }
+      if (mathMember(invocation.expression, scopes) !== undefined) return mathCall(invocation, scopes, output);
       const json = jsonOperation(invocation, scopes);
       if (json) return jsonCall(invocation, json, scopes, output);
       if (stringMethodName(invocation)) return stringMethod(invocation, scopes, output);
@@ -365,6 +366,13 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     if (ts.isNumericLiteral(node)) return { kind: "number", value: staticPlist(node, fail) as number };
     if (node.kind === ts.SyntaxKind.TrueKeyword || node.kind === ts.SyntaxKind.FalseKeyword) return { kind: "boolean", value: node.kind === ts.SyntaxKind.TrueKeyword };
     if (ts.isIdentifier(node)) return resolve(node, scopes, output);
+    if (ts.isCallExpression(node) && mathMember(node.expression, scopes) !== undefined) return mathCall(node, scopes, output);
+    const mathConstant = mathMember(node, scopes);
+    if (mathConstant !== undefined) {
+      const constants: Record<string, number> = { E: Math.E, PI: Math.PI, LN2: Math.LN2, LN10: Math.LN10, LOG2E: Math.LOG2E, LOG10E: Math.LOG10E, SQRT1_2: Math.SQRT1_2, SQRT2: Math.SQRT2 };
+      if (!Object.hasOwn(constants, mathConstant)) fail(`Math.${mathConstant} is not a supported numeric constant. Call supported Math functions directly.`, node);
+      return { kind: "number", value: constants[mathConstant] };
+    }
     if (ts.isCallExpression(node) && jsonOperation(node, scopes)) return jsonCall(node, jsonOperation(node, scopes)!, scopes, output);
     if (ts.isCallExpression(node) && stringMethodName(node)) return stringMethod(node, scopes, output);
     if (ts.isCallExpression(node) && arrayMethodName(node)) return arrayMethod(node, scopes, output, true)!;
@@ -577,6 +585,63 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
   function helperDeclaration(expr: ts.CallExpression, scopes: Scope[]): ts.FunctionDeclaration | undefined {
     if (!ts.isIdentifier(expr.expression) || scopes.some(scope => scope.has(expr.expression.getText(sourceFile)))) return undefined;
     return functions.get(expr.expression.text);
+  }
+  function mathMember(node: ts.Expression, scopes: Scope[]): string | undefined {
+    const access = unwrap(node);
+    if (!ts.isPropertyAccessExpression(access) && !ts.isElementAccessExpression(access)) return undefined;
+    const receiver = unwrap(access.expression);
+    if (!ts.isIdentifier(receiver) || receiver.text !== "Math" || scopes.some(scope => scope.has("Math")) || functions.has("Math") || imports.has("Math")) return undefined;
+    if (access.questionDotToken) fail("Optional Math access is not supported.", access);
+    if (ts.isPropertyAccessExpression(access)) return access.name.text;
+    const key = unwrap(access.argumentExpression);
+    if (!ts.isStringLiteralLike(key)) fail("Math access requires a static member name.", access);
+    return key.text;
+  }
+  function mathCall(expr: ts.CallExpression, scopes: Scope[], output: IRNode[]): ScalarValue {
+    const method = mathMember(expr.expression, scopes)!;
+    if (expr.questionDotToken) fail("Optional Math calls are not supported.", expr);
+    if (expr.typeArguments?.length || expr.arguments.some(ts.isSpreadElement)) fail("Math calls do not support type arguments or spreads.", expr);
+    if (!["abs", "sign", "min", "max", "floor", "ceil", "trunc", "round", "pow", "sqrt"].includes(method)) fail(`Math.${method} is not supported yet.`, expr);
+    if (method === "min" || method === "max") {
+      if (!expr.arguments.length) fail(`Math.${method} requires at least one number; infinite results are unsupported.`, expr);
+    } else if (expr.arguments.length !== (method === "pow" ? 2 : 1)) fail(`Math.${method} expects ${method === "pow" ? "two numbers" : "one number"}.`, expr);
+    // Freeze all arguments before computing, matching JS argument evaluation order.
+    const args = expr.arguments.map(argument => numeric(argument, scopes, output));
+    const line = position(expr).line;
+    const num = (value: number): ScalarValue => ({ kind: "number", value });
+    const calc = (left: ScalarValue, operator: "+" | "-" | "%" | "**", right: ScalarValue): ScalarValue => {
+      const id = nextId++;
+      output.push({ kind: "math", id, left, right, operator, line });
+      return { kind: "ref", id, outputName: "Calculation Result", valueType: "number" };
+    };
+    const choose = (left: ScalarValue, operator: "<" | ">" | ">=", right: ScalarValue, yes: ScalarValue, no: ScalarValue): ScalarValue => {
+      const name = `ts_${nextId++}_math`;
+      output.push({ kind: "numeric-if", left, right, operator,
+        then: [{ kind: "set", name, value: yes, line }], else: [{ kind: "set", name, value: no, line }], line });
+      const id = nextId++;
+      output.push({ kind: "get", id, name, line });
+      return { kind: "ref", id, outputName: "Variable", valueType: "number" };
+    };
+    const x = args[0];
+    if (method === "pow") return calc(x, "**", args[1]);
+    if (method === "sqrt") {
+      if (x.kind === "number" && x.value < 0) fail("Math.sqrt requires a nonnegative number; NaN is unsupported.", expr);
+      return calc(x, "**", num(0.5));
+    }
+    if (method === "abs") return choose(x, "<", num(0), calc(num(0), "-", x), x);
+    if (method === "sign") return choose(x, "<", num(0), num(-1), choose(x, ">", num(0), num(1), num(0)));
+    if (method === "min" || method === "max") {
+      return args.slice(1).reduce((best, item) => choose(item, method === "min" ? "<" : ">", best, item, best), x);
+    }
+    // Decompose into integer/remainder instead of using native round-to-nearest.
+    // This also avoids adding 0.5 to a large input before truncating.
+    const fraction = calc(x, "%", num(1));
+    const integer = calc(x, "-", fraction);
+    if (method === "trunc") return integer;
+    if (method === "floor") return choose(fraction, "<", num(0), calc(integer, "-", num(1)), integer);
+    if (method === "ceil") return choose(fraction, ">", num(0), calc(integer, "+", num(1)), integer);
+    const negative = choose(fraction, "<", num(-0.5), calc(integer, "-", num(1)), integer);
+    return choose(fraction, ">=", num(0.5), calc(integer, "+", num(1)), negative);
   }
   function stringMethodName(expr: ts.CallExpression): StringMethod | undefined {
     const access = unwrap(expr.expression);
