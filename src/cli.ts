@@ -29,7 +29,7 @@ try {
     console.log(`Imported → ${output}`);
   } else if (positionals[0] === "actions") {
     const matches = searchActions(positionals.slice(1).join(" "));
-    for (const item of matches) console.log(`${item.id}\t${item.name}\t${item.platforms.join(", ")}`);
+    for (const item of matches) console.log(`${item.category}.${item.functionName}\t${item.id}\t${item.name}\t${item.platforms.join(", ")}`);
     console.log(`${matches.length} catalog entries (metadata, not device verification).`);
   } else if (positionals[0] === "action") {
     if (positionals.length !== 2) throw new Error("Use action full.native.identifier");

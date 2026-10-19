@@ -5,7 +5,7 @@ import ts from "typescript";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { compile } from "../src/compiler.js";
-import { readCatalog } from "../src/catalog.js";
+import { readCatalog, searchActions } from "../src/catalog.js";
 import { workflowToTypeScript } from "../src/importer.js";
 
 const source = (body: string, imports = "actions, native, raw, text, attachment, showResult, askNumber, input") => `import { ${imports} } from "@js-shortcuts/ios";
@@ -158,4 +158,102 @@ test("TypeScript editor suggests catalog identifiers and action-specific paramet
   assert.ok(keys.includes("WFTextActionText"));
   assert.ok(keys.includes("UUID"));
   assert.ok(!keys.includes("WFMathOperand"));
+});
+
+test("every catalog action has a unique category function that emits its exact identifier and parameters", () => {
+  const catalog = readCatalog().actions;
+  const categories = [...new Set(catalog.map(a => a.category))];
+  const names = catalog.map(a => `${a.category}.${a.functionName}`);
+  assert.equal(new Set(names).size, catalog.length);
+  for (const name of names) assert.match(name, /^[A-Za-z_$][\w$]*\.[A-Za-z_$][\w$]*$/);
+  // Compilation probes only: placeholder values do not assert device compatibility.
+  const parameters = catalog.map(a => Object.fromEntries(a.parameters.map(p => [p.key, "metadata probe"])));
+  const body = catalog.map((a, i) => `await ${names[i]}(${a.parameters.length ? JSON.stringify(parameters[i]) : ""});`).join("\n");
+  const emitted = compile(source(body, categories.join(", "))).workflow.WFWorkflowActions;
+  assert.equal(emitted.length, catalog.length);
+  for (const [i, action] of emitted.entries()) {
+    assert.equal(action.WFWorkflowActionIdentifier, catalog[i].id);
+    const { UUID, ...values } = action.WFWorkflowActionParameters;
+    assert.equal(typeof UUID, "string");
+    assert.deepEqual(values, parameters[i]);
+  }
+});
+
+test("category defaults and import aliases compose without generic output arguments", () => {
+  const body = `const answer = await AI.ask({ WFLLMPrompt: text("Name an app") });
+    const trimmed = await Text.trim({ WFInput: text(answer) });
+    const n = await Numbers.create({ WFNumberActionNumber: 7 });
+    await showResult(\`\${trimmed}: \${n + 1}\`);
+    await Clipboard.set({ WFInput: text(trimmed) });`;
+  const named = compile(source(body, "LLM as AI, Text, Numbers, Clipboard, text, showResult"));
+  const direct = compile(source(body
+    .replace("AI.ask(", 'actions["is.workflow.actions.askllm"]<string>(')
+    .replace("Text.trim(", 'actions["is.workflow.actions.text.trimwhitespace"]<string>(')
+    .replace("Numbers.create(", 'actions["is.workflow.actions.number"]<number>(')
+    .replace("Clipboard.set(", 'actions["is.workflow.actions.setclipboard"](')));
+  assert.deepEqual(normalize(named), normalize(direct));
+});
+
+test("category functions retain raw export parameters and explicit structured output types", () => {
+  const parameters = { UUID: "EXPORTED-ID", FutureParameter: { Values: [1, true, "a"] } };
+  const compiled = compile(source(`await LLM.ask(raw(${JSON.stringify(parameters)}));
+    const item = await Dictionary.get<{ title: string }>({ WFDictionaryKey: "item" });
+    await showResult(item.title);
+    const items = await Text.split({ text: "a,b" });
+    for (const item of items) { await showResult(item); }
+    const content = await Clipboard.get({});
+    await Clipboard.set({ WFInput: attachment(content) });`, "LLM, Dictionary, Text, Clipboard, raw, showResult, attachment"));
+  assert.deepEqual(compiled.workflow.WFWorkflowActions[0].WFWorkflowActionParameters, parameters);
+  assert.deepEqual(compile(workflowToTypeScript(compiled.workflow)).workflow, compiled.workflow);
+});
+
+test("categorized example compiles and round-trips through native imports", () => {
+  const code = readFileSync(new URL("../../examples/categorized-actions.ts", import.meta.url), "utf8");
+  const compiled = compile(code);
+  assert.deepEqual(compiled.workflow.WFWorkflowActions.map(a => a.WFWorkflowActionIdentifier),
+    ["askllm", "text.trimwhitespace", "setclipboard", "showresult"].map(id => `is.workflow.actions.${id}`));
+  assert.deepEqual(compile(workflowToTypeScript(compiled.workflow)).workflow, compiled.workflow);
+});
+
+test("category and method completion expose all functions and action-specific keys", () => {
+  const categories = completions(source("", "/*cursor*/"));
+  for (const category of new Set(readCatalog().actions.map(a => a.category))) {
+    assert.ok(categories.includes(category), `Missing category ${category}`);
+  }
+  const methods = completions(source("await LLM./*cursor*/", "LLM"));
+  for (const action of readCatalog().actions.filter(a => a.category === "LLM")) {
+    assert.ok(methods.includes(action.functionName), `Missing LLM.${action.functionName}`);
+  }
+  const keys = completions(source("await LLM.ask({ /*cursor*/ });", "LLM"));
+  assert.ok(keys.includes("WFLLMPrompt"));
+  assert.ok(keys.includes("WFLLMModel"));
+  assert.ok(!keys.includes("WFMathOperand"));
+  assert.ok(searchActions("LLM.ask").some(a => a.id === "is.workflow.actions.askllm"));
+});
+
+for (const [body, error] of [
+  ['await LLM.ask({ Typo: 1 });', /Unknown catalog parameter/],
+  ['await LLM.missing({});', /Unknown catalog function/],
+  ['await LLM.ask();', /one parameters object/],
+  ['await LLM.ask({}, {});', /one parameters object/],
+  ['await LLM.ask?.({});', /Optional catalog/],
+  ['await LLM?.ask({});', /Optional catalog/],
+  ['await LLM["ask"]({});', /direct category function call/],
+  ['LLM.ask({});', /await Category/],
+  ['const p = {}; await LLM.ask(p);', /parameters must be an object/],
+  ['const f = LLM.ask; await f({});', /Unknown variable/],
+  ['const { ask } = LLM; await ask({});', /Unknown variable/],
+  ['const LLM = input<{ ask: string }>(); await LLM.ask({});', /Only imported Shortcuts/],
+  ['{ await LLM.ask({}); const LLM = 1; }', /Only imported Shortcuts/],
+  ['const answer = await LLM.ask({}); const wrong: number = answer;', /TS2322/],
+  ['const wrong: number = await LLM.ask<string>({});', /TS2322/],
+] as const) {
+  test(`rejects invalid category use: ${body}`, () => {
+    assert.throws(() => compile(source(body, "LLM, input")), error);
+  });
+}
+
+test("category checks apply to JavaScript and type-only category imports do not invoke actions", () => {
+  assert.throws(() => compile(source('await LLM.ask({ Typo: 1 });', "LLM"), { filename: "example.js" }), /Unknown catalog parameter/);
+  assert.throws(() => compile(source('await LLM.ask({});', "type LLM")), /Only imported Shortcuts/);
 });

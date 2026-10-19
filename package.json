@@ -7,6 +7,7 @@
     "node": ">=22"
   },
   "scripts": {
+    "generate:catalog": "python3 scripts/generate-catalog.py",
     "typecheck": "tsc --noEmit && tsc -p examples/tsconfig.json",
     "build": "tsc",
     "test": "npm run build && node --test lib/test/*.test.js",

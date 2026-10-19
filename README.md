@@ -8,6 +8,8 @@ Apple signing. There is no JavaScript intermediate for your shortcut.
 The toolkit provides:
 
 - TypeScript constructs and convenient typed action functions for everyday code.
+- Category functions for every catalog action: `LLM.ask({...})`,
+  `Text.replace({...})`, `Clipboard.get({...})`, and app-specific categories.
 - `actions["identifier"]<T>(parameters)` for catalog actions, with parameter-key
   checks and editor completion.
 - `native<T>(identifier, parameters)` for arbitrary native/system/app action
@@ -661,6 +663,51 @@ npm run shortcut -- actions clipboard
 npm run shortcut -- actions calendar
 npm run shortcut -- action is.workflow.actions.downloadurl
 ```
+
+Every catalog action also has a named function in a category. Import the categories
+you need; editors complete their functions and native parameter keys:
+
+```ts
+import { LLM, Text, Clipboard, text, showResult } from "@js-shortcuts/ios";
+
+export default async function main(): Promise<void> {
+  const answer = await LLM.ask({
+    WFLLMPrompt: text("Bedenk een leuke naam voor mijn app"),
+  });
+  const trimmed = await Text.trim({ WFInput: text(answer) });
+  await Clipboard.set({ WFInput: text(trimmed) });
+  await showResult(trimmed);
+}
+```
+
+All **2,585 catalog entries** have a generated category function. Common actions
+use concise names such as `Text.create`, `Text.split`, `Text.join`,
+`Numbers.calculate`, and `Dictionary.get`. Other functions derive their names
+from the action's display name. App actions are grouped by app (with desktop/mobile
+variants together where known); colliding names receive a source suffix. Search
+with `npm run shortcut -- actions LLM` to see function names and native identifiers.
+The full declarations are in `api/functions.generated.d.ts`.
+
+No generic argument is required. `LLM.ask` defaults to an expected `string` result;
+common text/number functions have corresponding defaults. Actions without a known
+result schema default to `NativeContent`. A contextual type annotation can infer
+the expected result, just as with `native<T>`. You can also override it explicitly,
+for example `Dictionary.get<string>({...})` or `LLM.ask<{ title: string }>({...})`.
+These are compile-time expectations, not runtime validation or automatic native
+output configuration. Configure the action's native output parameters to match.
+Parameter names and encodings remain native, with the same key checking and
+`text`, `attachment`, `dictionary`, and `raw` helpers as the identifier API.
+
+Call category functions directly with `await` and an inline parameters object.
+Actions with no catalog parameters also accept no arguments, e.g. `Flow.nothing()`.
+Import aliases such as `import { LLM as AI }` work. Dynamic member selection,
+destructuring methods, and storing functions in variables are unsupported.
+The compiler emits the native action directly, without a JavaScript runtime.
+See `examples/categorized-actions.ts` for a complete example.
+
+Regenerate category functions and parameter declarations from the checked-in
+metadata with `npm run generate:catalog`. Categories and concise method names
+are maintained in `scripts/action_functions.py`.
 
 For direct catalog calls with identifier and parameter-key completion:
 

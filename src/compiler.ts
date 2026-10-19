@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { resolve as resolvePath } from "node:path";
 import { actions } from "./actions.js";
 import { wrappers } from "./wrappers.js";
-import { readCatalog } from "./catalog.js";
+import { readCatalog, type CatalogAction } from "./catalog.js";
 import { staticPlist, propertyName, isDictionary, unwrap, plistData, plistDate } from "./native.js";
 import { emitWorkflow } from "./emitter.js";
 import type { ActionName, Compilation, IRNode, ListRef, ObjectRef, OutputRef, ScalarValue, StringMethod, TextValue, Value, NativeParameter, PlistDictionary } from "./model.js";
@@ -74,6 +74,18 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
   const special = new Set(["actions", "native", "raw", "text", "attachment", "dictionary", "repeat", "menu", "input", "plistData", "plistDate", "stringifyJson", "parseJson", "requestJson"]);
   // Load metadata only when catalog calls are used; ordinary compilation has no catalog I/O.
   let catalogKeys: Map<string, Set<string>> | undefined;
+  let catalogCategories: Map<string, Map<string, CatalogAction>> | undefined;
+  function loadCatalog(): void {
+    if (catalogCategories) return;
+    catalogKeys = new Map();
+    catalogCategories = new Map();
+    for (const action of readCatalog().actions) {
+      catalogKeys.set(action.id, new Set([...action.parameters.map(p => p.key), "UUID", "CustomOutputName"]));
+      let category = catalogCategories.get(action.category);
+      if (!category) catalogCategories.set(action.category, category = new Map());
+      category.set(action.functionName, action);
+    }
+  }
   let settings: PlistDictionary = {};
   let settingsNode: ts.Expression | undefined;
   const mutable = new Map<Scope, Map<string, string>>();
@@ -98,7 +110,10 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
       for (const spec of clause.namedBindings.elements) {
         if (clause.isTypeOnly || spec.isTypeOnly) continue;
         const imported = (spec.propertyName ?? spec.name).text;
-        if (!actions.has(imported as ActionName) && !Object.hasOwn(wrappers, imported) && !special.has(imported)) fail("Unknown action import. Available: askText, showResult, notify, speak, getJson.", spec);
+        if (!actions.has(imported as ActionName) && !Object.hasOwn(wrappers, imported) && !special.has(imported)) {
+          loadCatalog();
+          if (!catalogCategories!.has(imported)) fail(`Unknown action import '${imported}'. Import an action or catalog category such as LLM, Text or Clipboard.`, spec);
+        }
         imports.set(spec.name.text, imported);
       }
     } else if (ts.isFunctionDeclaration(node) && hasModifier(node, ts.SyntaxKind.ExportKeyword)
@@ -183,6 +198,22 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
   function call(node: ts.Expression, scopes: Scope[], output: IRNode[], needsValue: boolean): Value | undefined {
     const invocation = ts.isAwaitExpression(node) ? unwrap(node.expression) : unwrap(node);
     if (ts.isCallExpression(invocation)) {
+      const target = unwrap(invocation.expression);
+      if ((ts.isPropertyAccessExpression(target) || ts.isElementAccessExpression(target))
+        && ts.isIdentifier(target.expression) && !scopes.some(scope => scope.has(target.expression.getText(sourceFile)))) {
+        const categoryName = imports.get(target.expression.text);
+        const category = categoryName && catalogCategories?.get(categoryName);
+        if (category) {
+          if (!ts.isAwaitExpression(node)) fail("Actions must be called as await Category.action({...}).", node);
+          if (invocation.questionDotToken || target.questionDotToken) fail("Optional catalog calls are not supported.", invocation);
+          if (!ts.isPropertyAccessExpression(target)) fail("Use a direct category function call: await Category.action({...}).", target);
+          const action = category.get(target.name.text);
+          if (!action) fail(`Unknown catalog function '${categoryName}.${target.name.text}'.`, target);
+          if (invocation.arguments.length > 1 || (!invocation.arguments.length && action.parameters.length)) fail("Catalog actions expect one parameters object.", invocation);
+          const argument = invocation.arguments[0] ?? ts.factory.createObjectLiteralExpression();
+          return nativeCall(invocation, action.id, argument, scopes, output, needsValue, position(node).line, catalogKeys!.get(action.id));
+        }
+      }
       const json = jsonOperation(invocation, scopes);
       if (json) return jsonCall(invocation, json, scopes, output);
       if (stringMethodName(invocation)) return stringMethod(invocation, scopes, output);
@@ -199,8 +230,8 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
       const identifierNode = target.argumentExpression;
       if (!identifierNode || !ts.isStringLiteralLike(unwrap(identifierNode))) fail('Catalog calls require a literal action identifier: actions["full.native.identifier"]({...}).', target);
       const identifier = (unwrap(identifierNode) as ts.StringLiteralLike).text;
-      catalogKeys ??= new Map(readCatalog().actions.map(action => [action.id, new Set([...action.parameters.map(p => p.key), "UUID", "CustomOutputName"])]));
-      const keys = catalogKeys.get(identifier);
+      loadCatalog();
+      const keys = catalogKeys!.get(identifier);
       if (!keys) fail(`Unknown catalog action '${identifier}'. Use native() for actions outside the catalog.`, identifierNode);
       if (expr.arguments.length !== 1) fail("Catalog actions expect one parameters object.", expr);
       return nativeCall(expr, identifier, expr.arguments[0], scopes, output, needsValue, position(node).line, keys);
