@@ -18472,7 +18472,8 @@
       ],
       "parameters": [],
       "category": "Shortcuts",
-      "functionName": "getOrientation"
+      "functionName": "getOrientation",
+      "resultType": "string"
     },
     {
       "id": "com.apple.ShortcutsActions.GetPhysicalActivity",

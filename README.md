@@ -44,6 +44,35 @@ Private sharing includes the signer's identity; on the receiving device, enable
 Private Sharing and add the signer's Apple-account email to Contacts. Public
 signing returned Apple service errors 500/502 on the development Mac; private
 signing succeeded. Failed signing preserves any previous signed file.
+Signing uses the system temporary directory before copying the signed result to
+the output volume. This avoids Apple's signing service failing to save directly
+into a project on an external volume ("signed.shortcut couldn't be saved").
+
+To compile, sign, and transfer a shortcut to your phone with one command:
+
+```sh
+npm run shortcut -- examples/mijn-script.ts --share
+```
+
+`--share` includes signing and defaults to `people-who-know-me`. It detects a LAN
+IPv4 address, chooses a free port, and prints a QR code and download link. Connect
+your iPhone to the same Wi-Fi, scan the QR, and open the downloaded `.shortcut`
+file from Safari Downloads or Files to add it to Shortcuts. Private sharing may
+need to be enabled in the receiving device's Shortcuts settings.
+
+The CLI also prints a browser QR-page link and saves `dist/mijn-script.share.html`
+(or `<output>.share.html` with `--out`). Keep the command running while downloading;
+Ctrl+C stops the server. Only the signed file from that run is served, along with
+its QR page. This is a local transfer link, not a persistent iCloud sharing link.
+
+Override the address or port when needed, for example when a VPN is active:
+
+```sh
+npm run shortcut -- examples/mijn-script.ts --share --host 192.168.1.164 --port 8765
+```
+
+Use `--mode anyone` to request public signing instead. Signing must succeed before
+the server starts; a signing failure never shares an older or unsigned file.
 
 `@js-shortcuts/ios` is a compiler intrinsic, not an npm package to install.
 Include `api/ios.d.ts` in your authoring project's tsconfig, as demonstrated in
@@ -688,7 +717,7 @@ variants together where known); colliding names receive a source suffix. Search
 with `npm run shortcut -- actions LLM` to see function names and native identifiers.
 The full declarations are in `api/functions.generated.d.ts`.
 
-No generic argument is required. `LLM.ask` defaults to an expected `string` result;
+No generic argument is required. `LLM.ask` and `Shortcuts.getOrientation` default to an expected `string` result;
 common text/number functions have corresponding defaults. Actions without a known
 result schema default to `NativeContent`. A contextual type annotation can infer
 the expected result, just as with `native<T>`. You can also override it explicitly,

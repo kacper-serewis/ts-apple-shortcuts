@@ -69,6 +69,19 @@ test("catalog calls default to opaque content that can be attached to other acti
   assert.equal(input.Value.OutputUUID, producer.WFWorkflowActionParameters.UUID);
 });
 
+test("quickLook uses the catalog Quick Look action and preserves the orientation output attachment", () => {
+  const body = `const orientation = await Shortcuts.getOrientation();
+    await quickLook(orientation);`;
+  const compiled = compile(source(body, "Shortcuts, quickLook"));
+  const direct = compile(source(body.replace("quickLook(orientation)", 'actions["is.workflow.actions.previewdocument"]({ WFInput: attachment(orientation) })'), "Shortcuts, actions, attachment"));
+  assert.deepEqual(normalize(compiled.workflow), normalize(direct.workflow));
+  assert.deepEqual(compiled.sourceMap, direct.sourceMap);
+  const [orientation, preview] = compiled.workflow.WFWorkflowActions;
+  assert.equal(orientation.WFWorkflowActionIdentifier, "com.apple.ShortcutsActions.GetOrientationAction");
+  assert.equal(preview.WFWorkflowActionIdentifier, "is.workflow.actions.previewdocument");
+  assert.equal((preview.WFWorkflowActionParameters.WFInput as any).Value.OutputUUID, orientation.WFWorkflowActionParameters.UUID);
+});
+
 test("native escape hatch still accepts third-party identifiers and unknown parameter keys", () => {
   assert.doesNotThrow(() => compile(source('await native("com.example.ThirdPartyAction", { UnlistedParameter: 1 });')));
 });
@@ -192,6 +205,17 @@ test("category defaults and import aliases compose without generic output argume
     .replace("Numbers.create(", 'actions["is.workflow.actions.number"]<number>(')
     .replace("Clipboard.set(", 'actions["is.workflow.actions.setclipboard"](')));
   assert.deepEqual(normalize(named), normalize(direct));
+});
+
+test("getOrientation infers text for conditions without an explicit result type", () => {
+  const body = `const orientation = await Shortcuts.getOrientation();
+    if (orientation === "Portrait") { await showResult("Upright"); }
+    else { await showResult(orientation); }`;
+  const inferred = compile(source(body, "Shortcuts, showResult"));
+  const explicit = compile(source(body.replace("getOrientation()", "getOrientation<string>()"), "Shortcuts, showResult"));
+  assert.deepEqual(normalize(inferred), normalize(explicit));
+  assert.throws(() => compile(source(`const orientation = await Shortcuts.getOrientation();
+    const wrong: number = orientation;`, "Shortcuts")), /TS2322/);
 });
 
 test("category functions retain raw export parameters and explicit structured output types", () => {

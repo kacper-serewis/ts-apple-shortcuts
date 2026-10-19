@@ -117,6 +117,7 @@ CONTENT_CATEGORIES = {
 
 # Pin concise names for common operations. Unknown result schemas remain opaque.
 METHODS = {
+    'com.apple.ShortcutsActions.GetOrientationAction': ('getOrientation', 'string'),
     'askllm': ('ask', 'string'), 'gettext': ('create', 'string'),
     'text.replace': ('replace', 'string'), 'text.split': ('split', 'string[]'),
     'text.combine': ('join', 'string'), 'text.match': ('match', 'string[]'),

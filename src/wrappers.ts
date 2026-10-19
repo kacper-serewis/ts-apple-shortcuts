@@ -13,7 +13,7 @@ export const wrappers: Record<string, Wrapper> = {
   getClipboard: { identifier: "getclipboard", args: [], output: "Clipboard" },
   setClipboard: { identifier: "setclipboard", args: [arg("WFInput", "attachment")] },
   openURL: { identifier: "openurl", args: [arg("WFInput", "text")] },
-  quickLook: { identifier: "quicklook", args: [arg("WFInput", "attachment")] },
+  quickLook: { identifier: "previewdocument", args: [arg("WFInput", "attachment")] },
   chooseFromList: { identifier: "choosefromlist", args: [arg("WFInput", "attachment"), arg("WFChooseFromListActionPrompt", "text")], defaults: { WFChooseFromListActionSelectMultiple: false }, output: "Chosen Item" },
   chooseMultiple: { identifier: "choosefromlist", args: [arg("WFInput", "attachment"), arg("WFChooseFromListActionPrompt", "text")], defaults: { WFChooseFromListActionSelectMultiple: true }, output: "Chosen Items" },
   splitText: { identifier: "text.split", args: [arg("text", "text"), arg("WFTextCustomSeparator", "text")], defaults: { WFTextSeparator: "Custom" }, output: "Split Text" },

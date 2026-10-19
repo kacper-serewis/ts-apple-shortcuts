@@ -4442,7 +4442,7 @@ declare module "@js-shortcuts/ios" {
     /** Get My Shortcuts — is.workflow.actions.getmyworkflows */
     readonly getMyShortcuts: <T = NativeContent>(parameters: KnownNativeParameters["is.workflow.actions.getmyworkflows"] | NativeEncoded) => Promise<T>;
     /** Get Orientation — com.apple.ShortcutsActions.GetOrientationAction */
-    readonly getOrientation: <T = NativeContent>(parameters?: KnownNativeParameters["com.apple.ShortcutsActions.GetOrientationAction"] | NativeEncoded) => Promise<T>;
+    readonly getOrientation: <T = string>(parameters?: KnownNativeParameters["com.apple.ShortcutsActions.GetOrientationAction"] | NativeEncoded) => Promise<T>;
     /** Get Physical Activity — com.apple.ShortcutsActions.GetPhysicalActivity */
     readonly getPhysicalActivity: <T = NativeContent>(parameters?: KnownNativeParameters["com.apple.ShortcutsActions.GetPhysicalActivity"] | NativeEncoded) => Promise<T>;
     /** Get Shortcut Attributes — com.apple.shortcuts.GetShortcutAttributesAction */
