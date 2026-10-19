@@ -102,6 +102,88 @@ Include `api/ios.d.ts` in your authoring project's tsconfig, as demonstrated in
 `examples/tsconfig.json`. It references the generated action catalog declarations.
 The compiler itself is built to Node.js under `lib/` using the TypeScript 6 API.
 
+## Optional app types (Home Assistant prototype)
+
+App types are opt-in and can be shared without installing the app on the authoring
+machine. Import compiler-generated `Metadata.appintents/extract.actionsdata` from
+an iOS `.app` / `.appex` or a macOS `.app` bundle on macOS:
+
+```sh
+npm run shortcut -- apps import /path/to/HomeAssistant.app \
+  --name HomeAssistant --out api/apps/my-home-assistant \
+  --reference /path/to/reference-workflow.plist
+```
+
+This creates a portable `.json` manifest and editor declarations in `.d.ts`.
+Choose a new output name when importing another version; existing files are never
+overwritten. Import each extension or Watch bundle separately, under its own
+namespace, rather than merging different bundle identities.
+
+The manifest retains metadata, bundle/version and the metadata SHA-256. Types
+cover strings, booleans, numbers, enums, arrays and branded opaque app entities.
+Unsupported types remain `NativeContent`. Entity properties are not exposed as
+JavaScript dictionary fields. Availability annotations, defaults and numeric
+ranges remain in the metadata; they are not runtime validation.
+
+Metadata alone does not prove a Shortcuts action's identifier or serialized
+parameters. `--reference` reads an unsigned XML/binary plist or inspection JSON
+from a native shortcut and copies only the matching action identifier and
+`AppIntentDescriptor`. It does not copy server selections or other parameter
+values. A signed/encrypted `.shortcut` must first be imported into Shortcuts and
+its native workflow extracted. Omit `--reference` for type generation alone;
+compiling an action without a native binding fails explicitly. Other actions need
+their own reference, and a confirmed descriptor does not establish that every
+parameter encoding or result type has been executed on-device.
+
+A built Home Assistant development snapshot is included:
+
+```sh
+npm run shortcut -- examples/apps/home-assistant-brightness.ts \
+  --app api/apps/home-assistant-dev.json \
+  --out dist/home-assistant-brightness
+```
+
+```ts
+/// <reference path="../../api/apps/home-assistant-dev.d.ts" />
+import { HomeAssistant, raw } from "@js-shortcuts/ios";
+
+export default async function main(): Promise<void> {
+  await HomeAssistant.setBrightness({
+    light: raw({ Value: { Type: "Ask" }, WFSerializationType: "WFTextTokenAttachment" }),
+    brightness: 50,
+  });
+}
+```
+
+Include the generated `.d.ts` in your tsconfig or via a reference directive for
+editor completion. Pass `--app` for compilation (repeat it for multiple apps), or
+pass manifests as `compile(source, { apps: [...] })`. Restart `--dev` after changing
+an app manifest. The web visualizer does not load optional app manifests yet.
+
+The included snapshot has **64 actions and one native binding**, for
+`SetBrightnessAppIntent`, from Home Assistant commit
+`906aae66d977b3a1e560c9a17b9deab9c6e149bd`. It targets
+`io.robbie.HomeAssistant.dev`, **not the App Store app**. Its sample asks for the
+light at runtime; `"light.globe"` alone is not a serialized Home Assistant entity.
+A phone export with `light.globe` selected and brightness 50 now confirms the
+release identity and selected entity (see the release binding below). The user confirmed that the generated shortcut works on their iPhone for
+`light.globe` at 50%; this is user-reported execution evidence.
+The generated shortcut was publicly signed and imported into the iOS 27 simulator;
+its saved action matches the compiler output exactly and the editor shows 50%.
+This verifies import/recognition, not a server call. See
+`artifacts/home-assistant-verification.json` for build and simulator evidence.
+The upstream Apache-2.0 license is preserved in `api/apps/home-assistant-LICENSE.txt`.
+
+A release binding is now also available in `api/apps/home-assistant-release.json`
+(namespace `HomeAssistantRelease`). It contains only `setBrightness`, with the
+production app identifier and descriptor verified against a phone export. Its
+parameter types come from the development build above; the installed release
+version is unknown. The exported lamp selection is kept in ignored local test
+files, not in this manifest. Use `--app api/apps/home-assistant-release.json` and
+include its companion `.d.ts` when writing a shortcut for the release app.
+The generated 50% test was publicly signed, its download verified, and its
+execution on the configured iPhone confirmed by the user.
+
 ## Visualize compiled blocks
 
 Online: https://kacper-serewis.github.io/ts-apple-shortcuts/

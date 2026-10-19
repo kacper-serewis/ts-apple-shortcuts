@@ -8,5 +8,5 @@
     "types": [],
     "lib": ["ES2023"]
   },
-  "include": ["*.ts", "../api/ios.d.ts"]
+  "include": ["*.ts", "apps/*.ts", "../api/ios.d.ts"]
 }

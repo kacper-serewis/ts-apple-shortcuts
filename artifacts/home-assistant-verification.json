@@ -1,0 +1,84 @@
+{
+  "date": "2026-10-19",
+  "repository": "https://github.com/home-assistant/iOS",
+  "commit": "906aae66d977b3a1e560c9a17b9deab9c6e149bd",
+  "license": "Apache-2.0 (api/apps/home-assistant-LICENSE.txt)",
+  "build": {
+    "status": "succeeded",
+    "xcode": "27.0 (27A266a)",
+    "scheme": "App-Debug",
+    "configuration": "Debug",
+    "destination": "iOS Simulator, iPhone 17e, iOS 27.0",
+    "command": "xcodebuild -project HomeAssistant.xcodeproj -scheme App-Debug -configuration Debug -destination platform=iOS\\ Simulator,id=294D96E5-D7C8-4ADF-8983-55114743857F -derivedDataPath /tmp/ts-shortcuts-ha-build CODE_SIGNING_ALLOWED=NO DISABLE_SWIFTLINT=1 CI=true build",
+    "metadataSHA256": "9f30acd5d7d051fb72ffd64c686dc12b0bb48bc48523fe375d97e58e28ae64c9"
+  },
+  "installedSimulatorApp": {
+    "source": "Official CI artifact from the same commit",
+    "artifact": "https://github.com/home-assistant/iOS/actions/runs/39184107243/artifacts/12159340088",
+    "metadataSHA256": "df68a225338626cc63c15ca7ebce4047e19fe0aaf0a7defaa2f67c5976186b83"
+  },
+  "import": {
+    "bundleIdentifier": "io.robbie.HomeAssistant.dev",
+    "version": "2026.10.2",
+    "actions": 64,
+    "nativeBindings": [
+      "SetBrightnessAppIntent"
+    ]
+  },
+  "nativeReference": {
+    "file": "test/fixtures/home-assistant-set-brightness-workflow.json",
+    "method": "Created Set brightness in the Shortcuts editor; selected Ask Each Time for light and entered 50; read saved ZSHORTCUTACTIONS.ZDATA read-only from simulator Shortcuts.sqlite.",
+    "binding": {
+      "identifier": "io.robbie.HomeAssistant.dev.SetBrightnessAppIntent",
+      "defaults": {
+        "AppIntentDescriptor": {
+          "TeamIdentifier": "None",
+          "BundleIdentifier": "io.robbie.HomeAssistant.dev",
+          "Name": "Home Assistant \u0394",
+          "AppIntentIdentifier": "SetBrightnessAppIntent"
+        }
+      }
+    },
+    "brightnessStorage": "Native editor stores \"50\" as text; compiler emits numeric 50."
+  },
+  "checks": {
+    "typecheck": "passed",
+    "nodeTests": 527,
+    "pythonMetadataTests": 4,
+    "siteBuild": "passed"
+  },
+  "physicalDevice": {
+    "status": "passed (user-confirmed)",
+    "requestedEntity": "light.globe",
+    "brightness": 50,
+    "artifact": "dist/HA-Globe-50.shortcut",
+    "note": "User confirmed that the generated release shortcut works on their iPhone for light.globe at 50%. Result reported by the user, not independently observed by the agent."
+  },
+  "simulatorImport": {
+    "status": "passed",
+    "signingMode": "anyone",
+    "transport": "Safari download then Files \u2192 Add Shortcut",
+    "name": "home-assistant-brightness-public",
+    "matchesCompiledActionsExactly": true,
+    "actions": 1,
+    "workflow": "artifacts/home-assistant-imported-workflow.json",
+    "signedSHA256": "a330e45de76fb01feb0495629ea21dfa299b2369b9302d57878925858676d752",
+    "execution": "Not executed against a Home Assistant server; no lamp was changed.",
+    "editorRecognizedAction": "Set Light to 50%",
+    "screenshot": "artifacts/home-assistant-imported.png"
+  },
+  "releaseReference": {
+    "source": "User-supplied iCloud shortcut, retrieved 2026-10-19",
+    "action": "io.robbie.HomeAssistant.SetBrightnessAppIntent",
+    "teamIdentifier": "QMQYCKL255",
+    "metadataOrigin": "SetBrightness schema from the recorded development build; release export confirms action and parameter keys, not installed app version.",
+    "manifest": "api/apps/home-assistant-release.json",
+    "personalEntityStorage": "Only in ignored dist/home-assistant-globe.ts and dist/HA-Globe-50 artifacts. Shared fixture uses a synthetic entity.",
+    "compiledDescriptorMatches": true,
+    "compiledEntityMatches": true,
+    "brightness": 50,
+    "signingMode": "anyone",
+    "signedSHA256": "ffba401d50bd19d2c5bb49d7aea2fe98447bb6d7e1b1a867e908371276031daa",
+    "downloadBytesVerified": true
+  }
+}

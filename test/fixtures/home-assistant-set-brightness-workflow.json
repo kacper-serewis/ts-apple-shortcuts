@@ -1,0 +1,23 @@
+{
+  "WFWorkflowActions": [
+    {
+      "WFWorkflowActionIdentifier": "io.robbie.HomeAssistant.dev.SetBrightnessAppIntent",
+      "WFWorkflowActionParameters": {
+        "light": {
+          "Value": {
+            "Type": "Ask"
+          },
+          "WFSerializationType": "WFTextTokenAttachment"
+        },
+        "AppIntentDescriptor": {
+          "TeamIdentifier": "None",
+          "BundleIdentifier": "io.robbie.HomeAssistant.dev",
+          "Name": "Home Assistant \u0394",
+          "AppIntentIdentifier": "SetBrightnessAppIntent"
+        },
+        "UUID": "5720A042-47E0-421A-9865-774EE9A9C73E",
+        "brightness": "50"
+      }
+    }
+  ]
+}

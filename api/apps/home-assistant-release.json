@@ -1,0 +1,337 @@
+{
+  "format": 1,
+  "namespace": "HomeAssistantRelease",
+  "bundleIdentifier": "io.robbie.HomeAssistant",
+  "source": {
+    "version": "2026.10.2",
+    "metadataSHA256": "9f30acd5d7d051fb72ffd64c686dc12b0bb48bc48523fe375d97e58e28ae64c9",
+    "metadataBundleIdentifier": "io.robbie.HomeAssistant.dev",
+    "installedReleaseVersion": "unknown; reference proves SetBrightness exists"
+  },
+  "metadata": {
+    "actions": {
+      "SetBrightnessAppIntent": {
+        "actionConfiguration": {
+          "actionSummary": {
+            "wrapper": {
+              "otherParameterIdentifiers": [],
+              "summaryString": {
+                "formatString": "Set ${light} to ${brightness}%",
+                "parameterIdentifiers": [
+                  "light",
+                  "brightness"
+                ]
+              }
+            }
+          }
+        },
+        "assistantDefinedSchemaTraits": [],
+        "assistantDefinedSchemas": [],
+        "authenticationPolicy": 0,
+        "availabilityAnnotations": {
+          "LNPlatformNameMACOS": {
+            "introducedVersion": "13.0"
+          },
+          "LNPlatformNameWATCHOS": {
+            "introducedVersion": "9.4"
+          },
+          "LNPlatformNameWildcard": {
+            "introducedVersion": "*"
+          }
+        },
+        "descriptionMetadata": {
+          "descriptionText": {
+            "alternatives": [],
+            "defaultValue": "Sets a light's brightness as a percentage",
+            "key": "app_intents.set_brightness.description"
+          },
+          "searchKeywords": []
+        },
+        "effectiveBundleIdentifiers": [],
+        "fullyQualifiedTypeName": "HomeAssistant.SetBrightnessAppIntent",
+        "identifier": "SetBrightnessAppIntent",
+        "isAuthPolExplicit": false,
+        "isDiscoverable": true,
+        "mangledTypeName": "13HomeAssistant22SetBrightnessAppIntentV",
+        "mangledTypeNameByBundleIdentifier": {},
+        "mangledTypeNameByBundleIdentifierV2": {},
+        "mangledTypeNameV2": "13HomeAssistant22SetBrightnessAppIntentV",
+        "openAppWhenRun": false,
+        "outputFlags": 6,
+        "parameters": [
+          {
+            "capabilities": 0,
+            "dynamicOptionsSupport": 2,
+            "inputConnectionBehavior": 0,
+            "isInput": false,
+            "isOptional": false,
+            "name": "light",
+            "resolvableInputTypes": [],
+            "title": {
+              "alternatives": [],
+              "defaultValue": "Light",
+              "key": "app_intents.lights.light.title"
+            },
+            "typeSpecificMetadata": [],
+            "valueType": {
+              "entity": {
+                "wrapper": {
+                  "typeName": "DimmableLightAppEntity"
+                }
+              }
+            }
+          },
+          {
+            "capabilities": 0,
+            "dynamicOptionsSupport": 0,
+            "inputConnectionBehavior": 0,
+            "isInput": false,
+            "isOptional": false,
+            "name": "brightness",
+            "resolvableInputTypes": [
+              {
+                "kindValue": 0,
+                "valueType": {
+                  "primitive": {
+                    "wrapper": {
+                      "typeIdentifier": 2
+                    }
+                  }
+                }
+              },
+              {
+                "kindValue": 0,
+                "valueType": {
+                  "primitive": {
+                    "wrapper": {
+                      "typeIdentifier": 0
+                    }
+                  }
+                }
+              },
+              {
+                "kindValue": 0,
+                "valueType": {
+                  "primitive": {
+                    "wrapper": {
+                      "typeIdentifier": 7
+                    }
+                  }
+                }
+              }
+            ],
+            "title": {
+              "alternatives": [],
+              "defaultValue": "Brightness",
+              "key": "app_intents.set_brightness.parameter.brightness"
+            },
+            "typeSpecificMetadata": [
+              "LNValueTypeMetadataKeyNumberUpperBound",
+              {
+                "double": {
+                  "wrapper": 100
+                }
+              },
+              "LNValueTypeMetadataKeyNumberLowerBound",
+              {
+                "double": {
+                  "wrapper": 1
+                }
+              },
+              "LNValueTypeMetadataKeyNumberRangeType",
+              {
+                "int": {
+                  "wrapper": 0
+                }
+              }
+            ],
+            "valueType": {
+              "primitive": {
+                "wrapper": {
+                  "typeIdentifier": 2
+                }
+              }
+            }
+          }
+        ],
+        "presentationStyle": 0,
+        "requiredCapabilities": [],
+        "supportedModes": 1,
+        "systemProtocolMetadata": [],
+        "systemProtocolMetadataV2": [],
+        "systemProtocols": [],
+        "title": {
+          "alternatives": [],
+          "defaultValue": "Set brightness",
+          "key": "app_intents.set_brightness.title"
+        },
+        "typeSpecificMetadata": [],
+        "visibilityMetadata": {
+          "assistantOnly": false,
+          "isDiscoverable": true
+        }
+      }
+    },
+    "entities": {
+      "DimmableLightAppEntity": {
+        "assistantDefinedSchemas": [],
+        "availabilityAnnotations": {
+          "LNPlatformNameMACOS": {
+            "introducedVersion": "13.0"
+          },
+          "LNPlatformNameWATCHOS": {
+            "introducedVersion": "9.4"
+          },
+          "LNPlatformNameWildcard": {
+            "introducedVersion": "*"
+          }
+        },
+        "defaultQueryIdentifier": "HomeAssistant.DimmableLightAppEntityQuery",
+        "displayTypeName": {
+          "alternatives": [],
+          "defaultValue": "Light",
+          "key": "app_intents.dimmable_light.entity.name"
+        },
+        "effectiveBundleIdentifiers": [],
+        "entitySyncMetadata": {
+          "entitySyncType": 0
+        },
+        "fullyQualifiedTypeName": "HomeAssistant.DimmableLightAppEntity",
+        "mangledTypeName": "13HomeAssistant22DimmableLightAppEntityV",
+        "mangledTypeNameByBundleIdentifier": {},
+        "properties": [
+          {
+            "capabilities": 0,
+            "identifier": "entityId",
+            "isOptional": false,
+            "title": {
+              "alternatives": [],
+              "defaultValue": "Entity ID",
+              "key": "app_intents.entity.property.entity_id"
+            },
+            "valueType": {
+              "primitive": {
+                "wrapper": {
+                  "typeIdentifier": 0
+                }
+              }
+            }
+          },
+          {
+            "capabilities": 0,
+            "identifier": "displayString",
+            "isOptional": false,
+            "title": {
+              "alternatives": [],
+              "defaultValue": "Name",
+              "key": "app_intents.entity.property.name"
+            },
+            "valueType": {
+              "primitive": {
+                "wrapper": {
+                  "typeIdentifier": 0
+                }
+              }
+            }
+          },
+          {
+            "capabilities": 0,
+            "identifier": "areaName",
+            "isOptional": true,
+            "title": {
+              "alternatives": [],
+              "defaultValue": "Area",
+              "key": "app_intents.entity.property.area"
+            },
+            "valueType": {
+              "primitive": {
+                "wrapper": {
+                  "typeIdentifier": 0
+                }
+              }
+            }
+          },
+          {
+            "capabilities": 0,
+            "identifier": "deviceName",
+            "isOptional": true,
+            "title": {
+              "alternatives": [],
+              "defaultValue": "Device",
+              "key": "app_intents.entity.property.device"
+            },
+            "valueType": {
+              "primitive": {
+                "wrapper": {
+                  "typeIdentifier": 0
+                }
+              }
+            }
+          },
+          {
+            "capabilities": 0,
+            "identifier": "floorName",
+            "isOptional": true,
+            "title": {
+              "alternatives": [],
+              "defaultValue": "Floor",
+              "key": "app_intents.entity.property.floor"
+            },
+            "valueType": {
+              "primitive": {
+                "wrapper": {
+                  "typeIdentifier": 0
+                }
+              }
+            }
+          },
+          {
+            "capabilities": 0,
+            "identifier": "serverName",
+            "isOptional": false,
+            "title": {
+              "alternatives": [],
+              "defaultValue": "Server",
+              "key": "app_intents.entity.property.server"
+            },
+            "valueType": {
+              "primitive": {
+                "wrapper": {
+                  "typeIdentifier": 0
+                }
+              }
+            }
+          }
+        ],
+        "requiredCapabilities": [],
+        "systemProtocolMetadata": [],
+        "systemProtocolMetadataV2": [],
+        "transient": false,
+        "typeName": "DimmableLightAppEntity",
+        "typeSpecificMetadata": [],
+        "visibilityMetadata": {
+          "assistantOnly": false,
+          "isDiscoverable": true
+        }
+      }
+    },
+    "generator": {
+      "name": "xcode-tools",
+      "version": "27A266a"
+    },
+    "version": 1
+  },
+  "bindings": {
+    "SetBrightnessAppIntent": {
+      "identifier": "io.robbie.HomeAssistant.SetBrightnessAppIntent",
+      "defaults": {
+        "AppIntentDescriptor": {
+          "TeamIdentifier": "QMQYCKL255",
+          "BundleIdentifier": "io.robbie.HomeAssistant",
+          "Name": "Home Assistant",
+          "AppIntentIdentifier": "SetBrightnessAppIntent"
+        }
+      }
+    }
+  }
+}
