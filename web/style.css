@@ -1,0 +1,141 @@
+:root {
+  color-scheme: light dark;
+  --bg: #f2f2f7;
+  --panel: #ffffff;
+  --card: #ffffff;
+  --text: #1c1c1e;
+  --muted: #8e8e93;
+  --border: #d1d1d6;
+  --pill: #e5f0ff;
+  --pill-text: #0a64d6;
+  --variable: #fff1e0;
+  --variable-text: #c45f00;
+  --highlight: rgba(255, 204, 0, 0.28);
+  --error: #d70015;
+  --line-height: 20px;
+  --scripting: #8e8e93;
+  --variables: #ff9500;
+  --text-cat: #ffcc00;
+  --web: #30b0c7;
+  --output: #ff3b30;
+  --other: #5856d6;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #000000;
+    --panel: #1c1c1e;
+    --card: #2c2c2e;
+    --text: #f2f2f7;
+    --muted: #98989f;
+    --border: #3a3a3c;
+    --pill: #0a3a72;
+    --pill-text: #9ccaff;
+    --variable: #5a3300;
+    --variable-text: #ffc078;
+    --highlight: rgba(255, 214, 10, 0.18);
+    --error: #ff6961;
+  }
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  display: flex; flex-direction: column;
+  background: var(--bg); color: var(--text);
+  font: 14px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+}
+header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--panel);
+}
+h1 { font-size: 16px; margin: 0 auto 0 0; }
+h1 span { color: var(--muted); }
+header select, header input, header button {
+  font: inherit; padding: 5px 10px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--card); color: var(--text);
+}
+header button:not(:disabled) { background: #007aff; border-color: #007aff; color: white; cursor: pointer; }
+#status { color: var(--muted); font-variant-numeric: tabular-nums; min-width: 12ch; text-align: right; }
+#status.error { color: var(--error); }
+main { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); min-height: 0; }
+section { display: flex; flex-direction: column; min-height: 0; }
+
+/* Editor: a plain textarea over a layer that marks the lines linked to a block. */
+.editor-pane { border-right: 1px solid var(--border); background: var(--panel); }
+.editor { flex: 1; display: flex; min-height: 0; overflow: hidden; }
+.editor, .editor textarea {
+  font: 13px/var(--line-height) ui-monospace, "SF Mono", Menlo, monospace; tab-size: 2;
+}
+.gutter {
+  margin: 0; padding: 12px 8px 12px 12px; min-width: 48px; text-align: right;
+  color: var(--muted); user-select: none; overflow: hidden; border-right: 1px solid var(--border);
+}
+.gutter .mark { color: var(--text); font-weight: 600; }
+.gutter .error { color: var(--error); font-weight: 700; }
+.code { position: relative; flex: 1; min-width: 0; }
+.line-marks { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.line-marks div { position: absolute; left: 0; right: 0; height: var(--line-height); background: var(--highlight); }
+.line-marks div.error { background: color-mix(in srgb, var(--error) 18%, transparent); }
+textarea {
+  position: absolute; inset: 0; width: 100%; height: 100%; resize: none; border: 0; outline: 0;
+  padding: 12px; background: transparent; color: var(--text); white-space: pre; overflow: auto;
+}
+#error {
+  margin: 0; padding: 10px 14px; border-top: 1px solid var(--border);
+  color: var(--error); font: 12px/1.5 ui-monospace, Menlo, monospace; white-space: pre-wrap;
+}
+
+/* Output */
+.tabs { display: flex; gap: 4px; padding: 8px 16px 0; border-bottom: 1px solid var(--border); }
+.tabs button {
+  font: inherit; padding: 6px 12px; border: 0; border-bottom: 2px solid transparent;
+  background: none; color: var(--muted); cursor: pointer;
+}
+.tabs button[aria-selected="true"] { color: var(--text); border-bottom-color: #007aff; }
+.tab-panel { flex: 1; overflow: auto; padding: 16px; margin: 0; }
+.tab-panel.json { font: 12px/1.5 ui-monospace, Menlo, monospace; }
+.stale { opacity: 0.45; }
+
+.block {
+  position: relative; margin: 0 0 8px; padding: 10px 12px;
+  background: var(--card); border-radius: 12px; border: 2px solid transparent;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08); cursor: pointer;
+}
+.block.middle, .block.end { padding-block: 6px; background: transparent; box-shadow: none; }
+.block.middle .title, .block.end .title { color: var(--muted); }
+.block.linked { border-color: #ffcc00; }
+.block.target { border-color: #007aff; }
+.block .head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.icon {
+  flex: none; align-self: center; width: 22px; height: 22px; border-radius: 6px;
+  display: grid; place-items: center; color: white; font-size: 12px; font-weight: 700;
+}
+.title { font-weight: 600; }
+.summary { line-height: 1.9; }
+.index { margin-left: auto; color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.literal { color: var(--text); font-weight: 500; white-space: pre-wrap; }
+.literal.empty::before { content: "empty"; color: var(--muted); font-style: italic; font-weight: 400; }
+.token {
+  display: inline-block; padding: 0 7px; border-radius: 6px; line-height: 20px;
+  background: var(--pill); color: var(--pill-text); font-weight: 500; white-space: nowrap;
+}
+.token.variable { background: var(--variable); color: var(--variable-text); }
+.token.output::before { content: "◆ "; font-size: 9px; vertical-align: 1px; }
+.token[data-source] { cursor: pointer; }
+.token[data-source]:hover { outline: 1px solid currentColor; }
+.details { margin: 8px 0 0 30px; display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; font-size: 13px; }
+.details dt { color: var(--muted); }
+.details dd { margin: 0; overflow-wrap: anywhere; }
+.produces { margin: 6px 0 0 30px; font-size: 12px; color: var(--muted); }
+.depth-guide { position: absolute; top: -8px; bottom: -8px; width: 2px; background: var(--border); }
+
+.cat-scripting { background: var(--scripting); }
+.cat-variables { background: var(--variables); }
+.cat-text { background: var(--text-cat); color: #1c1c1e; }
+.cat-web { background: var(--web); }
+.cat-output { background: var(--output); }
+.cat-other { background: var(--other); }
+
+@media (max-width: 900px) {
+  main { grid-template-columns: 1fr; grid-template-rows: 45% 55%; }
+  .editor-pane { border-right: 0; border-bottom: 1px solid var(--border); }
+}

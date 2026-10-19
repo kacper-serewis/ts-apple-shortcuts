@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TypeScript → Shortcuts visualizer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>TypeScript <span>→</span> Shortcuts</h1>
+    <select id="examples" aria-label="Load example"><option value="">Load example…</option></select>
+    <input id="name" value="TS Shortcut" aria-label="Shortcut name">
+    <span id="status" role="status"></span>
+    <button id="download" disabled>Download .plist</button>
+  </header>
+  <main>
+    <section class="editor-pane">
+      <div class="editor">
+        <pre class="gutter" aria-hidden="true"></pre>
+        <div class="code">
+          <div class="line-marks" aria-hidden="true"></div>
+          <textarea id="source" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="TypeScript source"></textarea>
+        </div>
+      </div>
+      <div id="error" hidden></div>
+    </section>
+    <section class="output-pane">
+      <nav class="tabs" role="tablist">
+        <button role="tab" data-tab="blocks" aria-selected="true">Blocks</button>
+        <button role="tab" data-tab="workflow" aria-selected="false">Workflow JSON</button>
+        <button role="tab" data-tab="ir" aria-selected="false">IR</button>
+      </nav>
+      <div id="blocks" class="tab-panel"></div>
+      <pre id="workflow" class="tab-panel json" hidden></pre>
+      <pre id="ir" class="tab-panel json" hidden></pre>
+    </section>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

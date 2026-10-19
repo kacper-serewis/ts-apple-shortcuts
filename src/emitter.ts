@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { actions } from "./actions.js";
 import { isDictionary } from "./native.js";
 import type { Emission, IRNode, ListRef, NativeAction, ObjectRef, OutputRef, PlistDictionary, PlistValue, ScalarValue, SourceLocation, Value, NativeParameter } from "./model.js";
@@ -9,7 +8,7 @@ export function emitWorkflow(ir: IRNode[], { name, settings = {} }: { name: stri
   const refs = new Map<number, string>();
   const dictionaries = new Map<number, [string, Value][]>();
   const lists = new Map<number, Value[]>();
-  const uuid = () => randomUUID().toUpperCase();
+  const uuid = () => crypto.randomUUID().toUpperCase();
   function token(ref: OutputRef | ListRef | ObjectRef): PlistDictionary {
     const id = refs.get(ref.id);
     if (!id) throw new Error(`Missing action output ${ref.id}`);
