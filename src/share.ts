@@ -30,23 +30,31 @@ function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]!);
 }
 
-export interface ShortcutShare {
+export interface ShareServer {
+  /** Stable download URL for the currently published signed file. */
   url: string;
   pageUrl: string;
+  /** JSON endpoint reporting the published build: {"build": "..."}. */
+  versionUrl: string;
   html: string;
   terminalQR: string;
+  /** Replace what the stable URL serves. The previous file stays served until this is called. */
+  publish(content: Buffer, build?: string): void;
   close(): Promise<void>;
 }
+export type ShortcutShare = ShareServer;
 
-/** Serve an immutable copy of one signed file, never a directory of project files. */
-export async function shareShortcut(file: string, { host, port = 0 }: { host: string; port?: number }): Promise<ShortcutShare> {
+/** Serve one in-memory signed file, never a directory of project files. */
+export async function createShareServer(name: string, { host, port = 0, token = randomBytes(12).toString("hex") }: { host: string; port?: number; token?: string }): Promise<ShareServer> {
   validateShareHost(host);
   parseSharePort(String(port));
-  const content = await readFile(file);
-  const name = basename(file);
+  if (!/^[0-9a-f]{24}$/.test(token)) throw new Error("Share token must be 24 lowercase hex characters.");
   const encodedName = encodeURIComponent(name).replace(/['()*]/g, char => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
-  const base = `/${randomBytes(12).toString("hex")}/`;
+  const base = `/${token}/`;
   const downloadPath = `${base}${encodedName}`;
+  const versionPath = `${base}version.json`;
+  let content: Buffer | undefined;
+  let version: Buffer | undefined;
   let html = "";
   const server = createServer((request, response) => {
     response.setHeader("Cache-Control", "no-store");
@@ -56,10 +64,13 @@ export async function shareShortcut(file: string, { host, port = 0 }: { host: st
       return;
     }
     let body: Buffer;
-    if (request.url === downloadPath) {
+    if (request.url === downloadPath && content) {
       body = content;
       response.setHeader("Content-Type", "application/octet-stream");
       response.setHeader("Content-Disposition", `attachment; filename="shortcut.shortcut"; filename*=UTF-8''${encodedName}`);
+    } else if (request.url === versionPath && version) {
+      body = version;
+      response.setHeader("Content-Type", "application/json");
     } else if (request.url === base && html) {
       body = Buffer.from(html);
       response.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -94,9 +105,23 @@ export async function shareShortcut(file: string, { host, port = 0 }: { host: st
 <h1>${escapeHtml(name)}</h1>${svg}<p><a class="download" href="${escapeHtml(url)}">Download shortcut</a></p>
 <ol><li>Connect your iPhone to the same Wi-Fi network as this computer.</li><li>Scan the QR code or tap Download shortcut.</li><li>Open the downloaded file from Safari Downloads or Files to add it to Shortcuts.</li></ol>
 <p>Keep the sharing command running. Press Ctrl+C in the terminal to stop sharing.</p></html>`;
-    return { url, pageUrl, html, terminalQR, close };
+    const publish = (next: Buffer, build?: string) => {
+      content = Buffer.from(next);
+      version = build === undefined ? undefined : Buffer.from(JSON.stringify({ build }));
+    };
+    return { url, pageUrl, versionUrl: origin + versionPath, html, terminalQR, publish, close };
   } catch (error) {
     await close();
     throw error;
   }
+}
+
+/** Serve an immutable copy of one signed file. */
+export async function shareShortcut(file: string, options: { host: string; port?: number; token?: string }): Promise<ShortcutShare> {
+  validateShareHost(options.host);
+  parseSharePort(String(options.port ?? 0));
+  const content = await readFile(file);
+  const share = await createShareServer(basename(file), options);
+  share.publish(content);
+  return share;
 }

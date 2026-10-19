@@ -74,6 +74,29 @@ npm run shortcut -- examples/mijn-script.ts --share --host 192.168.1.164 --port 
 Use `--mode anyone` to request public signing instead. Signing must succeed before
 the server starts; a signing failure never shares an older or unsigned file.
 
+### Auto-update during development
+
+```sh
+npm run shortcut -- examples/mijn-script.ts --dev --ssid "My Wi-Fi"
+```
+
+`--dev` does everything `--share` does, then keeps watching the source file. Each
+save recompiles, re-signs and publishes the new build on the same URL. A dev build
+starts with a short check: it fetches `version.json` from this server, and if the
+build differs it opens the download link and stops. Open the downloaded file and
+choose **Replace Shortcut**. Shortcuts always asks before replacing a shortcut, so
+the update needs that one confirmation.
+
+- `--ssid` limits the check to one Wi-Fi network. Without it, the shortcut also
+  checks elsewhere and fails when this server is unreachable. macOS hides the
+  current network name, so it can't be detected automatically.
+- The token and port are saved in `<output>.dev.json` and reused, so an installed
+  dev build keeps working after restarting `--dev`. Delete that file, or pass a
+  different `--port`, and you'll need to reinstall from the new QR code.
+- A failed build is reported and the previous build stays published.
+- The check is only added with `--dev`. Build without it before sharing a shortcut
+  with others.
+
 `@js-shortcuts/ios` is a compiler intrinsic, not an npm package to install.
 Include `api/ios.d.ts` in your authoring project's tsconfig, as demonstrated in
 `examples/tsconfig.json`. It references the generated action catalog declarations.
