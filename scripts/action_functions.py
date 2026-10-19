@@ -115,17 +115,16 @@ CONTENT_CATEGORIES = {
     'safariwebpage': 'Safari', 'shazam': 'Audio', 'weather': 'Weather', 'workflow': 'Shortcuts',
 }
 
-# Pin concise names for common operations. Unknown result schemas remain opaque.
+# Pin concise names for common operations. Return types come from action-results.json.
 METHODS = {
-    'com.apple.ShortcutsActions.GetOrientationAction': ('getOrientation', 'string'),
-    'askllm': ('ask', 'string'), 'gettext': ('create', 'string'),
-    'text.replace': ('replace', 'string'), 'text.split': ('split', 'string[]'),
-    'text.combine': ('join', 'string'), 'text.match': ('match', 'string[]'),
-    'text.changecase': ('changeCase', 'string'), 'text.trimwhitespace': ('trim', 'string'),
-    'number': ('create', 'number'), 'math': ('calculate', 'number'),
-    'getclipboard': ('get', None), 'setclipboard': ('set', None),
-    'dictionary': ('create', None), 'getvalueforkey': ('get', None), 'setvalueforkey': ('set', None),
-    'list': ('create', None), 'getitemfromlist': ('get', None),
+    'askllm': 'ask', 'gettext': 'create',
+    'text.replace': 'replace', 'text.split': 'split',
+    'text.combine': 'join', 'text.match': 'match',
+    'text.changecase': 'changeCase', 'text.trimwhitespace': 'trim',
+    'number': 'create', 'math': 'calculate',
+    'getclipboard': 'get', 'setclipboard': 'set',
+    'dictionary': 'create', 'getvalueforkey': 'get', 'setvalueforkey': 'set',
+    'list': 'create', 'getitemfromlist': 'get',
 }
 
 
@@ -151,7 +150,7 @@ def assign_functions(actions):
     candidates = []
     for action in actions:
         short = action['id'].removeprefix('is.workflow.actions.')
-        method, result = METHODS.get(short, (camel(action['name']), None))
+        method, result = METHODS.get(short, camel(action['name'])), None
         candidates.append((category_for(action['id']), method, result))
     counts = Counter((category, method) for category, method, _ in candidates)
     source_counts = Counter((category, method, action['id'].split('.')[2])

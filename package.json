@@ -8,6 +8,8 @@
   },
   "scripts": {
     "generate:catalog": "python3 scripts/generate-catalog.py",
+    "extract:results": "python3 scripts/extract-action-results.py",
+    "test:metadata": "python3 -m unittest discover -s scripts -p 'test_*.py'",
     "typecheck": "tsc --noEmit && tsc -p examples/tsconfig.json",
     "build": "tsc",
     "test": "npm run build && node --test lib/test/*.test.js",

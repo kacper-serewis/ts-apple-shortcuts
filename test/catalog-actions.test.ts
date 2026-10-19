@@ -196,15 +196,15 @@ test("category defaults and import aliases compose without generic output argume
   const body = `const answer = await AI.ask({ WFLLMPrompt: text("Name an app") });
     const trimmed = await Text.trim({ WFInput: text(answer) });
     const n = await Numbers.create({ WFNumberActionNumber: 7 });
-    await showResult(\`\${trimmed}: \${n + 1}\`);
+    await showResult(\`\${trimmed[0]}: \${n + 1}\`);
     await Clipboard.set({ WFInput: text(trimmed) });`;
   const named = compile(source(body, "LLM as AI, Text, Numbers, Clipboard, text, showResult"));
   const direct = compile(source(body
-    .replace("AI.ask(", 'actions["is.workflow.actions.askllm"]<string>(')
-    .replace("Text.trim(", 'actions["is.workflow.actions.text.trimwhitespace"]<string>(')
+    .replace("AI.ask({", 'actions["is.workflow.actions.askllm"]<string>({ WFGenerativeResultType: "Text",')
+    .replace("Text.trim(", 'actions["is.workflow.actions.text.trimwhitespace"]<string[]>(')
     .replace("Numbers.create(", 'actions["is.workflow.actions.number"]<number>(')
     .replace("Clipboard.set(", 'actions["is.workflow.actions.setclipboard"](')));
-  assert.deepEqual(normalize(named), normalize(direct));
+  assert.deepEqual(normalize(named.workflow), normalize(direct.workflow));
 });
 
 test("getOrientation infers text for conditions without an explicit result type", () => {
@@ -212,21 +212,64 @@ test("getOrientation infers text for conditions without an explicit result type"
     if (orientation === "Portrait") { await showResult("Upright"); }
     else { await showResult(orientation); }`;
   const inferred = compile(source(body, "Shortcuts, showResult"));
-  const explicit = compile(source(body.replace("getOrientation()", "getOrientation<string>()"), "Shortcuts, showResult"));
+  const explicit = compile(source(body.replace("Shortcuts.getOrientation()", 'actions["com.apple.ShortcutsActions.GetOrientationAction"]<DeviceOrientation>({})'), "actions, type DeviceOrientation, showResult"));
   assert.deepEqual(normalize(inferred), normalize(explicit));
   assert.throws(() => compile(source(`const orientation = await Shortcuts.getOrientation();
     const wrong: number = orientation;`, "Shortcuts")), /TS2322/);
 });
 
-test("category functions retain raw export parameters and explicit structured output types", () => {
+test("orientation enum completion and diagnostics reject misspellings and invented return types", () => {
+  const prefix = 'const orientation = await Shortcuts.getOrientation();';
+  const choices = completions(source(`${prefix} if (orientation === "/*cursor*/") {}`, "Shortcuts"));
+  const expected = ["Portrait", "Portrait Upside Down", "Landscape Left", "Landscape Right", "Face Up", "Face Down", "Unknown"];
+  for (const value of expected) assert.ok(choices.includes(value), `Missing orientation ${value}`);
+  assert.ok(!choices.includes("Landscape"));
+  assert.throws(() => compile(source(`${prefix} if (orientation === "Portait") {}`, "Shortcuts")), /TS2367/);
+  assert.throws(() => compile(source('const orientation: number = await Shortcuts.getOrientation();', "Shortcuts")), /TS2322/);
+  assert.throws(() => compile(source('await Shortcuts.getOrientation<string>();', "Shortcuts")), /TS2558/);
+});
+
+test("every generated output can be forwarded as native content; void actions need no result", () => {
+  const catalog = readCatalog().actions;
+  const categories = [...new Set(catalog.map(a => a.category))];
+  const body = catalog.map((action, index) => {
+    const call = `${action.category}.${action.functionName}(${action.parameters.length ? "{}" : ""})`;
+    return action.resultType === "void" ? `await ${call};` : `const value${index} = await ${call}; await quickLook(value${index});`;
+  }).join("\n");
+  const compiled = compile(source(body, [...categories, "quickLook"].join(", ")));
+  assert.equal(compiled.workflow.WFWorkflowActions.length, catalog.length + catalog.filter(a => a.resultType !== "void").length);
+  assert.ok(catalog.every(a => a.resultType && a.resultStatus));
+  const unresolved = catalog.filter(a => a.resultStatus === "unresolved");
+  assert.ok(unresolved.every(a => a.resultType?.startsWith("UnresolvedActionResult<")));
+});
+
+test("LLM text return mode is configured, while explicit and raw output modes remain exact", () => {
+  const compiled = compile(source(`const answer = await LLM.ask({ WFLLMPrompt: text("Hi") });
+    await showResult(answer);
+    const other = await LLM.ask({ WFGenerativeResultType: "Dictionary" });
+    await quickLook(other);
+    await LLM.ask(raw({ WFLLMPrompt: "Exact" }));`, "LLM, text, showResult, quickLook, raw"));
+  const actions = compiled.workflow.WFWorkflowActions.filter(a => a.WFWorkflowActionIdentifier === "is.workflow.actions.askllm");
+  assert.equal(actions[0].WFWorkflowActionParameters.WFGenerativeResultType, "Text");
+  assert.equal(actions[1].WFWorkflowActionParameters.WFGenerativeResultType, "Dictionary");
+  assert.deepEqual(actions[2].WFWorkflowActionParameters, { WFLLMPrompt: "Exact" });
+  assert.throws(() => compile(source('const answer: number = await LLM.ask({});', "LLM")), /TS2322/);
+});
+
+test("void and native entity results cannot masquerade as scalar return types", () => {
+  assert.throws(() => compile(source('const n: number = await Files.quickLook({});', "Files")), /Unsupported JSON value type 'void'|TS2322/);
+  assert.throws(() => compile(source('const focus: string = await Focus.getCurrentFocus();', "Focus")), /TS2322/);
+});
+
+test("category functions retain raw export parameters and native() supports user-defined JSON schemas", () => {
   const parameters = { UUID: "EXPORTED-ID", FutureParameter: { Values: [1, true, "a"] } };
   const compiled = compile(source(`await LLM.ask(raw(${JSON.stringify(parameters)}));
-    const item = await Dictionary.get<{ title: string }>({ WFDictionaryKey: "item" });
+    const item = await native<{ title: string }>("is.workflow.actions.getvalueforkey", { WFDictionaryKey: "item" });
     await showResult(item.title);
     const items = await Text.split({ text: "a,b" });
     for (const item of items) { await showResult(item); }
     const content = await Clipboard.get({});
-    await Clipboard.set({ WFInput: attachment(content) });`, "LLM, Dictionary, Text, Clipboard, raw, showResult, attachment"));
+    await Clipboard.set({ WFInput: attachment(content) });`, "LLM, native, Text, Clipboard, raw, showResult, attachment"));
   assert.deepEqual(compiled.workflow.WFWorkflowActions[0].WFWorkflowActionParameters, parameters);
   assert.deepEqual(compile(workflowToTypeScript(compiled.workflow)).workflow, compiled.workflow);
 });
@@ -235,7 +278,7 @@ test("categorized example compiles and round-trips through native imports", () =
   const code = readFileSync(new URL("../../examples/categorized-actions.ts", import.meta.url), "utf8");
   const compiled = compile(code);
   assert.deepEqual(compiled.workflow.WFWorkflowActions.map(a => a.WFWorkflowActionIdentifier),
-    ["askllm", "text.trimwhitespace", "setclipboard", "showresult"].map(id => `is.workflow.actions.${id}`));
+    ["askllm", "text.trimwhitespace", "text.combine", "setclipboard", "showresult"].map(id => `is.workflow.actions.${id}`));
   assert.deepEqual(compile(workflowToTypeScript(compiled.workflow)).workflow, compiled.workflow);
 });
 
@@ -270,7 +313,7 @@ for (const [body, error] of [
   ['const LLM = input<{ ask: string }>(); await LLM.ask({});', /Only imported Shortcuts/],
   ['{ await LLM.ask({}); const LLM = 1; }', /Only imported Shortcuts/],
   ['const answer = await LLM.ask({}); const wrong: number = answer;', /TS2322/],
-  ['const wrong: number = await LLM.ask<string>({});', /TS2322/],
+  ['await LLM.ask<string>({});', /TS2558/],
 ] as const) {
   test(`rejects invalid category use: ${body}`, () => {
     assert.throws(() => compile(source(body, "LLM, input")), error);

@@ -720,15 +720,16 @@ Every catalog action also has a named function in a category. Import the categor
 you need; editors complete their functions and native parameter keys:
 
 ```ts
-import { LLM, Text, Clipboard, text, showResult } from "@js-shortcuts/ios";
+import { LLM, Text, Clipboard, text, joinText, showResult } from "@js-shortcuts/ios";
 
 export default async function main(): Promise<void> {
   const answer = await LLM.ask({
     WFLLMPrompt: text("Bedenk een leuke naam voor mijn app"),
   });
   const trimmed = await Text.trim({ WFInput: text(answer) });
-  await Clipboard.set({ WFInput: text(trimmed) });
-  await showResult(trimmed);
+  const message = await joinText(trimmed, "");
+  await Clipboard.set({ WFInput: text(message) });
+  await showResult(message);
 }
 ```
 
@@ -740,15 +741,42 @@ variants together where known); colliding names receive a source suffix. Search
 with `npm run shortcut -- actions LLM` to see function names and native identifiers.
 The full declarations are in `api/functions.generated.d.ts`.
 
-No generic argument is required. `LLM.ask` and `Shortcuts.getOrientation` default to an expected `string` result;
-common text/number functions have corresponding defaults. Actions without a known
-result schema default to `NativeContent`. A contextual type annotation can infer
-the expected result, just as with `native<T>`. You can also override it explicitly,
-for example `Dictionary.get<string>({...})` or `LLM.ask<{ title: string }>({...})`.
-These are compile-time expectations, not runtime validation or automatic native
-output configuration. Configure the action's native output parameters to match.
-Parameter names and encodings remain native, with the same key checking and
-`text`, `attachment`, `dictionary`, and `raw` helpers as the identifier API.
+Category functions have fixed return types derived from Apple's ToolKit output
+schemas: primitives, arrays, native entities, `void`, and closed enum unions.
+They do not accept a caller-selected generic return type. For example:
+
+```ts
+const orientation = await Shortcuts.getOrientation();
+// "Portrait" | "Portrait Upside Down" | "Landscape Left" |
+// "Landscape Right" | "Face Up" | "Face Down" | "Unknown"
+if (orientation === "Portrait") {
+  await showResult("Phone is upright");
+}
+```
+
+Import `Shortcuts` and `showResult` from `@js-shortcuts/ios` for this example.
+`DeviceOrientation` is also exported if you need to name the type. Enum literals
+are English display values from Apple metadata; localized Shortcuts text coercion
+may produce different labels.
+
+`LLM.ask` selects native Text output by default and returns `string`. Explicit
+non-Text output uses Apple's broader native-content result type. `Text.trim`
+returns `string[]`, so the example joins its output before displaying it. Native
+entities carry their Apple type identifier and can be passed to other actions;
+they are not JavaScript objects with inferred properties.
+
+The checked-in snapshot supplies output schemas for **2,323 of 2,585 actions**,
+from Apple ToolKit v80 on macOS and v79/v67 simulator databases. The remaining
+**262 actions** explicitly return `UnresolvedActionResult<"action.identifier">`:
+no schema was available, so their types are not guessed. Function documentation
+marks these gaps. Metadata describes declared outputs, not a guarantee that an
+action exists or succeeds on every device.
+
+For user-defined JSON shapes or missing schemas, `native<T>` and the low-level
+`actions["identifier"]<T>` remain explicit escape hatches. Those assertions do not
+validate or configure native output. Parameter names and encodings remain native,
+with the same key checking and `text`, `attachment`, `dictionary`, and `raw` helpers
+as the identifier API.
 
 Call category functions directly with `await` and an inline parameters object.
 Actions with no catalog parameters also accept no arguments, e.g. `Flow.nothing()`.
@@ -759,7 +787,13 @@ See `examples/categorized-actions.ts` for a complete example.
 
 Regenerate category functions and parameter declarations from the checked-in
 metadata with `npm run generate:catalog`. Categories and concise method names
-are maintained in `scripts/action_functions.py`.
+are maintained in `scripts/action_functions.py`. Output schemas live in
+`data/action-results.json`, with declarations in `api/results.generated.d.ts`.
+To refresh them on a Mac with Apple ToolKit databases, run
+`npm run extract:results`, then `npm run generate:catalog`. Extraction reads only
+catalog/type metadata and never modifies the databases. Normal builds use the
+checked-in snapshot and do not need access to those databases. Run the extractor
+and renderer checks with `npm run test:metadata`.
 
 For direct catalog calls with identifier and parameter-key completion:
 

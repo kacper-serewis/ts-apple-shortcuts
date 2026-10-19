@@ -174,7 +174,7 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     const depth = item ? arrayDepth(item, nested) : 0;
     return depth < 0 ? -1 : depth + 1;
   }
-  function typedRef(type: ts.Type, id: number, outputName: string, node: ts.Node): Value {
+  function typedRef(type: ts.Type, id: number, outputName: string, node: ts.Node, nativeUnion = false): Value {
     if (type.flags & ts.TypeFlags.Never) return { kind: "ref", id, outputName };
     if (type.flags & ts.TypeFlags.StringLike || type.isUnion() && type.types.every(t => !!(t.flags & ts.TypeFlags.StringLike))) {
       return { kind: "ref", id, outputName };
@@ -182,6 +182,9 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     if (type.flags & ts.TypeFlags.NumberLike || type.isUnion() && type.types.every(t => !!(t.flags & ts.TypeFlags.NumberLike))) return { kind: "ref", id, outputName, valueType: "number" };
     if (type.flags & ts.TypeFlags.BooleanLike || type.isUnion() && type.types.every(t => !!(t.flags & ts.TypeFlags.BooleanLike))) return { kind: "ref", id, outputName, valueType: "boolean" };
     if (type.getProperty("__nativeContent")) return { kind: "ref", id, outputName, valueType: "content" };
+    // Heterogeneous native results can be forwarded as content. Do not pretend
+    // they are JSON objects or coerce them implicitly to a particular scalar.
+    if (nativeUnion && type.isUnion()) return { kind: "ref", id, outputName, valueType: "content" };
     if (checker.isArrayType(type) || checker.isTupleType(type)) {
       jsonTypes.set(id, type);
       const depth = arrayDepth(type);
@@ -211,7 +214,7 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
           if (!action) fail(`Unknown catalog function '${categoryName}.${target.name.text}'.`, target);
           if (invocation.arguments.length > 1 || (!invocation.arguments.length && action.parameters.length)) fail("Catalog actions expect one parameters object.", invocation);
           const argument = invocation.arguments[0] ?? ts.factory.createObjectLiteralExpression();
-          return nativeCall(invocation, action.id, argument, scopes, output, needsValue, position(node).line, catalogKeys!.get(action.id));
+          return nativeCall(invocation, action.id, argument, scopes, output, needsValue, position(node).line, catalogKeys!.get(action.id), action.functionDefaults);
         }
       }
       const json = jsonOperation(invocation, scopes);
@@ -329,7 +332,7 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     output.push({ kind: "action", action: action as ActionName, argument, id, line: position(node).line });
     return result;
   }
-  function nativeCall(expr: ts.CallExpression, identifier: string, argument: ts.Expression, scopes: Scope[], output: IRNode[], needsValue: boolean, line: number, knownKeys?: Set<string>): Value | undefined {
+  function nativeCall(expr: ts.CallExpression, identifier: string, argument: ts.Expression, scopes: Scope[], output: IRNode[], needsValue: boolean, line: number, knownKeys?: Set<string>, defaults?: Record<string, string>): Value | undefined {
     if (!ts.isObjectLiteralExpression(unwrap(argument)) && !ts.isCallExpression(unwrap(argument))) fail("Native parameters must be an object literal or raw({...}).", argument);
     const parameters = parameter(argument, scopes, output);
     if (parameters.kind !== "parameter-object" && !(parameters.kind === "literal" && isDictionary(parameters.value))) fail("Native parameters must be an object literal or raw({...}).", argument);
@@ -338,10 +341,15 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
         if (!knownKeys.has(key)) fail(`Unknown catalog parameter '${key}' for '${identifier}'. Use raw({...}) for exact exported parameters missing from the catalog.`, argument);
       }
     }
+    if (defaults && parameters.kind === "parameter-object") {
+      for (const [key, value] of Object.entries(defaults)) {
+        if (!parameters.entries.some(([name]) => name === key)) parameters.entries.push([key, { kind: "literal", value }]);
+      }
+    }
     const id = nextId++;
     output.push({ kind: "native", id, identifier, parameters, preserveParameters: !needsValue && parameters.kind === "literal", line });
     if (!needsValue) return undefined;
-    return typedRef(checker.getAwaitedType(checker.getTypeAtLocation(expr))!, id, "Result", expr);
+    return typedRef(checker.getAwaitedType(checker.getTypeAtLocation(expr))!, id, "Result", expr, !!knownKeys);
   }
   function scalar(node: ts.Expression, scopes: Scope[], output: IRNode[]): ScalarValue {
     const result = value(node, scopes, output);

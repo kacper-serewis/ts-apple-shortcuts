@@ -1,5 +1,6 @@
 /// <reference path="./actions.generated.d.ts" />
 /// <reference path="./functions.generated.d.ts" />
+/// <reference path="./results.generated.d.ts" />
 declare module "@js-shortcuts/ios" {
   /** Text supported by the native Shortcuts compiler. */
   export type ShortcutText = string;

@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 export interface CatalogAction {
   id: string; name: string; platforms: string[];
   category: string; functionName: string; resultType?: string;
+  resultStatus?: "known" | "unresolved";
+  functionDefaults?: Record<string, string>;
   parameters: { key: string; type: string; name?: string }[];
 }
 export interface Catalog { source: string; version: string; actions: CatalogAction[] }
