@@ -1,29 +1,29 @@
 import ts from "typescript";
-import { fileURLToPath } from "node:url";
-import { resolve as resolvePath } from "node:path";
 import { actions } from "./actions.js";
 import { wrappers } from "./wrappers.js";
-import { readCatalog, type CatalogAction } from "./catalog.js";
+import type { CatalogAction } from "./catalog.js";
+import { nodeHost } from "./hosts/node-host.js";
+import type { CompileHost } from "./hosts/host.js";
 import { staticPlist, propertyName, isDictionary, unwrap, plistData, plistDate } from "./native.js";
 import { emitWorkflow } from "./emitter.js";
 import type { ActionName, Compilation, IRNode, ListRef, ObjectRef, OutputRef, ScalarValue, StringMethod, TextValue, Value, NativeParameter, PlistDictionary } from "./model.js";
 
-interface Position { line: number; column: number }
+export interface Position { line: number; column: number }
 export class CompileError extends Error {
-  constructor(message: string, filename: string, position?: Position) {
+  constructor(message: string, filename: string, readonly position?: Position) {
     super(`${filename}${position ? `:${position.line}:${position.column}` : ""}: ${message}`);
     this.name = "CompileError";
   }
 }
 
-export interface CompileOptions { filename?: string; name?: string }
+export interface CompileOptions { filename?: string; name?: string; host?: CompileHost }
 type Scope = Map<string, Value | undefined>;
 interface FunctionFrame { done: string; result?: string }
 interface LoopFrame { skip: string; broken?: string }
 
 // Direct TypeScript AST → IR → workflow. No JavaScript emit, eval or source import.
-export function compile(source: string, { filename = "shortcut.ts", name = "TS Shortcut" }: CompileOptions = {}): Compilation {
-  const inputPath = resolvePath(filename);
+export function compile(source: string, { filename = "shortcut.ts", name = "TS Shortcut", host: environment = nodeHost }: CompileOptions = {}): Compilation {
+  const inputPath = environment.resolve(filename);
   const isJavaScript = /\.m?js$/i.test(filename);
   const sourceFile = ts.createSourceFile(inputPath, source, ts.ScriptTarget.ES2023, true, isJavaScript ? ts.ScriptKind.JS : ts.ScriptKind.TS);
   function position(node: ts.Node): Position {
@@ -45,13 +45,11 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     lib: ["lib.es2023.d.ts"],
     skipLibCheck: true,
   };
-  const host = ts.createCompilerHost(compilerOptions);
+  const host = environment.createCompilerHost(compilerOptions);
   const originalGetSourceFile = host.getSourceFile.bind(host);
   host.getSourceFile = (path, languageVersion, onError, shouldCreateNewSourceFile) =>
-    resolvePath(path) === inputPath ? sourceFile : originalGetSourceFile(path, languageVersion, onError, shouldCreateNewSourceFile);
-  // Runtime layout is lib/src/compiler.js; the declarations also serve editors.
-  const apiPath = fileURLToPath(new URL("../../api/ios.d.ts", import.meta.url));
-  const program = ts.createProgram([inputPath, apiPath], compilerOptions, host);
+    environment.resolve(path) === inputPath ? sourceFile : originalGetSourceFile(path, languageVersion, onError, shouldCreateNewSourceFile);
+  const program = ts.createProgram([inputPath, environment.apiPath], compilerOptions, host);
   const checker = program.getTypeChecker();
   // Type metadata stays in the frontend; the serializable IR holds native refs.
   const jsonTypes = new Map<number, ts.Type>();
@@ -79,7 +77,7 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     if (catalogCategories) return;
     catalogKeys = new Map();
     catalogCategories = new Map();
-    for (const action of readCatalog().actions) {
+    for (const action of environment.catalog().actions) {
       catalogKeys.set(action.id, new Set([...action.parameters.map(p => p.key), "UUID", "CustomOutputName"]));
       let category = catalogCategories.get(action.category);
       if (!category) catalogCategories.set(action.category, category = new Map());

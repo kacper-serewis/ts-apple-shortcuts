@@ -25,6 +25,8 @@
     "build:switch": "npm run build && node lib/src/cli.js examples/switch-test.ts",
     "build:switch-numeric": "npm run build && node lib/src/cli.js examples/switch-numeric-test.ts",
     "shortcut": "tsc && node lib/src/cli.js",
+    "build:site": "node scripts/build-site.mjs",
+    "visualize": "tsc && node scripts/build-site.mjs && node lib/src/visualizer/server.js",
     "verify:corpus": "tsc && node scripts/verify-corpus.mjs",
     "sign:demo": "npm run build && node lib/src/cli.js examples/visible-test.ts --sign",
     "build:dictionaries": "npm run build && node lib/src/cli.js examples/dictionaries-test.ts",
@@ -45,6 +47,7 @@
   },
   "devDependencies": {
     "@types/node": "^26.6.5",
-    "@types/qrcode": "^1.5.6"
+    "@types/qrcode": "^1.5.6",
+    "esbuild": "^0.28.2"
   }
 }

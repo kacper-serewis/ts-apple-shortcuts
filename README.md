@@ -102,6 +102,25 @@ Include `api/ios.d.ts` in your authoring project's tsconfig, as demonstrated in
 `examples/tsconfig.json`. It references the generated action catalog declarations.
 The compiler itself is built to Node.js under `lib/` using the TypeScript 6 API.
 
+## Visualize compiled blocks
+
+Online: https://kacper-serewis.github.io/ts-apple-shortcuts/
+
+```sh
+npm run visualize   # http://localhost:5173 (--port to change)
+npm run build:site  # static build in site/, as deployed to GitHub Pages
+```
+
+A web page with a TypeScript editor next to the compiled actions,
+rendered as indented Shortcuts-style blocks. It recompiles as you type. Clicking
+a block highlights the source line that produced it, and moving the cursor
+highlights that line's blocks. Clicking a variable pill jumps to the action that
+produced the value. Compile errors mark the offending line and dim the last good
+output. Tabs show the raw workflow JSON and IR, and you can download the unsigned
+plist. Examples from `examples/` load from the dropdown. The compiler runs
+entirely in the browser with an in-memory file host, so the site is static; nothing
+runs on a device. Pushes to `main` deploy it through `.github/workflows/pages.yml`.
+
 ## Write a shortcut
 
 ```ts

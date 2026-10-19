@@ -58,12 +58,24 @@ export function isDictionary(value: PlistValue): value is PlistDictionary {
   return value !== null && typeof value === "object" && Object.getPrototypeOf(value) === Object.prototype;
 }
 
+// atob/btoa instead of Buffer so the compiler also runs in browsers.
+export function toBase64(bytes: Uint8Array): string {
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary);
+}
+
 /** Canonical base64, optionally wrapped in whitespace as in exported plist data. */
 export function plistData(base64: string): Uint8Array {
   const compact = base64.replace(/\s/g, "");
-  const bytes = Buffer.from(compact, "base64");
-  if (bytes.toString("base64") !== compact) throw new Error("plistData expects valid padded base64.");
-  return new Uint8Array(bytes);
+  let bytes: Uint8Array;
+  try {
+    bytes = Uint8Array.from(atob(compact), char => char.charCodeAt(0));
+  } catch {
+    throw new Error("plistData expects valid padded base64.");
+  }
+  if (toBase64(bytes) !== compact) throw new Error("plistData expects valid padded base64.");
+  return bytes;
 }
 
 /** Apple plutil accepts whole-second UTC dates in XML. Reject rather than truncate subsecond values. */

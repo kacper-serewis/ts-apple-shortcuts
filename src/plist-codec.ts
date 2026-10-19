@@ -1,5 +1,5 @@
 import type { PlistValue } from "./model.js";
-import { plistData, plistDate } from "./native.js";
+import { plistData, plistDate, toBase64 } from "./native.js";
 
 function xmlText(value: string): string {
   if (!value.isWellFormed() || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\ufffe\uffff]/u.test(value)) throw new Error("Invalid plist XML string.");
@@ -16,7 +16,7 @@ export function buildPlist(value: PlistValue): string {
       if (!Number.isFinite(value)) throw new Error("Plist numbers must be finite.");
       return Number.isInteger(value) ? `${pad}<integer>${BigInt(value)}</integer>` : `${pad}<real>${value}</real>`;
     }
-    if (value instanceof Uint8Array) return `${pad}<data>${Buffer.from(value).toString("base64")}</data>`;
+    if (value instanceof Uint8Array) return `${pad}<data>${toBase64(value)}</data>`;
     if (value instanceof Date) return `${pad}<date>${plistDate(value.toISOString()).toISOString().replace(/\.000Z$/, "Z")}</date>`;
     if (Array.isArray(value)) return `${pad}<array>\n${value.map(v => write(v, depth + 1)).join("\n")}\n${pad}</array>`;
     if (value && Object.getPrototypeOf(value) === Object.prototype) {
@@ -36,7 +36,7 @@ type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 export function stringifyInspection(input: unknown): string {
   let typed = !!input && typeof input === "object" && Object.hasOwn(input, "$shortcutsPlist");
   function encode(value: unknown): Json {
-    if (value instanceof Uint8Array) { typed = true; return { $plist: "data", value: Buffer.from(value).toString("base64") }; }
+    if (value instanceof Uint8Array) { typed = true; return { $plist: "data", value: toBase64(value) }; }
     if (value instanceof Date) { typed = true; return { $plist: "date", value: plistDate(value.toISOString()).toISOString() }; }
     if (Array.isArray(value)) return value.map(encode);
     if (value && typeof value === "object" && Object.getPrototypeOf(value) === Object.prototype) {
