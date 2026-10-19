@@ -1,4 +1,5 @@
 import ts from "typescript";
+import { appActions, appDeclarations, type AppMetadata } from "./app-metadata.js";
 import { actions } from "./actions.js";
 import { wrappers } from "./wrappers.js";
 import type { CatalogAction } from "./catalog.js";
@@ -16,13 +17,13 @@ export class CompileError extends Error {
   }
 }
 
-export interface CompileOptions { filename?: string; name?: string; host?: CompileHost }
+export interface CompileOptions { filename?: string; name?: string; host?: CompileHost; apps?: AppMetadata[] }
 type Scope = Map<string, Value | undefined>;
 interface FunctionFrame { done: string; result?: string }
 interface LoopFrame { skip: string; broken?: string }
 
 // Direct TypeScript AST → IR → workflow. No JavaScript emit, eval or source import.
-export function compile(source: string, { filename = "shortcut.ts", name = "TS Shortcut", host: environment = nodeHost }: CompileOptions = {}): Compilation {
+export function compile(source: string, { filename = "shortcut.ts", name = "TS Shortcut", host: environment = nodeHost, apps = [] }: CompileOptions = {}): Compilation {
   const inputPath = environment.resolve(filename);
   const isJavaScript = /\.m?js$/i.test(filename);
   const sourceFile = ts.createSourceFile(inputPath, source, ts.ScriptTarget.ES2023, true, isJavaScript ? ts.ScriptKind.JS : ts.ScriptKind.TS);
@@ -46,10 +47,12 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     skipLibCheck: true,
   };
   const host = environment.createCompilerHost(compilerOptions);
+  const appApiPath = environment.resolve("__shortcuts_apps.generated.d.ts");
+  const appApi = ts.createSourceFile(appApiPath, apps.map(appDeclarations).join("\n"), ts.ScriptTarget.ES2023, true);
   const originalGetSourceFile = host.getSourceFile.bind(host);
   host.getSourceFile = (path, languageVersion, onError, shouldCreateNewSourceFile) =>
-    environment.resolve(path) === inputPath ? sourceFile : originalGetSourceFile(path, languageVersion, onError, shouldCreateNewSourceFile);
-  const program = ts.createProgram([inputPath, environment.apiPath], compilerOptions, host);
+    environment.resolve(path) === inputPath ? sourceFile : environment.resolve(path) === appApiPath ? appApi : originalGetSourceFile(path, languageVersion, onError, shouldCreateNewSourceFile);
+  const program = ts.createProgram([inputPath, environment.apiPath, ...(apps.length ? [appApiPath] : [])], compilerOptions, host);
   const checker = program.getTypeChecker();
   // Type metadata stays in the frontend; the serializable IR holds native refs.
   const jsonTypes = new Map<number, ts.Type>();
@@ -84,6 +87,13 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
       category.set(action.functionName, action);
     }
   }
+  const appCategories = new Map<string, AppMetadata>();
+  for (const app of apps) {
+    loadCatalog();
+    if (catalogCategories!.has(app.namespace) || appCategories.has(app.namespace) || special.has(app.namespace)
+      || actions.has(app.namespace as ActionName) || Object.hasOwn(wrappers, app.namespace)) fail(`Duplicate app namespace '${app.namespace}'.`);
+    appCategories.set(app.namespace, app);
+  }
   let settings: PlistDictionary = {};
   let settingsNode: ts.Expression | undefined;
   const mutable = new Map<Scope, Map<string, string>>();
@@ -110,7 +120,7 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
         const imported = (spec.propertyName ?? spec.name).text;
         if (!actions.has(imported as ActionName) && !Object.hasOwn(wrappers, imported) && !special.has(imported)) {
           loadCatalog();
-          if (!catalogCategories!.has(imported)) fail(`Unknown action import '${imported}'. Import an action or catalog category such as LLM, Text or Clipboard.`, spec);
+          if (!catalogCategories!.has(imported) && !appCategories.has(imported)) fail(`Unknown action import '${imported}'. Import an action or catalog category such as LLM, Text or Clipboard.`, spec);
         }
         imports.set(spec.name.text, imported);
       }
@@ -203,6 +213,19 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
       if ((ts.isPropertyAccessExpression(target) || ts.isElementAccessExpression(target))
         && ts.isIdentifier(target.expression) && !scopes.some(scope => scope.has(target.expression.getText(sourceFile)))) {
         const categoryName = imports.get(target.expression.text);
+        const app = categoryName && appCategories.get(categoryName);
+        if (app) {
+          if (!ts.isAwaitExpression(node) || invocation.questionDotToken || !ts.isPropertyAccessExpression(target) || target.questionDotToken) fail("Use await App.action({...}).", node);
+          const action = appActions(app).find(a => a.name === target.name.text);
+          if (!action) fail(`Unknown app function '${app.namespace}.${target.name.text}'.`, target);
+          const binding = app.bindings[action.id];
+          if (!binding) fail(`No native export binding for ${app.namespace}.${action.name}. Reimport the app with --reference exported-workflow.plist.`, target);
+          if (invocation.arguments.length > 1 || (!invocation.arguments.length && action.parameters.length)) fail("App actions expect one parameters object.", invocation);
+          const argument = invocation.arguments[0] ?? ts.factory.createObjectLiteralExpression();
+          if (!ts.isObjectLiteralExpression(unwrap(argument))) fail("App parameters must be an object literal; use raw() on individual encoded fields.", argument);
+          return nativeCall(invocation, binding.identifier, argument, scopes, output, needsValue, position(node).line,
+            new Set(action.parameters.map(p => p.name as string)), binding.defaults);
+        }
         const category = categoryName && catalogCategories?.get(categoryName);
         if (category) {
           if (!ts.isAwaitExpression(node)) fail("Actions must be called as await Category.action({...}).", node);
@@ -331,7 +354,7 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     output.push({ kind: "action", action: action as ActionName, argument, id, line: position(node).line });
     return result;
   }
-  function nativeCall(expr: ts.CallExpression, identifier: string, argument: ts.Expression, scopes: Scope[], output: IRNode[], needsValue: boolean, line: number, knownKeys?: Set<string>, defaults?: Record<string, string>): Value | undefined {
+  function nativeCall(expr: ts.CallExpression, identifier: string, argument: ts.Expression, scopes: Scope[], output: IRNode[], needsValue: boolean, line: number, knownKeys?: Set<string>, defaults?: PlistDictionary): Value | undefined {
     if (!ts.isObjectLiteralExpression(unwrap(argument)) && !ts.isCallExpression(unwrap(argument))) fail("Native parameters must be an object literal or raw({...}).", argument);
     const parameters = parameter(argument, scopes, output);
     if (parameters.kind !== "parameter-object" && !(parameters.kind === "literal" && isDictionary(parameters.value))) fail("Native parameters must be an object literal or raw({...}).", argument);

@@ -7,6 +7,8 @@ import { spawnSync } from "node:child_process";
 import { watch, type FSWatcher } from "node:fs";
 import { buildPlist, stringifyInspection } from "./plist-codec.js";
 import { compile } from "./compiler.js";
+import { appDeclarations } from "./app-metadata.js";
+import { importAppBundle, bindAppWorkflow, readAppManifest } from "./app-importer.js";
 import { readWorkflow, workflowToTypeScript } from "./importer.js";
 import { searchActions } from "./catalog.js";
 import { createShareServer, parseSharePort, selectShareHost, shareShortcut, validateShareHost, type ShareServer } from "./share.js";
@@ -16,6 +18,7 @@ try {
   const { values, positionals } = parseArgs({
     allowPositionals: true,
     options: {
+      app: { type: "string", multiple: true }, reference: { type: "string" },
       sign: { type: "boolean" }, share: { type: "boolean" }, dev: { type: "boolean" }, mode: { type: "string" },
       host: { type: "string" }, port: { type: "string" }, ssid: { type: "string" },
       name: { type: "string" }, out: { type: "string" }, help: { type: "boolean", short: "h" },
@@ -30,6 +33,21 @@ try {
     console.log('       node lib/src/cli.js import workflow.plist --out examples/imported.ts');
     console.log('       node lib/src/cli.js actions [search words]');
     console.log('       node lib/src/cli.js action full.native.identifier');
+    console.log('       node lib/src/cli.js apps import App.app --name HomeAssistant --out api/apps/home-assistant [--reference workflow.plist]');
+    console.log('       node lib/src/cli.js input.ts --app api/apps/home-assistant.json');
+  } else if (positionals[0] === "apps") {
+    if (positionals[1] !== "import" || positionals.length !== 3 || !values.name || !values.out) throw new Error("Use apps import App.app --name HomeAssistant --out api/apps/home-assistant [--reference workflow.plist]");
+    let app = await importAppBundle(resolve(positionals[2]), values.name);
+    if (values.reference) app = bindAppWorkflow(app, await readWorkflow(resolve(values.reference)));
+    const output = resolve(values.out);
+    const declarations = appDeclarations(app);
+    await mkdir(dirname(output), { recursive: true });
+    // Exclusive creation: importing a different app version must not silently replace existing bindings.
+    await writeFile(`${output}.json`, JSON.stringify(app, null, 2) + "\n", { flag: "wx" });
+    try { await writeFile(`${output}.d.ts`, declarations, { flag: "wx" }); }
+    catch (error) { await rm(`${output}.json`); throw error; }
+    console.log(`Imported ${Object.keys(app.metadata.actions as object).length} actions; ${Object.keys(app.bindings).length} native export bindings → ${output}.{json,d.ts}`);
+    console.log(`Compile with --app ${output}.json. Include ${output}.d.ts for editor types.`);
   } else if (positionals[0] === "import") {
     if (positionals.length !== 2 || !values.out || !/\.ts$/.test(values.out)) throw new Error("Use import workflow.plist --out example.ts");
     const output = resolve(values.out);
@@ -62,8 +80,9 @@ try {
     const stem = basename(filename).replace(/\.(ts|js|mts|mjs)$/i, "");
     const output = resolve(values.out ?? `dist/${stem}`);
     const name = values.name ?? stem;
+    const apps = await Promise.all((values.app ?? []).map(readAppManifest));
     const build = async (source: string, update?: DevUpdate) => {
-      let compilation = compile(source, { filename, name });
+      let compilation = compile(source, { filename, name, apps });
       if (values.name) compilation.workflow.WFWorkflowName = values.name;
       if (update) compilation = injectDevUpdate(compilation, update);
       const { workflow, ir, sourceMap } = compilation;

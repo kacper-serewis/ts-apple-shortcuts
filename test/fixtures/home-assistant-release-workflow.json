@@ -1,0 +1,26 @@
+{
+  "WFWorkflowActions": [
+    {
+      "WFWorkflowActionIdentifier": "io.robbie.HomeAssistant.SetBrightnessAppIntent",
+      "WFWorkflowActionParameters": {
+        "light": {
+          "identifier": "test-server-light.globe",
+          "title": {
+            "key": "Test lamp"
+          },
+          "subtitle": {
+            "key": "Test lamp"
+          }
+        },
+        "AppIntentDescriptor": {
+          "TeamIdentifier": "QMQYCKL255",
+          "BundleIdentifier": "io.robbie.HomeAssistant",
+          "Name": "Home Assistant",
+          "AppIntentIdentifier": "SetBrightnessAppIntent"
+        },
+        "UUID": "7D572CD9-8B28-46D8-B53F-56047090351C",
+        "brightness": "50"
+      }
+    }
+  ]
+}
