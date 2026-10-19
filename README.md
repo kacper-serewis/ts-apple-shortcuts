@@ -237,6 +237,7 @@ export default async function main(): Promise<number> {
 | String `trim` / `trimStart` / `trimEnd`, case conversion, `concat`, `startsWith` / `endsWith` / `includes` | Native text actions; literal case-sensitive search and ECMAScript whitespace trimming |
 | String `replace(search, replacement)` | First literal match; JavaScript replacement templates with captured input values |
 | String `replaceAll(search, replacement)` | Every non-overlapping literal match; original prefix/suffix per match; see empty-search Unicode limit below |
+| String `length` / `indexOf(search, position?)` | UTF-16 length and literal search positions, including runtime finite numeric start positions |
 | `+`, `-`, `*`, `/`, `%`, `**`, unary `-` on numbers | Calculate actions, including scientific operands |
 | `Math.abs/sign/min/max/floor/ceil/trunc/round/pow/sqrt` and eight Math constants | Native calculations and numeric conditions; finite-number subset |
 | `const`, initialized `let`, lexical blocks | Immutable references or scoped native variables |
@@ -253,7 +254,8 @@ export default async function main(): Promise<number> {
 | Array `join(separator?)` | Native text accumulation; preserves empty entries and renders booleans as true/false |
 | `items[index]`, `items.length` | Literal or computed zero-based index → one-based native index; Count Items |
 | Nested `for (const item of items)` | Repeat with Each, preserving outer-item references |
-| Unlabeled `break` / `continue` in `for…of` | Scoped guards skip remaining loop body actions or iterations |
+| Counted `for (let i = start; i < end; i += step)` and descending/inclusive forms | Repeat Count with safe integer ranges and stable boundary/step values |
+| Unlabeled `break` / `continue` in supported loops | Scoped guards skip remaining loop body actions or iterations |
 | `map`, `filter`, `reduce`, `forEach` with synchronous arrow callbacks | Repeat with Each; collected outputs or scoped accumulation |
 | `some`, `every`, `findIndex`, scalar `includes` / `indexOf` | Guarded native iteration; first decisive result |
 | `repeat(n, async index => { ... })` | Repeat Count with optional zero-based index; nonpositive dynamic counts are skipped |
@@ -277,7 +279,7 @@ values. Conditions require booleans or explicit comparisons; arbitrary JS
 truthiness is not implemented. Numeric calculations and formatting use native
 Shortcuts behavior, not a complete JavaScript number runtime.
 
-In loop bodies, `break` and `continue` target the innermost `for…of` loop in the same function.
+In loop bodies, `break` and `continue` target the innermost supported loop in the same function.
 Inside a `switch`, `break` exits that switch; `continue` still targets the nearest
 enclosing loop. An inner loop owns its own `break` and `continue`.
 Nested loops have independent state, and code after the loop continues normally.
@@ -285,6 +287,39 @@ They compose with helper returns and with loops inside menu/repeat callbacks;
 jumps cannot cross a function or callback boundary. Native repeats still visit
 remaining iterations after `break`, but guards skip their bodies, so a large list
 can cost time even after breaking.
+
+Counted `for` loops support one initialized `let` counter, `<`, `<=`, `>` or `>=`
+comparisons (also with operands reversed), and `++`, `--`, `+=`, `-=`, or equivalent
+addition/subtraction assignments. Start, boundary and step may be runtime numbers;
+they must be safe integers, the step must be nonzero and point toward the boundary,
+and the iteration span/count must fit a safe integer. Statically invalid values
+are compile errors; invalid runtime ranges display an alert and stop the shortcut.
+
+```ts
+const limit = await askNumber("Hoeveel rondes?");
+for (let i = 0; i < limit; i++) {
+  if (i === 2) { continue; }
+  await showResult(`Ronde ${i}`);
+}
+for (let i = 5; i >= 1; i -= 2) {
+  await showResult(i); // 5, 3, 1
+}
+```
+
+The initializer evaluates once before boundary/step capture. Boundary and step
+expressions must be stable and free of side effects; arithmetic, field/index
+reads, list/text lengths and pure supported Math calls are allowed. The compiler
+rejects body writes to the counter or any mutable binding used by the boundary
+or step, including writes from captured callbacks. To change a separate source
+variable inside the loop, first capture the boundary in a `const`. Shadowed
+bindings and independent helper parameters remain writable.
+
+`continue` advances the counter; `break` and a helper return skip that advance.
+Counters are block-scoped and nested loops keep independent state. The compiler
+does not approximate general `for`/`while` loops with an arbitrary iteration limit.
+Changing a loop's range during its body, fractional progressions and general loop
+conditions remain unsupported. Native numeric representation and remaining-repeat
+overhead still apply. Build `examples/counted-loop-test.ts` with `npm run build:counted-loop`.
 
 List indices can come from variables, arithmetic, loop items or awaited actions.
 The index expression is evaluated once. Supply a nonnegative integer within the
@@ -374,7 +409,7 @@ or as statements. Supported return values include scalars, typed objects/lists
 and opaque native content; `void` helpers are supported too.
 
 `return` inside a helper returns to its caller, including inside branches and
-nested `for…of` loops. It does not stop the shortcut. Returns from main retain
+nested supported loops. It does not stop the shortcut. Returns from main retain
 their native Stop/Output behavior. Native repeats still visit the remaining
 iterations after an early helper return, with guards skipping their bodies;
 large lists can therefore cost time even after finding a result.
@@ -581,18 +616,62 @@ const tags = [" TS ", "IOS"].map(tag => tag.trim().toLowerCase());
 ```
 
 Supported methods are `trim()`, `trimStart()`, `trimEnd()`, `toUpperCase()`,
-`toLowerCase()`, `concat(...texts)`, `startsWith(text)`, `endsWith(text)` and
-`includes(text)`. They are synchronous and can be chained, used in conditions,
+`toLowerCase()`, `concat(...texts)`, `startsWith(text, position?)`,
+`endsWith(text, endPosition?)` and `includes(text, position?)`.
+They are synchronous and can be chained, used in conditions,
 passed through helpers or called inside array callbacks. Receiver and arguments
 are evaluated once in source order, including when the result is ignored.
 String and array `includes` are selected by the receiver type.
 
 Search is literal and case-sensitive: regex characters in the needle are
 escaped, and an empty needle matches even an empty receiver. Accents and Unicode
-normalization forms remain distinct. Search currently accepts one text argument;
-optional position/end-position arguments and RegExp arguments are unsupported.
-String `indexOf`, `slice`, `substring`, `split`, and `length` are not
-implemented yet; explicit `splitText`/`replaceText` actions remain available.
+normalization forms remain distinct. The optional position is a finite number,
+including runtime values: it truncates toward zero and clamps between zero and
+the receiver's UTF-16 length. `includes` searches at or after that position;
+`startsWith` requires a match at that position. `endsWith` requires a match ending
+at `endPosition`, which defaults to the full text length. An empty search matches
+at every clamped position, including inside an emoji's surrogate pair.
+
+```ts
+"😀a😀".includes("😀", 1); // true: finds the later emoji
+"😀a😀".startsWith("😀", 1); // false: position 1 is inside the first emoji
+"😀a😀".endsWith("😀", 2); // true: the first emoji ends at position 2
+```
+
+Arguments are captured before later argument effects; their original values remain
+available if a position expression changes the receiver/search variables. Positive
+positions use native loops over Unicode scalars and add overhead on long text.
+RegExp arguments, implicit coercion and non-finite positions are unsupported.
+Run `npm run build:text-predicate-position` for the native example.
+String `slice`, `substring`, and `split` are not implemented yet;
+explicit `splitText`/`replaceText` actions remain available.
+
+`text.length` returns the number of UTF-16 code units, matching JavaScript rather
+than native grapheme counting: `"😀".length` is `2`, `"e\u0301".length` is `2`,
+and `"👨‍👩‍👧‍👦".length` is `11`. It works on runtime text, dictionary text fields,
+and expressions. Array `.length` still counts items; object `.length` still reads
+that object's field.
+
+`text.indexOf(search, position?)` accepts a literal or runtime text search and an
+optional finite numeric position. Matching is literal and case-sensitive, with
+no Unicode normalization. The start is truncated toward zero and clamped to the
+range from zero through the UTF-16 text length. A missing match returns `-1`; an
+empty search returns the clamped start, including positions inside surrogate pairs.
+Receiver, search and position evaluate once in that order, retaining captured values
+if later arguments modify their source variables.
+
+```ts
+const offset = "😀a😀b".indexOf("😀", 1); // 3
+const overlap = "aaaa".indexOf("aa", 1); // 1
+const empty = "😀".indexOf("", 1); // 1
+```
+
+Searching from a positive position advances over complete Unicode scalars until
+the requested UTF-16 position is reached, then searches the remaining text once.
+Large positive starts therefore add native loop overhead. Surrogate halves are
+never materialized as intermediate native text. Existing plist string restrictions
+apply; implicit search/position coercion, RegExp arguments and non-finite positions
+are unsupported. Run `npm run build:text-position` for `examples/text-position-test.ts`.
 `concat` accepts text arguments without implicit coercion or argument spreads.
 
 Trimming uses the ECMAScript whitespace set, including BOM and nonbreaking
@@ -1229,7 +1308,7 @@ a full JS engine. Unsupported constructs produce errors with source locations.
 
 - No arbitrary npm imports, function values, classes, closures outside
   supported inline callbacks, general promises or `try/catch`.
-- No ordinary `for`, `while`, labeled jumps, destructuring assignments, array
+- No general `for`/`while` conditions, changing counted-loop bounds, labeled jumps, destructuring assignments, array
   holes, argument spreads, object property mutation or other array methods such as `.sort()`.
 - List indexing requires a valid nonnegative integer at runtime. Out-of-range
   behavior follows Shortcuts, not JavaScript's `undefined`; dynamic bounds are not checked.
@@ -1254,10 +1333,10 @@ outputs and JSON features are intended for `.ts`/`.mts`.
 ## Verification
 
 `npm run typecheck` checks compiler, tests and all examples. `npm test` currently
-passes **646 tests**. `npm run test:metadata` passes four metadata tests, and
+passes **721 tests**. `npm run test:metadata` passes four metadata tests, and
 `npm run build:site` builds the browser visualizer. The in-memory browser compiler
 and Node compiler produce equivalent workflows for the new object/list composition,
-copy, join, runtime lookup and text replacement examples as well as existing control-flow/catalog/HTTP
+copy, join, runtime lookup, text replacement and text position examples as well as existing control-flow/catalog/HTTP
 examples. Historical native fixtures remain preserved. Comparisons
 against newly compiled source explicitly account for the change from Match Text
 to Replace Text in generated text equality; unrelated actions remain unchanged.
@@ -1267,6 +1346,18 @@ Source is never executed or fetched during compilation.
 
 On 2026-10-19, the iPhone 17e iOS 26.5 simulator ran:
 
+- `TS-Text-Predicates`: optional positions on `includes`, `startsWith` and
+  `endsWith` matched JavaScript for negative fractional, zero, interior-surrogate,
+  exact-boundary and out-of-range positions. Empty searches returned true at all
+  clamped positions; receiver/search capture survived later argument mutations.
+  All three results appeared and all 447 imported actions match the compiler output.
+  Evidence: `artifacts/text-predicate-position-verification.json`.
+- `TS-Text-Positions`: UTF-16 lengths for empty text, ASCII, combining accents,
+  emoji, family emoji, flags, skin-tone modifiers and CRLF matched JavaScript.
+  Literal search, overlapping matches, runtime positions, empty searches inside
+  surrogate pairs, normalization distinctions and argument capture passed.
+  All five outputs appeared and all 430 imported actions match the compiler output.
+  Evidence: `artifacts/text-position-verification.json`.
 - `text-replace-all-test`: non-overlapping matches, missing matches, six dynamic
   templates with original prefix/suffix, empty input, combining-accent boundaries,
   emoji, literal regex characters and argument snapshots all passed. All five

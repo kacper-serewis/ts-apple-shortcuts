@@ -46,7 +46,10 @@
     "build:array-join": "npm run build && node lib/src/cli.js examples/array-join-test.ts",
     "build:array-offset": "npm run build && node lib/src/cli.js examples/array-offset-test.ts",
     "build:text-replace": "npm run build && node lib/src/cli.js examples/text-replace-test.ts",
-    "build:text-replace-all": "npm run build && node lib/src/cli.js examples/text-replace-all-test.ts"
+    "build:text-replace-all": "npm run build && node lib/src/cli.js examples/text-replace-all-test.ts",
+    "build:text-position": "npm run build && node lib/src/cli.js examples/text-position-test.ts",
+    "build:text-predicate-position": "npm run build && node lib/src/cli.js examples/text-predicate-position-test.ts",
+    "build:counted-loop": "npm run build && node lib/src/cli.js examples/counted-loop-test.ts"
   },
   "dependencies": {
     "plist": "^5.0.0",

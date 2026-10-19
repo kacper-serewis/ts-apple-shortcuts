@@ -1,0 +1,97 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "baseCommit": "37f07ab512aa76d82df0be604700a46c8393d70f",
+  "change": "Lower text-only replaceAll to native actions with non-overlapping literal search, original prefix/suffix per match, one-time argument evaluation and JS replacement templates. Reuse template lowering with first-match replace.",
+  "validation": {
+    "typecheck": "passed: compiler, tests and all examples",
+    "tests": {
+      "passed": 646,
+      "failed": 0
+    },
+    "newFocusedTests": 17,
+    "dynamicTemplateCases": 323,
+    "staticTemplateCases": 51,
+    "metadataTests": 4,
+    "browserBuild": "passed",
+    "browserNodeParityExamples": 10,
+    "nativeRegressionFixturesInToolkitSuite": 28,
+    "plist": "Apple plutil -lint passed for example and guard probe",
+    "signingMode": "people-who-know-me"
+  },
+  "verifiedShortcut": {
+    "name": "text-replace-all-test",
+    "actionCount": 762,
+    "observedOutputs": [
+      "Matches: XbX/XXa/abc",
+      "Templates: $b$b;$&b$&b;abab;babb;babbbb;/babbab/bb;",
+      "Empty: \"!\"/\"!e!́!\"; emoji 😀",
+      "Unicode: [😀]é[😀]; literal X/X; exact éXé",
+      "Snapshot: a!ba!/changed/z"
+    ],
+    "completion": "All five results appeared in order; final Done returned to the editor with play available.",
+    "importComparison": "All 762 actions read from the simulator database match the compiled output exactly."
+  },
+  "guardProbe": {
+    "name": "TS-Replace-All-Guard",
+    "actionCount": 53,
+    "input": "😀",
+    "search": "",
+    "replacement": "!",
+    "observedAlert": "replaceAll with an empty search and this Unicode text needs UTF-16 surrogate splitting, which is not supported yet.",
+    "completion": "After OK, editor returned to play available. Neither result action after the guarded expression appeared.",
+    "importComparison": "All 53 actions read from the simulator database match the compiled output exactly."
+  },
+  "nativeCoverage": [
+    "Multiple matches and non-overlapping search",
+    "No-match result returns original text",
+    "Six runtime replacement templates with literal dollars, matches, original prefixes and original suffixes",
+    "Empty input and empty-search boundaries between BMP combining characters",
+    "Empty-search no-op on emoji",
+    "Nonempty emoji search",
+    "Literal regex metacharacters and backslash",
+    "Canonical Unicode sequences remain distinct",
+    "Receiver and needle captured before replacement argument mutates their source variables",
+    "Explicit alert and stop for unsupported surrogate splitting"
+  ],
+  "limitations": [
+    "Empty search with inserting replacement on supplementary characters stops explicitly; full UTF-16 surrogate splitting remains unimplemented.",
+    "RegExp objects, replacement callbacks, implicit coercion and optional calls are unsupported.",
+    "Dynamic templates use nested native loops and add overhead.",
+    "Native verification used the simulator, not a physical iPhone."
+  ],
+  "sha256": {
+    "src/text-replace.ts": "71e63221e2fb2d80f2e06ccdf2c67ea5de849075a841a01d369e241011a04443",
+    "src/compiler.ts": "3b0c2ec4754372b4b5a3197d82cad50798f1c138c8023236752f60d7826e6232",
+    "src/emitter.ts": "6357489135845121c7b0d76adc22bf97192200d3f50fec8fafa50195b8757814",
+    "src/model.ts": "a63e1fdb63cd7b936c2860b4652c2a976e200eff3c31195a063b9e74df4e9305",
+    "test/support/evaluate.ts": "d870f7403869b4ec23635f31623e7b768e61c5fb1f03c7d16c35998a31d800e9",
+    "test/text-replace.test.ts": "510a998f5ec9c55255395c02af442fb7cd26134ec5b85131fc48406889b4d0b6",
+    "test/text-replace-all.test.ts": "301d4ab34ce77dfbaa376d51080ee07968eb948fb070272936cc830b7b512ba7",
+    "test/typescript.test.ts": "0fbd7797ac8c850f781dfedb1bbc6262e95c0cd785de1692a02cf88076e42001",
+    "test/toolkit.test.ts": "b584142da293316ba864c954156195278ea4606b9f90d0832901a94627310f20",
+    "test/visualizer.test.ts": "603a6804aa36b19f2e45a57a173c059e8754d0888fd34e006f62a1a4465a626e",
+    "examples/text-replace-all-test.ts": "c986287f4f4145b66b44fb5d1d5851139168cb214a546612e2d59a59122094c7",
+    "test/fixtures/ios26-text-replace-all-workflow.json": "110179ca1a97551582128e03badb405aebc4258b5d8d5b8baf3db117107342b7",
+    "artifacts/text-replace-all-guard-probe.ts": "61db28fbcb439a29c4561a4ecfe9021e2af5b694a10b034a1b4b328c3afca7b4",
+    "README.md": "ff01b2dcd20b8a571afdae417a0d16994a6618f6301a111614c42dc86d955148",
+    "package.json": "802c1d61d8160930a9cda50a112c678d74e9d71cff9e494d87f99c69491e1240",
+    "artifacts/ios-text-replace-all-empty.png": "5d0d859e060cbcb98260dde64f8d81590382bba703e10893fef1e6dd9e22dd24",
+    "artifacts/ios-text-replace-all-guard.png": "f1e6cc690f09e483ba67c99bdadf263eb77224238796de38067f11e6e0560a10",
+    "artifacts/ios-text-replace-all-matches.png": "4cec50663058a236d6c4662ab1dbbb5ec5fde7d6b3f53d831610bf4dad3e15ad",
+    "artifacts/ios-text-replace-all-snapshot.png": "8d5303d55ee0c63fe61be62db4c71274f7b76478bd354ee2afc723d63724a820",
+    "artifacts/ios-text-replace-all-templates.png": "9d231d1ba3f926eb2c4f452dca5d93c87a9875b9499c33f4735c81b8037eebc7",
+    "artifacts/ios-text-replace-all-unicode.png": "aad9fd1ba8e70918346003b1c90667d328c9e62fdc8bde5814659a343fb177b5",
+    "dist/text-replace-all-test.json": "b58642a38a40fb11fabe7e2378d6f04f07b089207cd4a961f77ebd390114c6a2",
+    "dist/text-replace-all-test.shortcut": "37fee95f483dd1178cd933e114d7f03e1df5440a13977e8265a2e2e9852770a0",
+    "dist/text-replace-all-test.unsigned.plist": "c13c665a236338bebff071a665f86eaf15b528c7eb154addb511590ca12fb276",
+    "dist/TS-Replace-All-Guard.json": "dedb800195818f96c06423dcbc4f62497c572045e731fe982ab9de4da94a2a4a",
+    "dist/TS-Replace-All-Guard.shortcut": "a78fcdd53766efac1a2eefd78b2134d753c07c4f0405ea93afdf36d992447ae4",
+    "dist/TS-Replace-All-Guard.unsigned.plist": "fec5bd895259c765555a7cc565aa4dda781d490accde759d60da600e4efdc1d4"
+  }
+}

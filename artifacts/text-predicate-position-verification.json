@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "baseCommit": "37f07ab512aa76d82df0be604700a46c8393d70f",
+  "change": "Support optional finite numeric UTF-16 position arguments on string includes, startsWith and endsWith. Share position clamping and native search with indexOf, preserving all existing native workflows.",
+  "validation": {
+    "typecheck": "passed: compiler, tests and all examples",
+    "tests": {
+      "passed": 686,
+      "failed": 0
+    },
+    "newFocusedTests": 22,
+    "runtimePredicateCases": 720,
+    "staticPredicateCases": 90,
+    "metadataTests": 4,
+    "browserBuild": "passed",
+    "browserNodeParityExamples": 12,
+    "nativeRegressionFixturesInToolkitSuite": 30,
+    "plist": "Apple plutil -lint passed",
+    "signingMode": "people-who-know-me"
+  },
+  "verifiedShortcut": {
+    "name": "TS-Text-Predicates",
+    "actionCount": 447,
+    "observedOutputs": [
+      "Emoji: YYN;YYN;YNN;YNY;YYN;NNY;",
+      "Empty: YYY;YYY;YYY;YYY;YYY;YYY;",
+      "Snapshot: Y/changed/z"
+    ],
+    "completion": "All three outputs were observed in the same run. Final Done returned to the editor with play available.",
+    "importComparison": "All 447 imported actions read from the simulator database match the compiler output exactly."
+  },
+  "automationRecovery": {
+    "detail": "Opening the second result overlay and a subsequent AX snapshot timed out with Daemon request timed out. Existing commands were polled to completion; the shortcut was not restarted.",
+    "evidence": "BackgroundShortcutRunner log showed the computed Empty result. A simctl screenshot completed and showed that result with Done. After the failed snapshot became terminal, a coordinate tap on the observed Done button completed and normal AX inspection recovered. The third result then appeared.",
+    "screenshotFallback": "The Empty image was captured by simctl; other images used agent-device."
+  },
+  "nativeCoverage": [
+    "All three predicates at six runtime negative/fractional, zero, interior-surrogate, scalar-boundary and out-of-range positions",
+    "Correct distinction between includes searching forward and startsWith matching the exact start",
+    "endsWith uses an end position and rejects a search longer than the available prefix",
+    "Empty search matches all clamped positions, including inside surrogate pairs",
+    "Helper state resets across nested loop invocations",
+    "Receiver and needle captured before later position argument mutation"
+  ],
+  "limitations": [
+    "Positive positions use native scalar-advance loops and add overhead for long prefixes.",
+    "Non-finite positions, implicit coercion and RegExp search arguments remain unsupported.",
+    "Existing plist string restrictions apply.",
+    "Native runtime verified on a simulator, not a physical iPhone."
+  ],
+  "sha256": {
+    "src/text-position.ts": "1bccd336101e345a4ecfe732b6748f3143d7233cdcdab65db36dd5114993b9ff",
+    "src/text-operations.ts": "0b19155d5d2d103257d98890824d8461e48a92e0da5ef52ce7d45c90332798d2",
+    "src/compiler.ts": "acbcc76be58b549923f8d9d96291b7d8811503be39b5be4f17b82c6b3c7b0fe3",
+    "test/text-predicate-position.test.ts": "82889b7a033cf3bc6eac9ce8d29d7d3771ecb53ef588ed2f8dcb748c759c918e",
+    "test/text-position.test.ts": "c6de22b2336cf4cdd63bbcb9f1e2434e6c5190b89f930c4bdc14899b763d39e5",
+    "test/string-methods.test.ts": "f652961a9418381e43fecdc294df53af3557bf765af549def9ded981c2ba4f47",
+    "test/typescript.test.ts": "0f63be8cbfd0be765f8d5538558ce3a786ce94b269d32370d52484ef6e78fe9f",
+    "test/toolkit.test.ts": "3f5635a475642771233db1dad2e9595c38f67d496e07f38b55bbd3549506dadf",
+    "test/visualizer.test.ts": "3b0617fa23a3ca62fb99d97a038e6e15bf28c5b3ac37cc11561f91fd6c0b36d1",
+    "examples/text-predicate-position-test.ts": "929c56e0dc495c307dc559618088bb03ccd0e664fb1bcbb4a1d87c0e5f321272",
+    "test/fixtures/ios26-text-predicate-position-workflow.json": "203fafb2f5389cfb3c5bff07c39c870aa6dc1e557b5ed66408db159be4193407",
+    "README.md": "c2de21c74dd426d514f3776c5b75a232a6f932b37ee97a6c873962cbb4616366",
+    "package.json": "b425b08357e4ef11c18079f66358e69ab5180e061761429563a40b55739fa9fd",
+    "artifacts/ios-text-predicate-position-emoji.png": "a7f1984b3d6b6cc3e4bf6eb6992bbc00f968ba03712b3ec83850576641194f2f",
+    "artifacts/ios-text-predicate-position-empty.png": "61ae7943c9a0be60bbc28fc1e5b7b5392edb62ea648f7b9aa1037b77a11ca370",
+    "artifacts/ios-text-predicate-position-snapshot.png": "d0173419d55e2a701aea6af4fb37c6154a35ba9956b7c011565dc316ccd1247d",
+    "dist/TS-Text-Predicates.json": "7be9c1463ce39ca2c66945658acfa81562e252547c524298208d7a77d64e484c",
+    "dist/TS-Text-Predicates.shortcut": "d0837d6aac66e0579e9e2959916f8809df0591452269811697c172fee8e71598",
+    "dist/TS-Text-Predicates.unsigned.plist": "c96bfd3eb7ad638399d82443905b425cb8b7723be684188e42ba5731f076acb1"
+  }
+}

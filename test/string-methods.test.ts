@@ -78,7 +78,7 @@ test("native example produces all intended results", () => {
 
 for (const [body, error] of [
   ['"x".trim("y");', /takes no arguments/],
-  ['"x".startsWith("x", 1);', /position arguments/],
+  ['"x".startsWith("x", 1, 2);', /optional numeric position/],
   ['"x".endsWith();', /requires one text argument/],
   ['"x".includes(/x/);', /Unsupported expression|RegExp/],
   ['"x".concat(1);', /arguments must be text/],

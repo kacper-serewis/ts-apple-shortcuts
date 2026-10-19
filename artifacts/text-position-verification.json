@@ -1,0 +1,84 @@
+{
+  "date": "2026-10-19",
+  "device": {
+    "name": "iPhone 17e",
+    "os": "iOS 26.5",
+    "kind": "Simulator",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "baseCommit": "37f07ab512aa76d82df0be604700a46c8393d70f",
+  "change": "Add runtime string.length in UTF-16 code units and string.indexOf with literal/runtime text search and optional finite numeric start. Preserve evaluation order and mutable receiver/search snapshots. Share existing native text operation builders without changing replace/replaceAll fixtures.",
+  "validation": {
+    "typecheck": "passed: compiler, tests and all examples",
+    "tests": {
+      "passed": 663,
+      "failed": 0
+    },
+    "newFocusedTests": 17,
+    "lengthCases": 15,
+    "staticAndDefaultSearchCases": 132,
+    "runtimeSearchCases": 198,
+    "metadataTests": 4,
+    "browserBuild": "passed",
+    "browserNodeParityExamples": 11,
+    "nativeRegressionFixturesInToolkitSuite": 29,
+    "plist": "Apple plutil -lint passed",
+    "signingMode": "people-who-know-me"
+  },
+  "verifiedShortcut": {
+    "name": "TS-Text-Positions",
+    "actionCount": 430,
+    "observedOutputs": [
+      "Lengths: 0,3,2,2,11,4,4,2",
+      "Offsets: 0/1/-1",
+      "Positions: 0:0;3:1;3:2;3:3;-1:6;",
+      "Literal: 1; exact 2; combining 1",
+      "Snapshot: 3/changed/z; length 2"
+    ],
+    "completion": "All five outputs appeared in order. Final Done returned to the editor with play available.",
+    "importComparison": "All 430 imported actions read from the simulator database match the compiler output exactly."
+  },
+  "nativeCoverage": [
+    "Empty, ASCII, combining-accent, supplementary, ZWJ-family, regional-flag, skin-tone and CRLF text lengths",
+    "Default and positive search starts",
+    "Overlapping literal matches",
+    "No-match sentinel",
+    "Negative fractional and out-of-range runtime positions",
+    "Search begins inside a surrogate pair",
+    "Empty needle returns the clamped UTF-16 start, including a position inside a surrogate pair",
+    "Literal regex metacharacters and backslash",
+    "Canonical Unicode sequences remain distinct",
+    "Combining-mark match returns UTF-16 offset",
+    "Receiver and search captured before start argument mutation"
+  ],
+  "limitations": [
+    "Positive start positions require native scalar-advance loops, so long prefixes add overhead.",
+    "Non-finite positions, implicit coercion and RegExp search arguments are unsupported.",
+    "Existing plist restrictions apply to text, including unpaired-surrogate literals.",
+    "Native execution verified on a simulator, not a physical iPhone."
+  ],
+  "sha256": {
+    "src/text-position.ts": "d9373f4b9854a1306d8bb0a320bacd979352713907a1f2a010b8b5c0e10012c2",
+    "src/text-operations.ts": "0b19155d5d2d103257d98890824d8461e48a92e0da5ef52ce7d45c90332798d2",
+    "src/text-replace.ts": "34d790d2f8b40939d368f4bfab56a24b64cef127512eabc0c11b4b37e2e5cb02",
+    "src/compiler.ts": "bc63740f3f572c48e7e0ba6c3a17b56f21718c4a3ed4c8d38d2a769506670b5d",
+    "test/text-position.test.ts": "c6de22b2336cf4cdd63bbcb9f1e2434e6c5190b89f930c4bdc14899b763d39e5",
+    "test/support/evaluate.ts": "d870f7403869b4ec23635f31623e7b768e61c5fb1f03c7d16c35998a31d800e9",
+    "test/typescript.test.ts": "a63cc2b97f7c1ed2674a8caa8f6bc9779d98ad0fc334a7c1982d362e8f2e5a38",
+    "test/toolkit.test.ts": "c40569e9c4dbc3321a8201dc2a50d82622645b21c7e4e652730d95c5c42e4adc",
+    "test/visualizer.test.ts": "25695321517b40f7c1ca613f35413dbcbdedbb5aaef72e97642479d903636016",
+    "test/array-search.test.ts": "cd325c2a29fe731f2679a4e4accca2e67dda59d38826393891213452e2a4a224",
+    "examples/text-position-test.ts": "bdeafa7fd9b736e68d089ccc1a9f9d9226cd9bf1b3b33cd0a5711297af471aaa",
+    "test/fixtures/ios26-text-position-workflow.json": "b6002258b4f916bab48ea2212c8b54a869ef7a884602a5844eed8782d72de2f9",
+    "README.md": "e908e00ba9121e7f07f16418698ad3c78a8e381e6c6c115d080a5adbed20d72e",
+    "package.json": "9ca7ab7c190e0e7e7762aae4b137abb343750ae359f26d4a7286baa579f1ddb9",
+    "artifacts/ios-text-position-lengths.png": "ea46abd15e4b880dc8e08446b36f99b36eb37f87c15635136db5d62231435437",
+    "artifacts/ios-text-position-literal.png": "9f420914e4dcffcd515556bba24b2834253a146e54db60d0995cbf295636e884",
+    "artifacts/ios-text-position-offsets.png": "b84feb57f9677c04bd80728751a52874a99579651104f20dfbb77dcd71c8214e",
+    "artifacts/ios-text-position-positions.png": "2e4d8155700e67b8d08f45fd17fe72745b407d030c0978b0369a917cc717fda5",
+    "artifacts/ios-text-position-snapshot.png": "7290faf4f1be1462d35729e928ef70739a734412dbbdad125058bdd0c283560a",
+    "dist/TS-Text-Positions.json": "7d301af79c5e1519de9cddb0748c9906807ba950e356434d2d7f06a846d6e975",
+    "dist/TS-Text-Positions.shortcut": "8e76225bce5d53fa70a288656bb8e4f33ec8bc6ca18cb5cc48810d94cc644cb3",
+    "dist/TS-Text-Positions.unsigned.plist": "3f674a0d3f78e5efaedbe259f3a87c44d12afae867fddd6668158454c807f0ce"
+  }
+}

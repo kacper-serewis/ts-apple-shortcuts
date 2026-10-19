@@ -8,6 +8,8 @@ import type { CompileHost } from "./hosts/host.js";
 import { staticPlist, propertyName, isDictionary, unwrap, plistData, plistDate } from "./native.js";
 import { emitWorkflow } from "./emitter.js";
 import { lowerTextReplace, lowerTextReplaceAll } from "./text-replace.js";
+import { lowerTextLength, lowerTextIndexOf, lowerTextPredicate } from "./text-position.js";
+import { lowerForCount } from "./counted-loop.js";
 import type { ActionName, Compilation, DictionaryPart, IRNode, ListRef, ObjectRef, OutputRef, ScalarValue, StringMethod, TextValue, Value, NativeParameter, PlistDictionary } from "./model.js";
 
 export interface Position { line: number; column: number }
@@ -98,6 +100,7 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
   let settings: PlistDictionary = {};
   let settingsNode: ts.Expression | undefined;
   const mutable = new Map<Scope, Map<string, string>>();
+  let protectedForBindings = new Map<string, string>();
   let entry: ts.FunctionDeclaration | undefined;
   const hasModifier = (node: ts.FunctionDeclaration, kind: ts.SyntaxKind) => node.modifiers?.some(m => m.kind === kind);
   const isTypeDeclaration = (node: ts.Node) => ts.isTypeAliasDeclaration(node) || ts.isInterfaceDeclaration(node);
@@ -495,6 +498,11 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     if (ts.isPropertyAccessExpression(node)) {
       if (node.questionDotToken) fail("Optional chaining is not supported for JSON fields.", node);
       const input = value(node.expression, scopes, output);
+      if (category(input) === "text" && node.name.text === "length") {
+        const lowered = lowerTextLength(input as TextValue | OutputRef, () => nextId++, position(node).line);
+        output.push(...lowered.nodes);
+        return lowered.value;
+      }
       if (input.kind === "list-ref" && node.name.text === "length") {
         const id = nextId++;
         output.push({ kind: "native", id, identifier: "is.workflow.actions.count", parameters: { kind: "parameter-object", entries: [
@@ -687,26 +695,47 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     const negative = choose(fraction, "<", num(-0.5), calc(integer, "-", num(1)), integer);
     return choose(fraction, ">=", num(0.5), calc(integer, "+", num(1)), negative);
   }
-  function stringMethodName(expr: ts.CallExpression): StringMethod | "replace" | "replaceAll" | undefined {
+  function stringMethodName(expr: ts.CallExpression): StringMethod | "replace" | "replaceAll" | "indexOf" | undefined {
     const access = unwrap(expr.expression);
     if (!ts.isPropertyAccessExpression(access)) return undefined;
     const method = access.name.text;
-    if (!["trim", "trimStart", "trimEnd", "toUpperCase", "toLowerCase", "concat", "startsWith", "endsWith", "includes", "replace", "replaceAll"].includes(method)) return undefined;
-    // includes and concat also exist on arrays; dispatch from the checked receiver type.
-    if (["includes", "concat"].includes(method)) {
+    if (!["trim", "trimStart", "trimEnd", "toUpperCase", "toLowerCase", "concat", "startsWith", "endsWith", "includes", "replace", "replaceAll", "indexOf"].includes(method)) return undefined;
+    // Shared array/text methods dispatch from the checked receiver type.
+    if (["includes", "concat", "indexOf"].includes(method)) {
       const type = checker.getTypeAtLocation(access.expression);
       if (!(type.isUnion() ? type.types : [type]).every(t => !!(t.flags & ts.TypeFlags.StringLike))) return undefined;
     }
-    return method as StringMethod | "replace" | "replaceAll";
+    return method as StringMethod | "replace" | "replaceAll" | "indexOf";
   }
   function stringMethod(expr: ts.CallExpression, scopes: Scope[], output: IRNode[]): Value {
     const access = unwrap(expr.expression) as ts.PropertyAccessExpression;
     const method = stringMethodName(expr)!;
     if (expr.questionDotToken || access.questionDotToken) fail("Optional string method calls are not supported.", expr);
     if (expr.typeArguments?.length || expr.arguments.some(ts.isSpreadElement)) fail("String methods do not support type arguments or argument spreads.", expr);
+    if (method === "indexOf") {
+      if (expr.arguments.length < 1 || expr.arguments.length > 2) fail("String indexOf requires a text search value and optional numeric position.", expr);
+      const input = value(access.expression, scopes, output);
+      if (category(input) !== "text") fail("String methods require a text receiver.", access.expression);
+      const needle = value(expr.arguments[0], scopes, output);
+      if (category(needle) !== "text") fail("String indexOf requires a text search value; implicit conversion is unsupported.", expr.arguments[0]);
+      const start = expr.arguments[1] ? numeric(expr.arguments[1], scopes, output) : { kind: "number" as const, value: 0 };
+      const lowered = lowerTextIndexOf(input as TextValue | OutputRef, needle as TextValue | OutputRef, start, () => nextId++, position(expr).line);
+      output.push(...lowered.nodes);
+      return lowered.value;
+    }
     const predicate = ["startsWith", "endsWith", "includes"].includes(method);
+    if (predicate && expr.arguments.length === 2) {
+      const input = value(access.expression, scopes, output);
+      if (category(input) !== "text") fail("String methods require a text receiver.", access.expression);
+      const needle = value(expr.arguments[0], scopes, output);
+      if (category(needle) !== "text") fail("String method arguments must be text; implicit conversion and RegExp arguments are not supported.", expr.arguments[0]);
+      const suppliedPosition = numeric(expr.arguments[1], scopes, output);
+      const lowered = lowerTextPredicate(method as "includes" | "startsWith" | "endsWith", input as TextValue | OutputRef, needle as TextValue | OutputRef, suppliedPosition, () => nextId++, position(expr).line);
+      output.push(...lowered.nodes);
+      return lowered.value;
+    }
     const replacementMethod = method === "replace" || method === "replaceAll";
-    if (method !== "concat" && expr.arguments.length !== (replacementMethod ? 2 : predicate ? 1 : 0)) fail(replacementMethod ? `${method} requires a text search value and text replacement.` : predicate ? `${method} requires one text argument; position arguments are not supported yet.` : `${method} takes no arguments.`, expr);
+    if (method !== "concat" && expr.arguments.length !== (replacementMethod ? 2 : predicate ? 1 : 0)) fail(replacementMethod ? `${method} requires a text search value and text replacement.` : predicate ? `${method} requires one text argument and an optional numeric position.` : `${method} takes no arguments.`, expr);
     const input = value(access.expression, scopes, output);
     if (category(input) !== "text") fail("String methods require a text receiver.", access.expression);
     const args = expr.arguments.map(argument => {
@@ -1206,6 +1235,7 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     const scope = scopes.toReversed().find(scope => scope.has(target.text));
     const name = scope && mutable.get(scope)?.get(target.text);
     if (!name || !scope) fail("Only let variables can be assigned.", target);
+    if (protectedForBindings.has(name)) fail(protectedForBindings.get(name)!, target);
     const initial = scope.get(target.text)!;
     let result: Value;
     if (binary && (node as ts.BinaryExpression).operatorToken.kind === ts.SyntaxKind.EqualsToken) {
@@ -1325,6 +1355,107 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
       for (const d of statement.declarationList.declarations) declarePattern(d.name, scope);
     }
   }
+  function countedFor(node: ts.ForStatement, scopes: Scope[], frame?: FunctionFrame): IRNode[] {
+    const init = node.initializer;
+    if (!init || !ts.isVariableDeclarationList(init) || !(init.flags & ts.NodeFlags.Let) || init.declarations.length !== 1
+      || !ts.isIdentifier(init.declarations[0].name) || !init.declarations[0].initializer) {
+      fail("Use a counted for loop with one initialized let counter.", node);
+    }
+    const declaration = init.declarations[0], counter = declaration.name as ts.Identifier;
+    if (!node.condition || !node.incrementor) fail("Counted for loops require a comparison and counter update.", node);
+    const comparison = unwrap(node.condition);
+    if (!ts.isBinaryExpression(comparison)) fail("Use <, <=, > or >= against a stable numeric boundary.", node.condition);
+    const left = unwrap(comparison.left), right = unwrap(comparison.right);
+    const isCounter = (expr: ts.Expression): boolean => ts.isIdentifier(unwrap(expr)) && (unwrap(expr) as ts.Identifier).text === counter.text;
+    let operator = comparison.operatorToken.getText(sourceFile), boundary: ts.Expression;
+    if (!["<", "<=", ">", ">="].includes(operator)) fail("Use <, <=, > or >= against a stable numeric boundary.", comparison);
+    if (isCounter(left)) boundary = right;
+    else if (isCounter(right)) {
+      boundary = left; operator = ({ "<": ">", "<=": ">=", ">": "<", ">=": "<=" } as Record<string,string>)[operator];
+    } else fail("The for comparison must compare its counter directly with the boundary.", comparison);
+    const line = position(node).line, output: IRNode[] = [];
+    const scope: Scope = new Map(); mutable.set(scope, new Map()); declarePattern(counter, scope);
+    const nested = [...scopes, scope];
+    const initial = numeric(declaration.initializer!, nested, output);
+    bindPattern(counter, initial, scope, true, output, line);
+    const counterName = mutable.get(scope)!.get(counter.text)!;
+    const dependencies = new Set<string>();
+    const invariant = (expr: ts.Expression): void => {
+      expr = unwrap(expr);
+      if (ts.isNumericLiteral(expr)) return;
+      if (ts.isIdentifier(expr)) {
+        const binding = nested.toReversed().find(s => s.has(expr.text));
+        const name = binding && mutable.get(binding)?.get(expr.text);
+        if (name === counterName) fail("The for boundary and step must be independent of the counter.", expr);
+        if (name) dependencies.add(name);
+        return; // numeric() supplies unknown-name and TDZ diagnostics.
+      }
+      if (mathMember(expr, nested) !== undefined) return;
+      if (ts.isPrefixUnaryExpression(expr) && [ts.SyntaxKind.PlusToken, ts.SyntaxKind.MinusToken].includes(expr.operator)) { invariant(expr.operand); return; }
+      if (ts.isBinaryExpression(expr) && ["+","-","*","/","%","**"].includes(expr.operatorToken.getText(sourceFile))) { invariant(expr.left); invariant(expr.right); return; }
+      if (ts.isPropertyAccessExpression(expr) && !expr.questionDotToken) { invariant(expr.expression); return; }
+      if (ts.isElementAccessExpression(expr) && !expr.questionDotToken && expr.argumentExpression) { invariant(expr.expression); invariant(expr.argumentExpression); return; }
+      if (ts.isCallExpression(expr) && mathMember(expr.expression, nested) !== undefined) { expr.arguments.forEach(invariant); return; }
+      fail("For boundaries and steps must be stable numeric expressions without calls or side effects (pure Math calls are supported).", expr);
+    };
+    invariant(boundary);
+    const end = numeric(boundary, nested, output);
+    const increment = unwrap(node.incrementor);
+    let step: ScalarValue;
+    let delta: ts.Expression | undefined, negate = false;
+    if ((ts.isPrefixUnaryExpression(increment) || ts.isPostfixUnaryExpression(increment))
+      && [ts.SyntaxKind.PlusPlusToken, ts.SyntaxKind.MinusMinusToken].includes(increment.operator) && isCounter(increment.operand)) {
+      step = { kind: "number", value: increment.operator === ts.SyntaxKind.PlusPlusToken ? 1 : -1 };
+    } else if (ts.isBinaryExpression(increment) && isCounter(increment.left)) {
+      if ([ts.SyntaxKind.PlusEqualsToken, ts.SyntaxKind.MinusEqualsToken].includes(increment.operatorToken.kind)) {
+        delta = increment.right; negate = increment.operatorToken.kind === ts.SyntaxKind.MinusEqualsToken;
+      } else if (increment.operatorToken.kind === ts.SyntaxKind.EqualsToken) {
+        const rhs = unwrap(increment.right);
+        if (ts.isBinaryExpression(rhs) && [ts.SyntaxKind.PlusToken, ts.SyntaxKind.MinusToken].includes(rhs.operatorToken.kind)) {
+          if (isCounter(rhs.left)) { delta = rhs.right; negate = rhs.operatorToken.kind === ts.SyntaxKind.MinusToken; }
+          else if (rhs.operatorToken.kind === ts.SyntaxKind.PlusToken && isCounter(rhs.right)) delta = rhs.left;
+        }
+      }
+      if (!delta) fail("Update the for counter using ++, --, +=, -=, or an equivalent addition/subtraction.", increment);
+      invariant(delta); step = numeric(delta, nested, output);
+      if (negate) {
+        if (step.kind === "number") step = { kind: "number", value: -step.value };
+        else {
+          const id = nextId++; output.push({ kind: "math", id, left: { kind: "number", value: 0 }, operator: "-", right: step, line });
+          step = { kind: "ref", id, outputName: "Calculation Result", valueType: "number" };
+        }
+      }
+    } else fail("Update the for counter using ++, --, +=, -=, or an equivalent addition/subtraction.", increment);
+    const ascending = operator.startsWith("<");
+    for (const value of [initial, end, step]) if (value.kind === "number" && !Number.isSafeInteger(value.value)) fail("Counted for loops require safe integer start, boundary and step values.", node);
+    if (step.kind === "number" && (ascending ? step.value <= 0 : step.value >= 0)) fail("The for step must move toward its comparison boundary.", increment);
+    const count = lowerForCount(initial, end, step, ascending, operator.endsWith("="), () => nextId++, line);
+    output.push(...count.nodes);
+    const innerLoop: LoopFrame | undefined = hasLoopJump(node.statement) ? { skip: `ts_${nextId++}_skip`,
+      ...(hasLoopJump(node.statement, ts.SyntaxKind.BreakStatement) ? { broken: `ts_${nextId++}_break` } : {}) } : undefined;
+    if (innerLoop?.broken) output.push({ kind: "set", name: innerLoop.broken, value: { kind: "boolean", value: false }, line });
+    const previous = protectedForBindings;
+    protectedForBindings = new Map(previous);
+    protectedForBindings.set(counterName, "Only the for header may update its counter; body updates are not supported.");
+    for (const name of dependencies) if (!protectedForBindings.has(name)) protectedForBindings.set(name, "A counted for boundary or step cannot change inside its loop body; capture a separate const value first.");
+    let body: IRNode[];
+    try { body = block(node.statement, nested, frame, innerLoop); }
+    finally { protectedForBindings = previous; }
+    const advance: IRNode[] = [];
+    const current = resolve(counter, nested, advance) as ScalarValue, next = nextId++;
+    advance.push({ kind: "math", id: next, left: current, operator: "+", right: step, line });
+    advance.push({ kind: "set", name: counterName, value: { kind: "ref", id: next, outputName: "Calculation Result", valueType: "number" }, line });
+    let guardedAdvance = innerLoop?.broken ? whenFalse(innerLoop.broken, advance, line) : advance;
+    if (frame && hasLocalReturn(node.statement)) guardedAdvance = whenFalse(frame.done, guardedAdvance, line);
+    body.push(...guardedAdvance); // continue still advances; break and return do not.
+    if (innerLoop) {
+      body.unshift({ kind: "set", name: innerLoop.skip, value: { kind: "boolean", value: false }, line });
+      if (innerLoop.broken) body = whenFalse(innerLoop.broken, body, line);
+    }
+    if (frame && hasLocalReturn(node.statement)) body = whenFalse(frame.done, body, line);
+    output.push({ kind: "repeat-count", count: count.value, body, line });
+    return output;
+  }
   function block(node: ts.Statement, scopes: Scope[], frame?: FunctionFrame, loop?: LoopFrame, switchBreak?: string): IRNode[] {
     if (!ts.isBlock(node)) fail("Use braces around each branch or loop body.", node);
     return statements(node.statements, scopes, frame, loop, switchBreak);
@@ -1353,6 +1484,8 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
         output.push(...block(statement, nested, frame, loop, switchBreak));
       } else if (ts.isSwitchStatement(statement)) {
         output.push(...switchStatement(statement, nested, frame, loop));
+      } else if (ts.isForStatement(statement)) {
+        output.push(...countedFor(statement, nested, frame));
       } else if (ts.isForOfStatement(statement)) {
         if (statement.awaitModifier) fail("for await…of is not supported; use for…of.", statement);
         const init = statement.initializer;

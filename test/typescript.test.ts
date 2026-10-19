@@ -64,6 +64,9 @@ for (const [example, fixture] of [
   ["array-offset-test", "ios26-array-offset-workflow"],
   ["text-replace-test", "ios26-text-replace-workflow"],
   ["text-replace-all-test", "ios26-text-replace-all-workflow"],
+  ["text-position-test", "ios26-text-position-workflow"],
+  ["text-predicate-position-test", "ios26-text-predicate-position-workflow"],
+  ["counted-loop-test", "ios26-counted-loop-workflow"],
 ] as const) {
   test(`${example} retains the verified workflow with any legacy text-equality migration`, () => {
     const source = readFileSync(new URL(`../../examples/${example}.ts`, import.meta.url), "utf8");

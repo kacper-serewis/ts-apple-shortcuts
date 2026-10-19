@@ -125,7 +125,6 @@ for (const [body, error] of [
   ['[1].indexOf(1, 0, 1);', /requires a search value/],
   ['[{ n: 1 }].includes({ n: 1 });', /object identity/],
   ['[1].indexOf("1");', /scalar value category/],
-  ['"hello".indexOf("h");', /typed array/],
   ['[1]?.some(n => true);', /Optional array method/],
   ['[1].findIndex(n => { if (n > 0) { break; } return false; });', /enclosing supported loop/],
 ] as const) {
