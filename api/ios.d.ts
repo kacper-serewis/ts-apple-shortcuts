@@ -69,6 +69,18 @@ declare module "@js-shortcuts/ios" {
   export function attachment(value: unknown): NativeEncoded;
   /** Encode an object literal (or const alias) as a native dictionary parameter state. */
   export function dictionary(value: object): NativeEncoded;
+  /** Value types an App Intents entity property can declare. */
+  export type EntityPropertyValue = string | number | boolean | NativeContent | readonly (string | number | boolean | NativeContent)[];
+  /** Read a property of an App Intents entity, such as an alarm's "hours".
+   * Pass the property identifier from Apple metadata (see NativeEntityProperties), not its
+   * localized title. Compiles to a native property variable; no action is added.
+   * Use one entity at a time: inside for…of for lists. Values follow native Shortcuts behavior.
+   */
+  export function entityProperty<E extends NativeEntity<keyof NativeEntityProperties & string>, P extends keyof NativeEntityProperties[E["__nativeType"]] & string>(entity: E, property: P): NativeEntityProperties[E["__nativeType"]][P];
+  /** Entities without catalog property metadata (app manifests, native<T>() results).
+   * T declares the property value; it is not validated. Catalog entities must use a declared identifier.
+   */
+  export function entityProperty<T extends EntityPropertyValue = NativeContent>(entity: NativeContent, property: string): T;
   /** Receive input passed to this shortcut (for example by a share sheet). */
   export function input<T = NativeContent>(): T;
   /** Repeat n times with a zero-based index. A callback return skips only the rest of that iteration. */

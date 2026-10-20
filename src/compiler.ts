@@ -75,7 +75,7 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
   const imports = new Map<string, string>();
   const functions = new Map<string, ts.FunctionDeclaration>();
   const callStack: ts.FunctionDeclaration[] = [];
-  const special = new Set(["actions", "native", "raw", "text", "attachment", "dictionary", "repeat", "menu", "input", "plistData", "plistDate", "stringifyJson", "parseJson", "requestJson"]);
+  const special = new Set(["actions", "native", "raw", "text", "attachment", "dictionary", "repeat", "menu", "input", "plistData", "plistDate", "stringifyJson", "parseJson", "requestJson", "entityProperty"]);
   // Load metadata only when catalog calls are used; ordinary compilation has no catalog I/O.
   let catalogKeys: Map<string, Set<string>> | undefined;
   let catalogCategories: Map<string, Map<string, CatalogAction>> | undefined;
@@ -402,6 +402,7 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     if (ts.isCallExpression(node) && stringMethodName(node)) return stringMethod(node, scopes, output);
     if (ts.isCallExpression(node) && arrayMethodName(node)) return arrayMethod(node, scopes, output, true)!;
     if (ts.isCallExpression(node) && helperDeclaration(node, scopes)) return call(node, scopes, output, true)!;
+    if (ts.isCallExpression(node) && intrinsic(node, scopes) === "entityProperty") return entityProperty(node, scopes, output);
     if (ts.isCallExpression(node) && intrinsic(node, scopes) === "input") {
       if (node.arguments.length) fail("input<T>() takes no arguments.", node);
       const id = nextId++;
@@ -624,6 +625,36 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     output.push({ kind: "get", id, name, line });
     const typed = typedRef(checker.getTypeAtLocation(parameter), id, "Parameter", parameter);
     bindPattern(parameter.name, typed, scope, true, output, line);
+  }
+  function entityProperty(expr: ts.CallExpression, scopes: Scope[], output: IRNode[]): Value {
+    if (expr.questionDotToken) fail("Optional entityProperty calls are not supported.", expr);
+    if (expr.arguments.length !== 2 || expr.arguments.some(ts.isSpreadElement)) fail("entityProperty(entity, \"identifier\") takes an entity and a property identifier.", expr);
+    const [entityNode, nameNode] = expr.arguments;
+    const name = unwrap(nameNode);
+    if (!ts.isStringLiteralLike(name) || !name.text) fail("entityProperty requires a literal property identifier such as \"hours\".", nameNode);
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name.text)) fail(`'${name.text}' is not an App Intents property identifier. Use the identifier from Apple metadata (for example "hours"), not the localized title.`, nameNode);
+    // A catalog entity with declared properties must resolve to the typed overload;
+    // otherwise the untyped fallback would hide a misspelled identifier.
+    const signature = checker.getResolvedSignature(expr);
+    const typed = checker.getTypeAtLocation(expr.expression).getCallSignatures()
+      .find(candidate => candidate.typeParameters?.length === 2);
+    const knownIds = typed?.typeParameters?.[0].getConstraint()?.getProperty("__nativeType");
+    const entityId = checker.getTypeAtLocation(entityNode).getProperty("__nativeType");
+    if (knownIds && entityId && signature?.declaration !== typed?.declaration) {
+      const known = checker.getTypeOfSymbolAtLocation(knownIds, expr);
+      const actual = checker.getTypeOfSymbolAtLocation(entityId, entityNode);
+      if (actual.isStringLiteral() && (known.isUnion() ? known.types : [known]).some(type => type.isStringLiteral() && type.value === actual.value)) {
+        fail(`Unknown property '${name.text}' for entity '${actual.value}'. Use a property identifier declared in NativeEntityProperties.`, nameNode);
+      }
+    }
+    const input = value(entityNode, scopes, output);
+    if (input.kind === "list-ref") fail("entityProperty reads one entity. Iterate the list with for…of and read each item's property.", entityNode);
+    if (input.kind !== "ref" || input.valueType !== "content") fail("entityProperty requires native entity content, such as an App Intents action result or loop item.", entityNode);
+    const id = nextId++;
+    const result = typedRef(checker.getTypeAtLocation(expr), id, input.outputName, expr, true);
+    if (result.kind === "object-ref") fail("Entity properties cannot be read as JSON objects. Declare a scalar, list or NativeContent value.", expr);
+    output.push({ kind: "property", id, input, property: name.text, line: position(expr).line });
+    return result;
   }
   function numeric(node: ts.Expression, scopes: Scope[], output: IRNode[]): ScalarValue {
     const result = value(node, scopes, output);

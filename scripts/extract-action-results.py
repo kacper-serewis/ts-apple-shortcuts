@@ -2,7 +2,8 @@
 
 Usage: python3 scripts/extract-action-results.py [database.sqlite ...]
 With no arguments, inspect the host and installed simulator ToolKit databases.
-Only catalog actions and their referenced output type definitions are exported.
+Only catalog actions, their referenced output type definitions and static entity
+property declarations (identifier, English title, value type) are exported.
 """
 import collections
 import json
@@ -74,6 +75,35 @@ def decode_instance(blob, identifiers, expected):
     raise ValueError(f'Unsupported TypeInstance variant {kind}')
 
 
+def entity_properties(connection, type_id, identifiers, known):
+    try:
+        rows = connection.execute(
+            "SELECT p.id, p.typeInstance, (SELECT displayName FROM EntityPropertyLocalizations l "
+            "WHERE l.typeId = p.typeId AND l.propertyId = p.id AND l.locale = 'en') "
+            "FROM EntityProperties p WHERE p.typeId = ? ORDER BY p.id", (type_id,)).fetchall()
+    except sqlite3.OperationalError:
+        return []
+    properties = []
+    for identifier, blob, title in rows:
+        optional = False
+        try:
+            items = fields(blob)
+            while len(items) == 1 and items[0][0] in (3, 6) and isinstance(items[0][1], bytes):
+                # Property wrappers hold the value TypeInstance in field 1: variant 3 marks
+                # an optional value; variant 6 appears on settable entity properties.
+                inner = fields(items[0][1])
+                if len(inner) != 1 or inner[0][0] != 1 or not isinstance(inner[0][1], bytes):
+                    raise ValueError('Unsupported property wrapper encoding')
+                blob, optional = inner[0][1], optional or items[0][0] == 3
+                items = fields(blob)
+            schema = decode_instance(blob, identifiers, known)
+        except (ValueError, TypeError):
+            # An undecodable property type is omitted rather than guessed.
+            continue
+        properties.append({'id': identifier, 'title': title, 'schema': schema, **({'optional': True} if optional else {})})
+    return properties
+
+
 def type_ids(schema):
     if schema['kind'] == 'type':
         return {schema['id']}
@@ -115,7 +145,9 @@ def extract(paths, catalog):
                     continue
                 actions[identifier] = {'status': 'known', 'schema': schema, 'source': source}
                 priorities[identifier] = priority
-                for type_id in type_ids(schema):
+                pending = list(type_ids(schema))
+                while pending:
+                    type_id = pending.pop()
                     if type_priorities.get(type_id, (-1, False)) >= priority:
                         continue
                     kind = definitions[type_id]
@@ -126,11 +158,25 @@ def extract(paths, catalog):
                             "SELECT id, title FROM EnumerationCases WHERE typeId = ? AND locale = 'en' ORDER BY id", (type_id,))]
                         if cases:
                             definition['cases'] = cases
+                    elif kind == 2:
+                        # Static App Entity property declarations (identifier, English title, value type).
+                        # Property values are never read.
+                        properties = entity_properties(connection, type_id, identifiers, set(definitions))
+                        if properties:
+                            definition['properties'] = properties
+                            for item in properties:
+                                pending.extend(type_ids(item['schema']))
                     types[type_id] = definition
                     type_priorities[type_id] = priority
     for identifier in sorted(catalog - actions.keys()):
         actions[identifier] = {'status': 'unresolved', 'reason': 'Absent from the inspected Apple ToolKit databases.'}
     referenced = set().union(*(type_ids(a['schema']) for a in actions.values() if a['status'] == 'known'))
+    pending = list(referenced)
+    while pending:
+        for item in types.get(pending.pop(), {}).get('properties', []):
+            for type_id in type_ids(item['schema']) - referenced:
+                referenced.add(type_id)
+                pending.append(type_id)
     return {
         'formatVersion': 1,
         'notice': 'Apple-declared output schemas, not device execution guarantees. Enum titles use English localization. Missing and parameter-dependent results are explicit.',

@@ -41,6 +41,24 @@ node lib/src/cli.js examples/counted-loop-test.ts --out dist/TS-Counted-Loops --
 node lib/src/cli.js artifacts/counted-loop-guard-probe.ts --out dist/TS-Counted-Loop-Guard --name TS-Counted-Loop-Guard --sign --mode people-who-know-me
 ```
 
+## Alarm sync (entityProperty + Home Assistant Fire Event)
+
+- [x] `entityProperty(entity, "identifier")` with the editor's native property
+  aggrandizement, generated `NativeEntityProperties`, tests and simulator probes.
+- [ ] On the iPhone: install `dist/Wekkers-HA.shortcut` (Fire Event, release app)
+  and run it once by hand. Answer the privacy prompts with "Always Allow", and check
+  that the `iphone_wekkers` event arrives with the expected `alarms` data. Then
+  attach the "Clock app is opened/closed" automation.
+- [ ] Confirm the inferred release Fire Event binding. Export the shortcut after a
+  device run, or build one with Fire event, and import it with
+  `apps import ... --reference`. This also records the server entity's native
+  shape; the build uses a placeholder server identifier.
+- [ ] Not verified on any device yet: Find Alarms (`MTGetAlarmsIntent`) without an
+  `AppIntentDescriptor` on iOS, the `repeatDays` text, number properties, and
+  string properties with data. The simulator has no Clock app.
+- [ ] Optional: make catalog "Find …" query actions return lists. 530 actions with
+  `WFContentItemFilter` are currently typed as a single entity.
+
 ## Native action coverage — highest priority for the overall objective
 
 - [ ] Expand typed parameters, enum values, result types, picker/entity encoding

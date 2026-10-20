@@ -122,7 +122,8 @@ namespace, rather than merging different bundle identities.
 The manifest retains metadata, bundle/version and the metadata SHA-256. Types
 cover strings, booleans, numbers, enums, arrays and branded opaque app entities.
 Unsupported types remain `NativeContent`. Entity properties are not exposed as
-JavaScript dictionary fields. Availability annotations, defaults and numeric
+JavaScript dictionary fields; read them with `entityProperty<T>(entity, "identifier")`
+(see "Read App Intents entity properties"). Availability annotations, defaults and numeric
 ranges remain in the metadata; they are not runtime validation.
 
 Metadata alone does not prove a Shortcuts action's identifier or serialized
@@ -183,6 +184,30 @@ files, not in this manifest. Use `--app api/apps/home-assistant-release.json` an
 include its companion `.d.ts` when writing a shortcut for the release app.
 The generated 50% test was publicly signed, its download verified, and its
 execution on the configured iPhone confirmed by the user.
+
+### Fire Event (alarm sync)
+
+`api/apps/home-assistant-dev-fire-event.json` is a fresh import of the installed
+dev CI artifact (2026.10.2) with a `FireEventIntent` binding read from a Fire event
+action made in the iOS 26.5 simulator editor
+(`test/fixtures/home-assistant-fire-event-workflow.json`). The editor stores
+`eventName` and `eventData` as plain text: event data is JSON **text**, not a
+dictionary. Home Assistant parses it; an object without `eventName`/`eventData`
+keys becomes the event data. `api/apps/home-assistant-release-fire-event.json`
+(namespace `HomeAssistantRelease`) applies the release identity of the
+phone-exported `setBrightness` binding to Fire event. **No release export of Fire
+event exists yet.**
+
+The server parameter is an app entity. The simulator app has no server, so the
+editor could not select one. `examples/apps/iphone-wekkers-home-assistant.ts`
+passes `{ identifier, title, subtitle }`, the shape of the phone-exported light
+entity, with a placeholder identifier. Since Home Assistant 2026.9.3
+(commit 7edb32bb), the app resolves an unknown server identifier to its only
+configured server. With more than one server, choose it on the device. The
+simulator imported the generated action unchanged, and the editor showed Server
+"Home Assistant", the event name and the event data variable. The action could
+not run there: the CI artifact crashes at launch (`Sodium…PackageProduct.framework`
+is missing) and has no server login.
 
 ## Visualize compiled blocks
 
@@ -1187,6 +1212,45 @@ no schema was available, so their types are not guessed. Function documentation
 marks these gaps. Metadata describes declared outputs, not a guarantee that an
 action exists or succeeds on every device.
 
+### Read App Intents entity properties
+
+```ts
+import { actions, entityProperty, type NativeEntity } from "@js-shortcuts/ios";
+type Alarm = NativeEntity<"com.apple.clock.AlarmEntity">;
+
+export default async function main(): Promise<void> {
+  const found = await actions["com.apple.mobiletimer-framework.MobileTimerIntents.MTGetAlarmsIntent"]<Alarm[]>({});
+  const alarms = found.map(alarm => ({
+    hours: entityProperty(alarm, "hours"),          // number
+    enabled: entityProperty(alarm, "enabled"),      // boolean
+    days: entityProperty(alarm, "repeatDays").join(", "), // localized day names
+  }));
+}
+```
+
+`entityProperty` compiles to a native property variable. It adds no action: the
+value is the entity's existing output with a `WFPropertyVariableAggrandizement`.
+The iOS 26.5 editor stores the property **identifier** as `PropertyName` and
+repeats it in `PropertyUserInfo.WFLinkEntityContentPropertyUserInfoPropertyIdentifier`
+(`test/fixtures/ios26-entity-property-editor-actions.json`). Pass identifiers such
+as `"hours"`, not titles such as "Is Enabled".
+
+`NativeEntityProperties` declares identifiers and value types for 278 catalog
+entity types. They come from the same ToolKit databases as the output schemas;
+optional properties may be empty at runtime. For a catalog entity, an undeclared
+identifier is a compile error. Other native content, such as app entities or
+`native<T>()` results, uses `entityProperty<T>(entity, "identifier")`: `T` declares
+a string, number, boolean, `NativeContent` or flat list, without validation.
+Read one entity at a time, for example inside `for…of` or `map`. Properties of
+properties compose. Values use native conversion: an enum list joins as localized
+titles.
+
+Many "Find …" actions return a list although the catalog declares one entity. Use
+`actions["id"]<Entity[]>({})` for those. On the iOS 26.5 simulator, query actions
+without an `AppIntentDescriptor` resolved from their identifier. Boolean settings
+entities, read through `map`, `for…of` and conditions, arrived as JSON
+`false`/`true`. See `artifacts/entity-property-verification.json`.
+
 For user-defined JSON shapes or missing schemas, `native<T>` and the low-level
 `actions["identifier"]<T>` remain explicit escape hatches. Those assertions do not
 validate or configure native output. Parameter names and encodings remain native,
@@ -1333,7 +1397,7 @@ outputs and JSON features are intended for `.ts`/`.mts`.
 ## Verification
 
 `npm run typecheck` checks compiler, tests and all examples. `npm test` currently
-passes **721 tests**. `npm run test:metadata` passes four metadata tests, and
+passes **727 tests**. `npm run test:metadata` passes five metadata tests, and
 `npm run build:site` builds the browser visualizer. The in-memory browser compiler
 and Node compiler produce equivalent workflows for the new object/list composition,
 copy, join, runtime lookup, text replacement and text position examples as well as existing control-flow/catalog/HTTP
