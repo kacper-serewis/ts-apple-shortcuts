@@ -67,6 +67,15 @@ export interface FieldNode {
   key: string;
   line: number;
 }
+/** Reads an App Intents entity property in place: the result aliases the input's
+ * action output with an added native property aggrandizement. Emits no action. */
+export interface PropertyNode {
+  kind: "property";
+  id: number;
+  input: OutputRef;
+  property: string;
+  line: number;
+}
 export type NativeParameter =
   | { kind: "literal"; value: PlistValue }
   | { kind: "parameter-array"; items: NativeParameter[] }
@@ -91,7 +100,7 @@ export interface YieldNode { kind: "yield"; value?: Value; line: number }
 export interface JsonNode { kind: "json"; operation: "parse" | "stringify"; id: number; input: Value; line: number }
 export type StringMethod = "trim" | "trimStart" | "trimEnd" | "toUpperCase" | "toLowerCase" | "concat" | "startsWith" | "endsWith" | "includes";
 export interface StringNode { kind: "string"; method: StringMethod; id: number; input: ScalarValue; args: ScalarValue[]; line: number }
-export type IRNode = ActionNode | IfNode | ListNode | AssembleListNode | RepeatNode | FieldNode | NativeNode | DictionaryNode | AssembleDictionaryNode | MathNode | NumericIfNode | SetNode | GetNode | ReturnNode | RepeatCountNode | MenuNode | IndexNode | YieldNode | JsonNode | StringNode;
+export type IRNode = ActionNode | IfNode | ListNode | AssembleListNode | RepeatNode | FieldNode | NativeNode | DictionaryNode | AssembleDictionaryNode | MathNode | NumericIfNode | SetNode | GetNode | ReturnNode | RepeatCountNode | MenuNode | IndexNode | YieldNode | JsonNode | StringNode | PropertyNode;
 
 export interface NativeAction extends PlistDictionary {
   WFWorkflowActionIdentifier: string;

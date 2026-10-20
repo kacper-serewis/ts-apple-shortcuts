@@ -26,6 +26,10 @@ def render(schema, types):
     return f'NativeEntity<{json.dumps(identifier)}>'
 
 
+def comment(text):
+    return text.replace('*/', '* /').replace('\n', ' ').replace('\r', ' ')
+
+
 def result_for(action, snapshot):
     entry = snapshot['actions'].get(action['id'], {'status': 'unresolved'})
     if entry['status'] != 'known':
@@ -46,6 +50,15 @@ def declarations(actions, snapshot):
         if definition.get('cases'):
             values = sorted(set(case['title'] for case in definition['cases'] if case['title'] is not None))
             lines.append(f'    {json.dumps(identifier)}: ' + ' | '.join(json.dumps(value) for value in values) + ';')
+    lines += ['  }',
+              '  /** Static App Entity property declarations (identifier: value type) from Apple metadata.',
+              '   * Read with entityProperty(entity, "identifier"); titles are English display names. */',
+              '  export interface NativeEntityProperties {']
+    for identifier, definition in snapshot['types'].items():
+        if definition.get('properties'):
+            fields = ' '.join(f'/** {comment(item["title"] or item["id"])}{" (optional; may be empty)" if item.get("optional") else ""} */ {json.dumps(item["id"])}: {render(item["schema"], snapshot["types"])};'
+                              for item in definition['properties'])
+            lines.append(f'    {json.dumps(identifier)}: {{ {fields} }};')
     lines += ['  }', f'  export type DeviceOrientation = NativeEnumValues[{json.dumps(ORIENTATION)}];',
               '  export interface KnownNativeResults {']
     for action in actions:

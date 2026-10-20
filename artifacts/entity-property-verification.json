@@ -1,0 +1,83 @@
+{
+ "date": "2026-10-20",
+ "device": {
+  "name": "wekkers-alarm-sync (iPhone 17e)",
+  "os": "iOS 26.5",
+  "kind": "Simulator",
+  "udid": "EDA50232-C433-455A-9003-21AC7428D0CD"
+ },
+ "baseCommit": "b96029a",
+ "change": "entityProperty(entity, identifier): App Intents entity property reads as native WFPropertyVariableAggrandizement; NativeEntityProperties generated from ToolKit EntityProperties; Home Assistant Fire Event bindings; alarm sync example.",
+ "nativeForm": {
+  "source": "Shortcuts editor on the simulator: Find Conversation → Text with the Conversation GUID property; ZSHORTCUTACTIONS read read-only.",
+  "fixture": "test/fixtures/ios26-entity-property-editor-actions.json",
+  "aggrandizement": {
+   "Type": "WFPropertyVariableAggrandizement",
+   "PropertyName": "conversationGUID",
+   "PropertyUserInfo": {
+    "WFLinkEntityContentPropertyUserInfoPropertyIdentifier": "conversationGUID"
+   }
+  },
+  "finding": "PropertyName is the property identifier, not the localized title."
+ },
+ "entityPropertyProbe": {
+  "shortcut": "TS-Entity-Properties (artifacts/entity-property-probe.ts), 129 actions, public signing, imported through Files",
+  "importComparison": "All 129 imported actions equal the compiler output (test/fixtures/ios26-entity-properties-workflow.json).",
+  "resolution": "Query actions without AppIntentDescriptor were created as WFLinkContentItemFilterAction from the identifier (BackgroundShortcutRunner log).",
+  "observedBody": {
+   "favorites": 0,
+   "contactCount": 0,
+   "people": [],
+   "pictures": [],
+   "settings": [
+    {
+     "name": "silent",
+     "on": false
+    },
+    {
+     "name": "24h",
+     "on": true
+    }
+   ]
+  },
+  "limitations": [
+   "Contacts and Photos queries returned no entities on this simulator, also with an explicit AppIntentDescriptor, so string, enum and number properties were not observed with data.",
+   "The simulator has no Clock app (MobileTimer.app is a stub without a binary; MTGetAlarmsIntent is absent from its ToolKit database). Find Alarms and AlarmEntity properties, including repeatDays, were not executed."
+  ]
+ },
+ "fireEvent": {
+  "reference": "Fire event created in the simulator editor with the Home Assistant dev CI artifact (2026.10.2): test/fixtures/home-assistant-fire-event-workflow.json",
+  "eventData": "Stored as plain text (JSON text), not a dictionary.",
+  "server": "Not capturable: the app has no server login; Choose shows 'Couldn't communicate with a helper application'.",
+  "probe": "TS-FireEvent-Probe (artifacts/fire-event-probe.ts), 75 actions; imported actions equal the compiler output (test/fixtures/ios26-fire-event-probe-workflow.json). Editor showed Server 'Home Assistant', Event name iphone_wekkers, Event data = Text variable.",
+  "observedEventDataText": "{\"alarms\":[{\"label\":\"Silent\",\"hours\":7,\"minutes\":30,\"enabled\":false,\"repeats\":true,\"repeatDays\":\"Monday, Tuesday\"},{\"label\":\"\",\"hours\":0,\"minutes\":5,\"enabled\":true,\"repeats\":false,\"repeatDays\":\"\"}]}",
+  "execution": "Not executed: the CI artifact crashes at launch (missing Sodium_1BC75F510A1237_PackageProduct.framework), and no server exists. Privacy prompts appeared before the HTTP request and before sharing with Home Assistant.",
+  "releaseBinding": "api/apps/home-assistant-release-fire-event.json is inferred from the dev capture plus the phone-exported release SetBrightness descriptor; not confirmed by a release export."
+ },
+ "deliverables": {
+  "dist/Wekkers-HA.shortcut": {
+   "source": "examples/apps/iphone-wekkers-home-assistant.ts",
+   "app": "api/apps/home-assistant-release-fire-event.json",
+   "signing": "people-who-know-me",
+   "sha256": "71962ef5c0741ee7db48ac3082d3914895044ed736c787ac5dcc85b8b60e07ec"
+  },
+  "neverSentTo": "Simulator probes sent no data to the real Home Assistant server; they used http://127.0.0.1:8765 (scripts/http-echo.py)."
+ },
+ "validation": {
+  "typecheck": "passed",
+  "tests": {
+   "passed": 727,
+   "failed": 0
+  },
+  "metadataTests": 5,
+  "browserBuild": "passed",
+  "plist": "plutil -lint passed"
+ },
+ "deviceVerification": {
+  "date": "2026-10-20",
+  "device": "physical iPhone 17 (English locale), Home Assistant app 2026.10.1",
+  "shortcut": "dist/Wekkers-HA.shortcut from examples/apps/iphone-wekkers-home-assistant.ts",
+  "observed": "Home Assistant received event iphone_wekkers (origin REMOTE, user context of the app's account) with all 15 Clock alarms: hours, minutes and labels ('Alarm', 'Nap') matched the device.",
+  "notYetObserved": "Every alarm was disabled and non-repeating, so enabled=true and the repeatDays text format have not been observed on a device yet."
+ }
+}

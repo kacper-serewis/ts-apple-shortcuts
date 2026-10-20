@@ -1,0 +1,358 @@
+{
+  "format": 1,
+  "namespace": "HomeAssistantRelease",
+  "bundleIdentifier": "io.robbie.HomeAssistant",
+  "source": {
+    "version": "2026.10.2",
+    "metadataSHA256": "df68a225338626cc63c15ca7ebce4047e19fe0aaf0a7defaa2f67c5976186b83",
+    "metadataBundleIdentifier": "io.robbie.HomeAssistant.dev",
+    "installedReleaseVersion": "unknown; FireEventIntent ships in release 2026.9.2+, single-server fallback for synced server identifiers in 2026.9.3+",
+    "bindingOrigin": "FireEventIntent captured from the Home Assistant dev build in the iOS 26.5 simulator (test/fixtures/home-assistant-fire-event-workflow.json); release identifier and descriptor follow the phone-exported release SetBrightness binding. Not yet confirmed by a release export."
+  },
+  "metadata": {
+    "actions": {
+      "FireEventIntent": {
+        "actionConfiguration": {
+          "actionSummary": {
+            "wrapper": {
+              "otherParameterIdentifiers": [
+                "server",
+                "eventName",
+                "eventData"
+              ]
+            }
+          }
+        },
+        "assistantDefinedSchemaTraits": [],
+        "assistantDefinedSchemas": [],
+        "authenticationPolicy": 0,
+        "availabilityAnnotations": {
+          "LNPlatformNameIOS": {
+            "introducedVersion": "17.2"
+          },
+          "LNPlatformNameWATCHOS": {
+            "introducedVersion": "10.2"
+          },
+          "LNPlatformNameWildcard": {
+            "introducedVersion": "*"
+          }
+        },
+        "customIntentClassName": "FireEventIntent",
+        "descriptionMetadata": {
+          "descriptionText": {
+            "alternatives": [],
+            "defaultValue": "Fire an event on a Home Assistant server",
+            "key": "app_intents.fire_event.description"
+          },
+          "searchKeywords": []
+        },
+        "effectiveBundleIdentifiers": [],
+        "fullyQualifiedTypeName": "HomeAssistant.FireEventAppIntent",
+        "identifier": "FireEventIntent",
+        "isAuthPolExplicit": false,
+        "isDiscoverable": true,
+        "mangledTypeName": "",
+        "mangledTypeNameByBundleIdentifier": {},
+        "mangledTypeNameByBundleIdentifierV2": {},
+        "mangledTypeNameV2": "13HomeAssistant18FireEventAppIntentV",
+        "openAppWhenRun": false,
+        "outputFlags": 0,
+        "outputType": {
+          "primitive": {
+            "wrapper": {
+              "typeIdentifier": 0
+            }
+          }
+        },
+        "parameters": [
+          {
+            "capabilities": 0,
+            "dynamicOptionsSupport": 2,
+            "inputConnectionBehavior": 0,
+            "isInput": false,
+            "isOptional": false,
+            "name": "server",
+            "resolvableInputTypes": [],
+            "title": {
+              "alternatives": [],
+              "defaultValue": "Server",
+              "key": "app_intents.server.title"
+            },
+            "typeSpecificMetadata": [],
+            "valueType": {
+              "entity": {
+                "wrapper": {
+                  "typeName": "IntentServerAppEntity"
+                }
+              }
+            }
+          },
+          {
+            "capabilities": 0,
+            "dynamicOptionsSupport": 0,
+            "inputConnectionBehavior": 0,
+            "isInput": false,
+            "isOptional": false,
+            "name": "eventName",
+            "resolvableInputTypes": [
+              {
+                "kindValue": 0,
+                "valueType": {
+                  "array": {
+                    "wrapper": {
+                      "capabilities": 3,
+                      "memberValueType": {
+                        "primitive": {
+                          "wrapper": {
+                            "typeIdentifier": 2
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "kindValue": 0,
+                "valueType": {
+                  "primitive": {
+                    "wrapper": {
+                      "typeIdentifier": 0
+                    }
+                  }
+                }
+              },
+              {
+                "kindValue": 0,
+                "valueType": {
+                  "primitive": {
+                    "wrapper": {
+                      "typeIdentifier": 2
+                    }
+                  }
+                }
+              }
+            ],
+            "title": {
+              "alternatives": [],
+              "defaultValue": "Event name",
+              "key": "app_intents.fire_event.event_name.title"
+            },
+            "typeSpecificMetadata": [
+              "LNValueTypeMetadataKeyStringAutocorrect",
+              {
+                "int": {
+                  "wrapper": 0
+                }
+              },
+              "LNValueTypeMetadataKeyStringSmartQuotes",
+              {
+                "int": {
+                  "wrapper": 0
+                }
+              },
+              "LNValueTypeMetadataKeyStringSmartDashes",
+              {
+                "int": {
+                  "wrapper": 0
+                }
+              },
+              "LNValueTypeMetadataKeyStringCapitalizationType",
+              {
+                "int": {
+                  "wrapper": 0
+                }
+              }
+            ],
+            "valueType": {
+              "primitive": {
+                "wrapper": {
+                  "typeIdentifier": 0
+                }
+              }
+            }
+          },
+          {
+            "capabilities": 1,
+            "dynamicOptionsSupport": 0,
+            "inputConnectionBehavior": 0,
+            "isInput": false,
+            "isOptional": false,
+            "name": "eventData",
+            "parameterDescription": {
+              "alternatives": [],
+              "defaultValue": "JSON data to send with the event",
+              "key": "app_intents.fire_event.event_data.description"
+            },
+            "resolvableInputTypes": [
+              {
+                "kindValue": 0,
+                "valueType": {
+                  "array": {
+                    "wrapper": {
+                      "capabilities": 3,
+                      "memberValueType": {
+                        "primitive": {
+                          "wrapper": {
+                            "typeIdentifier": 2
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "kindValue": 0,
+                "valueType": {
+                  "primitive": {
+                    "wrapper": {
+                      "typeIdentifier": 0
+                    }
+                  }
+                }
+              },
+              {
+                "kindValue": 0,
+                "valueType": {
+                  "primitive": {
+                    "wrapper": {
+                      "typeIdentifier": 2
+                    }
+                  }
+                }
+              }
+            ],
+            "title": {
+              "alternatives": [],
+              "defaultValue": "Event data",
+              "key": "app_intents.fire_event.event_data.title"
+            },
+            "typeSpecificMetadata": [
+              "LNValueTypeMetadataKeyStringSmartDashes",
+              {
+                "int": {
+                  "wrapper": 0
+                }
+              },
+              "LNValueTypeSpecificMetadataKeyDefaultValue",
+              {
+                "string": {
+                  "wrapper": "{}"
+                }
+              },
+              "LNValueTypeMetadataKeyStringAutocorrect",
+              {
+                "int": {
+                  "wrapper": 0
+                }
+              },
+              "LNValueTypeMetadataKeyStringMultiline",
+              {
+                "int": {
+                  "wrapper": 1
+                }
+              },
+              "LNValueTypeMetadataKeyStringSmartQuotes",
+              {
+                "int": {
+                  "wrapper": 0
+                }
+              },
+              "LNValueTypeMetadataKeyStringCapitalizationType",
+              {
+                "int": {
+                  "wrapper": 0
+                }
+              }
+            ],
+            "valueType": {
+              "primitive": {
+                "wrapper": {
+                  "typeIdentifier": 0
+                }
+              }
+            }
+          }
+        ],
+        "presentationStyle": 0,
+        "requiredCapabilities": [],
+        "supportedModes": 1,
+        "systemProtocolMetadata": [],
+        "systemProtocolMetadataV2": [],
+        "systemProtocols": [],
+        "title": {
+          "alternatives": [],
+          "defaultValue": "Fire event",
+          "key": "app_intents.fire_event.title"
+        },
+        "typeSpecificMetadata": [],
+        "visibilityMetadata": {
+          "assistantOnly": false,
+          "isDiscoverable": true
+        }
+      }
+    },
+    "entities": {
+      "IntentServerAppEntity": {
+        "assistantDefinedSchemas": [],
+        "availabilityAnnotations": {
+          "LNPlatformNameMACOS": {
+            "introducedVersion": "13.0"
+          },
+          "LNPlatformNameTVOS": {
+            "introducedVersion": "16.0"
+          },
+          "LNPlatformNameWildcard": {
+            "introducedVersion": "*"
+          }
+        },
+        "defaultQueryIdentifier": "HomeAssistant.IntentServerAppEntity.IntentServerAppEntityQuery",
+        "displayTypeName": {
+          "alternatives": [],
+          "key": "MaterialDesignIcons"
+        },
+        "effectiveBundleIdentifiers": [],
+        "entitySyncMetadata": {
+          "entitySyncType": 0
+        },
+        "fullyQualifiedTypeName": "HomeAssistant.IntentServerAppEntity",
+        "mangledTypeName": "13HomeAssistant21IntentServerAppEntityV",
+        "mangledTypeNameByBundleIdentifier": {},
+        "numericFormatTypeName": {
+          "alternatives": [],
+          "key": "MaterialDesignIcons"
+        },
+        "properties": [],
+        "requiredCapabilities": [],
+        "systemProtocolMetadata": [],
+        "systemProtocolMetadataV2": [],
+        "transient": false,
+        "typeName": "IntentServerAppEntity",
+        "typeSpecificMetadata": [],
+        "visibilityMetadata": {
+          "assistantOnly": false,
+          "isDiscoverable": true
+        }
+      }
+    },
+    "generator": {
+      "name": "xcode-tools",
+      "version": "27A9275"
+    },
+    "version": 1
+  },
+  "bindings": {
+    "FireEventIntent": {
+      "identifier": "io.robbie.HomeAssistant.FireEventIntent",
+      "defaults": {
+        "AppIntentDescriptor": {
+          "TeamIdentifier": "QMQYCKL255",
+          "BundleIdentifier": "io.robbie.HomeAssistant",
+          "Name": "Home Assistant",
+          "AppIntentIdentifier": "FireEventIntent"
+        }
+      }
+    }
+  }
+}

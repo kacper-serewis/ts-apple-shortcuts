@@ -8,11 +8,19 @@ export function emitWorkflow(ir: IRNode[], { name, settings = {} }: { name: stri
   const refs = new Map<number, string>();
   const dictionaries = new Map<number, [string, Value][]>();
   const lists = new Map<number, Value[]>();
+  // Property reads alias an existing output and add native aggrandizements.
+  const aggrandizements = new Map<number, PlistDictionary[]>();
   const uuid = () => crypto.randomUUID().toUpperCase();
   function token(ref: OutputRef | ListRef | ObjectRef): PlistDictionary {
     const id = refs.get(ref.id);
     if (!id) throw new Error(`Missing action output ${ref.id}`);
-    return { Type: "ActionOutput", OutputUUID: id, OutputName: ref.outputName };
+    const extra = aggrandizements.get(ref.id);
+    return { Type: "ActionOutput", OutputUUID: id, OutputName: ref.outputName, ...(extra ? { Aggrandizements: extra } : {}) };
+  }
+  function coerce(input: PlistDictionary, itemClass: string): void {
+    const value = input.Value as PlistDictionary;
+    const existing = Array.isArray(value.Aggrandizements) ? value.Aggrandizements : [];
+    input.Value = { ...value, Aggrandizements: [...existing, { Type: "WFCoercionVariableAggrandizement", CoercionItemClass: itemClass }] };
   }
   const attachment = (ref: OutputRef | ListRef | ObjectRef) => ({ Value: token(ref), WFSerializationType: "WFTextTokenAttachment" });
   function text(value: ScalarValue): PlistValue {
@@ -314,7 +322,7 @@ export function emitWorkflow(ir: IRNode[], { name, settings = {} }: { name: stri
         const codes = { "===": 4, "!==": 5, "<": 0, "<=": 1, ">": 2, ">=": 3 };
         const rhs = node.right.kind === "boolean" ? Number(node.right.value) : nativeValue(node.right, node.line);
         const input = materialize(node.left, node.line);
-        input.Value = { ...(input.Value as PlistDictionary), Aggrandizements: [{ Type: "WFCoercionVariableAggrandizement", CoercionItemClass: "WFNumberContentItem" }] };
+        coerce(input, "WFNumberContentItem");
         emit("conditional", {
           GroupingIdentifier: group, WFControlFlowMode: 0, WFCondition: codes[node.operator],
           WFInput: { Type: "Variable", Variable: input },
@@ -340,7 +348,7 @@ export function emitWorkflow(ir: IRNode[], { name, settings = {} }: { name: stri
         const guard = node.count.kind !== "number" ? uuid() : undefined;
         if (guard) {
           const input = materialize(node.count, node.line);
-          input.Value = { ...(input.Value as PlistDictionary), Aggrandizements: [{ Type: "WFCoercionVariableAggrandizement", CoercionItemClass: "WFNumberContentItem" }] };
+          coerce(input, "WFNumberContentItem");
           emit("conditional", { GroupingIdentifier: guard, WFControlFlowMode: 0, WFCondition: 2, WFNumberValue: 0, WFInput: { Type: "Variable", Variable: input } }, node.line);
         }
         const group = uuid();
@@ -395,6 +403,16 @@ export function emitWorkflow(ir: IRNode[], { name, settings = {} }: { name: stri
             return listItem(item, node.line);
           }),
         }, node.line);
+      } else if (node.kind === "property") {
+        const source = refs.get(node.input.id);
+        if (!source) throw new Error(`Missing action output ${node.input.id}`);
+        refs.set(node.id, source);
+        // App Intents entity properties: PropertyName is the property identifier, not
+        // its localized title, and PropertyUserInfo repeats it (iOS 26.5 editor export).
+        aggrandizements.set(node.id, [...aggrandizements.get(node.input.id) ?? [], {
+          Type: "WFPropertyVariableAggrandizement", PropertyName: node.property,
+          PropertyUserInfo: { WFLinkEntityContentPropertyUserInfoPropertyIdentifier: node.property },
+        }]);
       } else if (node.kind === "repeat") {
         const group = uuid();
         const start = uuid();

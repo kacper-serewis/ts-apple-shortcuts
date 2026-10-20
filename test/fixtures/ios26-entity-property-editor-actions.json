@@ -1,0 +1,45 @@
+{
+ "WFWorkflowActions": [
+  {
+   "WFWorkflowActionIdentifier": "com.apple.MobileSMS.ConversationEntity",
+   "WFWorkflowActionParameters": {
+    "AppIntentDescriptor": {
+     "TeamIdentifier": "0000000000",
+     "BundleIdentifier": "com.apple.MobileSMS",
+     "Name": "Messages",
+     "AppIntentIdentifier": "ConversationEntity",
+     "ActionRequiresAppInstallation": true
+    },
+    "UUID": "A29B40EA-9139-4801-A012-DBB9B5778F04"
+   }
+  },
+  {
+   "WFWorkflowActionIdentifier": "is.workflow.actions.gettext",
+   "WFWorkflowActionParameters": {
+    "WFTextActionText": {
+     "Value": {
+      "string": "￼",
+      "attachmentsByRange": {
+       "{0, 1}": {
+        "Type": "ActionOutput",
+        "OutputName": "Conversation",
+        "OutputUUID": "A29B40EA-9139-4801-A012-DBB9B5778F04",
+        "Aggrandizements": [
+         {
+          "PropertyUserInfo": {
+           "WFLinkEntityContentPropertyUserInfoPropertyIdentifier": "conversationGUID"
+          },
+          "Type": "WFPropertyVariableAggrandizement",
+          "PropertyName": "conversationGUID"
+         }
+        ]
+       }
+      }
+     },
+     "WFSerializationType": "WFTextTokenString"
+    },
+    "UUID": "102490A8-9613-47F3-B6CF-9ABAC9AFA706"
+   }
+  }
+ ]
+}

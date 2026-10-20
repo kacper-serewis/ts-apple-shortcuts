@@ -36,6 +36,8 @@ export function evaluate(code: string, answers: number[] = [], menuChoices: stri
         case "json": refs.set(node.id, node.operation === "parse" ? JSON.parse(result(node.input)) : JSON.stringify(result(node.input))); break;
         case "string": refs.set(node.id, (String.prototype[node.method] as (...args: string[]) => unknown).apply(result(node.input), node.args.map(result))); break;
         case "field": refs.set(node.id, result(node.input)[node.key]); break;
+        // Test entities are plain objects keyed by App Intents property identifier.
+        case "property": refs.set(node.id, result(node.input)[node.property]); break;
         case "index": refs.set(node.id, result(node.input)[typeof node.index === "number" ? node.index : result(node.index)]); break;
         case "math": {
           const a = result(node.left), b = result(node.right);
@@ -105,7 +107,7 @@ export function evaluate(code: string, answers: number[] = [], menuChoices: stri
             assert.ok(Number.isInteger(start) && start >= 1 && start <= end && end <= input.length, "Invalid native range must be guarded");
             refs.set(node.id, input.slice(start - 1, end)); break;
           }
-          if (node.identifier === "is.workflow.actions.downloadurl" && onRequest) {
+          if ((node.identifier === "is.workflow.actions.downloadurl" || !node.identifier.startsWith("is.workflow.actions.")) && onRequest) {
             refs.set(node.id, onRequest(node, result));
             break;
           }
