@@ -1,5 +1,5 @@
 // Builds the static visualizer into site/: the compiler bundle, the page and
-// assets.json (TypeScript lib + API declarations, catalog and examples).
+// assets.json (TypeScript lib + API declarations, catalog, app manifests and examples).
 import { build } from "esbuild";
 import { cp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
@@ -21,16 +21,23 @@ async function addLib(name) {
   for (const [, lib] of text.matchAll(/<reference lib="([^"]+)"/g)) await addLib(`lib.${lib.toLowerCase()}.d.ts`);
 }
 await addLib("lib.es2023.d.ts");
-for (const name of (await readdir(at("api/"))).filter(file => file.endsWith(".d.ts"))) files[`/api/${name}`] = await readFile(at(`api/${name}`), "utf8");
+for (const dir of ["api/", "api/apps/"]) {
+  for (const name of (await readdir(at(dir))).filter(file => file.endsWith(".d.ts"))) files[`/${dir}${name}`] = await readFile(at(`${dir}${name}`), "utf8");
+}
+// Imported apps, keyed by name: a source referencing api/apps/<name>.d.ts compiles with <name>.json.
+const apps = {};
+for (const name of (await readdir(at("api/apps/"))).filter(file => file.endsWith(".json"))) {
+  apps[name.replace(/\.json$/, "")] = JSON.parse(await readFile(at(`api/apps/${name}`), "utf8"));
+}
 
 const { actions } = JSON.parse(await readFile(at("data/actions.json"), "utf8"));
 // Platforms are unused by the compiler and the page.
 const catalog = { actions: actions.map(action => ({ ...action, platforms: [] })) };
 const examples = {};
-for (const name of (await readdir(at("examples/"))).filter(file => file.endsWith(".ts")).sort()) {
+for (const name of (await readdir(at("examples/"), { recursive: true })).filter(file => file.endsWith(".ts")).sort()) {
   examples[name] = await readFile(at(`examples/${name}`), "utf8");
 }
-await writeFile(new URL("assets.json", out), JSON.stringify({ files, catalog, examples }));
+await writeFile(new URL("assets.json", out), JSON.stringify({ files, catalog, apps, examples }));
 
 await build({
   entryPoints: [new URL("src/visualizer/browser.ts", root).pathname],
