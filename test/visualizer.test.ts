@@ -7,6 +7,7 @@ import { compile } from "../src/compiler.js";
 import { memoryHost } from "../src/hosts/memory-host.js";
 import { readCatalog } from "../src/catalog.js";
 import { workflowBlocks, type Block, type Part } from "../src/visualizer/blocks.js";
+import { createVisualizer } from "../src/visualizer/browser.js";
 
 const blocks = (body: string) => {
   const { workflow, sourceMap } = compile(`import { askText, showResult, menu } from "@js-shortcuts/ios";
@@ -52,12 +53,20 @@ test("menus show their cases and unknown parameters fall back to catalog names",
   assert.ok(items && show(items.value).includes("One"));
 });
 
-test("the in-memory browser host compiles like the Node host", () => {
+// The files scripts/build-site.mjs ships: TypeScript libs and the API declarations, apps included.
+function siteFiles() {
   const libDir = dirname(createRequire(import.meta.url).resolve("typescript/lib/lib.es2023.d.ts"));
   const files: Record<string, string> = {};
   for (const name of readdirSync(libDir).filter(file => /^lib\..*\.d\.ts$/.test(file))) files[`/lib/${name}`] = readFileSync(join(libDir, name), "utf8");
-  const api = new URL("../../api/", import.meta.url);
-  for (const name of readdirSync(api).filter(file => file.endsWith(".d.ts"))) files[`/api/${name}`] = readFileSync(new URL(name, api), "utf8");
+  for (const dir of ["api/", "api/apps/"]) {
+    const api = new URL(`../../${dir}`, import.meta.url);
+    for (const name of readdirSync(api).filter(file => file.endsWith(".d.ts"))) files[`/${dir}${name}`] = readFileSync(new URL(name, api), "utf8");
+  }
+  return files;
+}
+
+test("the in-memory browser host compiles like the Node host", () => {
+  const files = siteFiles();
   const host = memoryHost(files, readCatalog());
   // UUIDs are random per compilation; compare everything else.
   const normalize = (value: unknown) => JSON.stringify(value).replace(/[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}/g, "UUID");
@@ -68,4 +77,17 @@ test("the in-memory browser host compiles like the Node host", () => {
   // Type checking uses the in-memory lib and API declarations too.
   assert.throws(() => compile(`import { askText } from "@js-shortcuts/ios";
 export default async function main() { await askText(42); }`, { host }), /TS2345/);
+});
+
+test("the browser visualizer compiles app examples with the manifests they reference", () => {
+  const appsDir = new URL("../../api/apps/", import.meta.url);
+  const apps = Object.fromEntries(readdirSync(appsDir).filter(file => file.endsWith(".json"))
+    .map(file => [file.replace(/\.json$/, ""), JSON.parse(readFileSync(new URL(file, appsDir), "utf8"))]));
+  const visualize = createVisualizer({ files: siteFiles(), catalog: readCatalog(), apps, examples: {} });
+  const examples = new URL("../../examples/apps/", import.meta.url);
+  for (const example of readdirSync(examples).filter(file => file.endsWith(".ts"))) {
+    const result = visualize(readFileSync(new URL(example, examples), "utf8"), example);
+    assert.ok(result.ok, `${example}: ${!result.ok && result.error}`);
+    assert.ok(result.blocks.length > 0, example);
+  }
 });

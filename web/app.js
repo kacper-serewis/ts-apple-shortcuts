@@ -242,7 +242,7 @@ let exampleSources = {};
 examples.addEventListener("change", () => {
   if (!examples.value) return;
   source.value = exampleSources[examples.value];
-  nameInput.value = examples.value.replace(/\.ts$/, "");
+  nameInput.value = examples.value.replace(/^.*\//, "").replace(/\.ts$/, "");
   examples.value = "";
   source.scrollTop = 0;
   localStorage.setItem(storageKey, source.value);
