@@ -49,7 +49,8 @@
     "build:text-replace-all": "npm run build && node lib/src/cli.js examples/text-replace-all-test.ts",
     "build:text-position": "npm run build && node lib/src/cli.js examples/text-position-test.ts",
     "build:text-predicate-position": "npm run build && node lib/src/cli.js examples/text-predicate-position-test.ts",
-    "build:counted-loop": "npm run build && node lib/src/cli.js examples/counted-loop-test.ts"
+    "build:counted-loop": "npm run build && node lib/src/cli.js examples/counted-loop-test.ts",
+    "build:while-loop": "npm run build && node lib/src/cli.js examples/while-loop-test.ts"
   },
   "dependencies": {
     "plist": "^5.0.0",

@@ -104,7 +104,7 @@ for (const [body, message] of [
   ['const x = await notify("hi");', /no supported return value/],
   ['await askText();', /exactly one/],
   ['if ("a" == "b") {}', /text comparison/],
-  ['while (true) {}', /Unsupported statement/],
+  ['do {} while (false);', /Unsupported statement/],
   ['const x = "a"; { await showResult(x); const x = "b"; }', /before its declaration/],
   ['{ const x = "a"; } await showResult(x);', /Unknown variable/],
   ['const showResult = "x"; await showResult("a");', /Only imported/],

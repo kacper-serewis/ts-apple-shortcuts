@@ -1,0 +1,47 @@
+{
+  "device": "iPhone 17e Simulator, iOS 26.5",
+  "shortcut": "TS-Recursion-Probe",
+  "date": "2026-10-21",
+  "completed_runs": [
+    {
+      "iterations": 10,
+      "seconds": 0.7757872
+    },
+    {
+      "iterations": 100,
+      "seconds": 6.0778459
+    },
+    {
+      "iterations": 1000,
+      "seconds": 70.832952
+    }
+  ],
+  "completed_run_provenance": "HTTP start/done events observed during this session; original /tmp event log lost after host reboot.",
+  "failed_run": {
+    "target_iterations": 5000,
+    "last_logged_increment": 1998,
+    "last_increment_time": "2026-10-21 01:00:38.845 +0200",
+    "termination_time": "2026-10-21 01:00:38.878 +0200",
+    "pid": 86353,
+    "system_explanation": "has an excessive number of assertions",
+    "termination": {
+      "namespace": "RUNNINGBOARD",
+      "flags": 6,
+      "code": 3490524077
+    },
+    "exception": {
+      "codes": "0x0000000000000000, 0x0000000000000000",
+      "rawCodes": [
+        0,
+        0
+      ],
+      "type": "EXC_CRASH",
+      "signal": "SIGKILL"
+    }
+  },
+  "conclusion": "Practical failure near 2000 recursive iterations for this implementation on this simulator. 1000 completed and unwound. A universal fixed recursion limit, or the largest reliably completing iteration count, is not established.",
+  "evidence": [
+    "while-recursion-last-iterations.log",
+    "while-recursion-termination.log"
+  ]
+}
