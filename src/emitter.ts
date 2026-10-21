@@ -330,6 +330,18 @@ export function emitWorkflow(ir: IRNode[], { name, settings = {} }: { name: stri
           WFConditionalActionString: typeof rhs === "number" ? String(rhs) : text(node.right),
         }, node.line);
         branches("conditional", group, node.then, node.else, node.line);
+      } else if (node.kind === "enum-if") {
+        const group = uuid();
+        const test = (item: { input: OutputRef; caseId: string }): PlistDictionary => ({
+          WFCondition: 4, WFInput: { Type: "Variable", Variable: materialize(item.input, node.line) }, WFLinkEnumeration: item.caseId,
+        });
+        const tests: PlistDictionary = node.tests.length === 1 ? test(node.tests[0]) : {
+          WFConditions: { WFSerializationType: "WFContentPredicateTableTemplate", Value: {
+            WFActionParameterFilterPrefix: 0, WFContentPredicateBoundedDate: false, WFActionParameterFilterTemplates: node.tests.map(test),
+          } },
+        };
+        emit("conditional", { GroupingIdentifier: group, WFControlFlowMode: 0, ...tests }, node.line);
+        branches("conditional", group, node.then, node.else, node.line);
       } else if (node.kind === "set") {
         emit("setvariable", { WFVariableName: node.name, WFInput: materialize(node.value, node.line) }, node.line);
       } else if (node.kind === "get") {
@@ -409,10 +421,13 @@ export function emitWorkflow(ir: IRNode[], { name, settings = {} }: { name: stri
         refs.set(node.id, source);
         // App Intents entity properties: PropertyName is the property identifier, not
         // its localized title, and PropertyUserInfo repeats it (iOS 26.5 editor export).
-        aggrandizements.set(node.id, [...aggrandizements.get(node.input.id) ?? [], {
-          Type: "WFPropertyVariableAggrandizement", PropertyName: node.property,
-          PropertyUserInfo: { WFLinkEntityContentPropertyUserInfoPropertyIdentifier: node.property },
-        }]);
+        // Classic content items use the property title, with PropertyUserInfo only where the
+        // editor stores one (Focus "Name" → WFItemName; location "Latitude" has none).
+        const property: PlistDictionary = node.contentItem
+          ? { Type: "WFPropertyVariableAggrandizement", PropertyName: node.property, ...(node.contentItem.userInfo ? { PropertyUserInfo: node.contentItem.userInfo } : {}) }
+          : { Type: "WFPropertyVariableAggrandizement", PropertyName: node.property,
+            PropertyUserInfo: { WFLinkEntityContentPropertyUserInfoPropertyIdentifier: node.property } };
+        aggrandizements.set(node.id, [...aggrandizements.get(node.input.id) ?? [], property]);
       } else if (node.kind === "repeat") {
         const group = uuid();
         const start = uuid();

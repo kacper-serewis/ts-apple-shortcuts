@@ -1,0 +1,17 @@
+{
+ "WFWorkflowActions": [
+  {
+   "WFWorkflowActionIdentifier": "io.robbie.HomeAssistant.dev.RenderTemplateIntent",
+   "WFWorkflowActionParameters": {
+    "AppIntentDescriptor": {
+     "TeamIdentifier": "QMQYCKL255",
+     "BundleIdentifier": "io.robbie.HomeAssistant.dev",
+     "Name": "Home Assistant Δ",
+     "AppIntentIdentifier": "RenderTemplateIntent"
+    },
+    "template": "{{ is_state('media_player.spotify_kacper','playing') }}}}",
+    "UUID": "DEA6961B-785A-45A5-8CA7-C4F79A0CF9D3"
+   }
+  }
+ ]
+}

@@ -18943,6 +18943,17 @@
           "AppIntentIdentifier": "FireEventIntent"
         }
       }
+    },
+    "RenderTemplateIntent": {
+      "identifier": "io.robbie.HomeAssistant.dev.RenderTemplateIntent",
+      "defaults": {
+        "AppIntentDescriptor": {
+          "TeamIdentifier": "QMQYCKL255",
+          "BundleIdentifier": "io.robbie.HomeAssistant.dev",
+          "Name": "Home Assistant Δ",
+          "AppIntentIdentifier": "RenderTemplateIntent"
+        }
+      }
     }
   }
 }

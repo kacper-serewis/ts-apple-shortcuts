@@ -209,6 +209,30 @@ simulator imported the generated action unchanged, and the editor showed Server
 not run there: the CI artifact crashes at launch (`Sodium…PackageProduct.framework`
 is missing) and has no server login.
 
+On a physical iPhone (App Store app 2026.10.1) the compiled alarm example did run:
+Home Assistant received `iphone_wekkers` with every Clock alarm, so the inferred
+release Fire Event binding works on a device (still no release export).
+
+### Render Template and the Action Button example
+
+The release manifest also binds `RenderTemplateIntent`, captured in the simulator
+editor with the dev app (`test/fixtures/home-assistant-render-template-workflow.json`)
+and given the release identity the same way as Fire Event. It returns the rendered
+template as text. Not yet run against a real server.
+
+`examples/apps/action-button.ts` is one shortcut for the iPhone Action Button; the
+first matching rule wins: Spotify playing (asked through Render Template) → Fire
+Event `action_button` `{"mode":"spotify_pause"}`; Driving focus → directions home
+within 1 km of work, otherwise to work; landscape → toggle the orientation lock;
+00:00–05:59 → toggle the flashlight; 22:00–23:59 → Fire Event
+`{"mode":"bedtijd"}`; otherwise open an app. `test/action-button.test.ts` checks
+the editor captures, the generated workflow and a rule table. The simulator ran
+each branch with `artifacts/action-button-probe.ts` (Home Assistant answer and
+hour typed in); the flashlight, vibration and the real Home Assistant actions
+cannot run there. Render Template is the first action, so when Home Assistant is
+unreachable the shortcut stops with an error before any other rule; Shortcuts
+cannot catch it.
+
 ## Visualize compiled blocks
 
 Online: https://kacper-serewis.github.io/ts-apple-shortcuts/

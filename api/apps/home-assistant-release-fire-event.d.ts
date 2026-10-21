@@ -5,5 +5,7 @@ declare module "@js-shortcuts/ios" {
     export type IntentServerAppEntity = Entity<"IntentServerAppEntity">;
     /** Native export binding available. */
     export function fireEvent(parameters: { "server": Entity<"IntentServerAppEntity"> | NativeEncoded; "eventName": string | NativeEncoded; "eventData": string | NativeEncoded }): Promise<string>;
+    /** Native export binding available. */
+    export function renderTemplate(parameters: { "server": Entity<"IntentServerAppEntity"> | NativeEncoded; "template": string | NativeEncoded }): Promise<string>;
   }
 }

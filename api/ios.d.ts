@@ -112,6 +112,11 @@ declare module "@js-shortcuts/ios" {
   /** Native date format (Unicode date patterns). */
   export function formatDate(date: NativeContent, format: string): Promise<string>;
   export function getBatteryLevel(): Promise<number>;
+  /** Open an installed app by bundle identifier, as the Open App action does after picking
+   * the app in the editor (iOS 26.5): WFSelectedApp plus WFAppIdentifier. Static strings only.
+   * The team identifier is optional; the editor stores it when the app is installed.
+   */
+  export function openApp(app: { bundleIdentifier: string; name: string; teamIdentifier?: string }): Promise<NativeEntity<"app">>;
 
   /** Get a native dictionary value. The key may be a runtime string or native dotted key path.
    * T declares the expected value; it does not validate the dictionary or handle missing keys.
