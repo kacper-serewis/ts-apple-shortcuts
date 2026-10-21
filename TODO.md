@@ -81,7 +81,13 @@ node lib/src/cli.js artifacts/counted-loop-guard-probe.ts --out dist/TS-Counted-
 - [ ] Support nullable values, optional chaining and explicit runtime schema
   validation for external JSON where needed.
 - [ ] Add object property mutation and destructuring assignment.
-- [ ] Investigate general `for`/`while` conditions and changing loop bounds.
+- [x] Add `while` conditions using self-invocation and JSON state, with nested
+  loops, changing bounds, `break` and `continue`.
+- [ ] Audit the existing main-return emitter: unlike the verified while runtime,
+  it still encodes Stop and Output WFOutput as an attachment instead of a text token.
+- [ ] Extend while boundaries to function-exiting returns, opaque native state
+  and direct `input()` reads; investigate constant-stack execution.
+- [ ] Investigate general `for` conditions and changing counted-loop bounds.
   Current counted loops require stable safe-integer start/bound/step values and
   a step toward the boundary; body updates to the counter are rejected.
 - [ ] Resolve native nested-array handling before enabling matrices: previous

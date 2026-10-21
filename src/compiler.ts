@@ -9,6 +9,7 @@ import { staticPlist, propertyName, isDictionary, unwrap, plistData, plistDate }
 import { emitWorkflow } from "./emitter.js";
 import { lowerTextReplace, lowerTextReplaceAll } from "./text-replace.js";
 import { lowerTextLength, lowerTextIndexOf, lowerTextPredicate } from "./text-position.js";
+import { WhileRuntime } from "./while-runtime.js";
 import { lowerForCount } from "./counted-loop.js";
 import type { ActionName, Compilation, DictionaryPart, IRNode, ListRef, ObjectRef, OutputRef, ScalarValue, StringMethod, TextValue, Value, NativeParameter, PlistDictionary } from "./model.js";
 
@@ -152,6 +153,8 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
   }
 
   let nextId = 0;
+  let whileDepth = 0;
+  const whileRuntime = new WhileRuntime(() => nextId++, String(settings.WFWorkflowName ?? name));
   function literal(value: string, node: ts.Node): TextValue {
     if (!value.isWellFormed() || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\ufffe\uffff]/u.test(value)) {
       fail("This string contains characters that a Shortcuts plist cannot represent.", node);
@@ -404,6 +407,7 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     if (ts.isCallExpression(node) && helperDeclaration(node, scopes)) return call(node, scopes, output, true)!;
     if (ts.isCallExpression(node) && intrinsic(node, scopes) === "entityProperty") return entityProperty(node, scopes, output);
     if (ts.isCallExpression(node) && intrinsic(node, scopes) === "input") {
+      if (whileDepth) fail("Capture input<T>() before the while loop; recursive iterations use internal Shortcut Input.", node);
       if (node.arguments.length) fail("input<T>() takes no arguments.", node);
       const id = nextId++;
       output.push({ kind: "native", id, identifier: "is.workflow.actions.getvariable", parameters: { kind: "literal", value: { WFVariable: { Value: { Type: "ExtensionInput" }, WFSerializationType: "WFTextTokenAttachment" } } }, line: position(node).line });
@@ -1487,6 +1491,88 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     output.push({ kind: "repeat-count", count: count.value, body, line });
     return output;
   }
+  function whileStatement(node: ts.WhileStatement, scopes: Scope[], frame?: FunctionFrame): IRNode[] {
+    // Returning across a Run Shortcut boundary needs a distinct completion protocol.
+    // Diagnose it rather than accidentally stopping only the recursive invocation.
+    if (hasLocalReturn(node.statement)) fail("A return cannot cross a while loop yet; use break and return after the loop.", node);
+    const line = position(node).line, id = nextId++;
+    const names = new Set<string>();
+    const scan = (child: ts.Node): void => { if (ts.isIdentifier(child)) names.add(child.text); ts.forEachChild(child, scan); };
+    scan(node);
+    const containsNativeContent = (type: ts.Type, seen = new Set<ts.Type>()): boolean => {
+      if (type.getProperty("__nativeContent")) return true;
+      if (seen.has(type)) return false;
+      seen.add(type);
+      if (type.isUnion()) return type.types.some(t => containsNativeContent(t, seen));
+      if (checker.isArrayType(type) || checker.isTupleType(type)) {
+        const item = checker.getIndexTypeOfType(type, ts.IndexKind.Number);
+        return !!item && containsNativeContent(item, seen);
+      }
+      if (!(type.flags & ts.TypeFlags.Object)) return false;
+      return checker.getPropertiesOfType(type).some(property => containsNativeContent(checker.getTypeOfSymbolAtLocation(property, node), seen));
+    };
+    const output: IRNode[] = [], restore: IRNode[] = [];
+    const captures: { key: string; original: Value; restored: Value; variable?: string }[] = [];
+    const loopScopes = scopes.map(scope => {
+      const copy: Scope = new Map(scope);
+      mutable.set(copy, new Map(mutable.get(scope)));
+      for (const [name, original] of scope) {
+        if (!original || !names.has(name)) continue;
+        const type = original.kind === "object-ref" || original.kind === "list-ref" ? jsonTypes.get(original.id) : undefined;
+        if (category(original) === "content" || type && containsNativeContent(type)
+          || original.kind === "list-ref" && original.arrayDepth !== undefined && original.arrayDepth !== 1) {
+          fail(`while loop state '${name}' must be JSON-compatible text, numbers, booleans, objects or flat lists.`, node);
+        }
+        const restored = cloneRef(original, nextId++, "Loop State");
+        const key = `v${captures.length}`, variable = mutable.get(scope)?.get(name);
+        captures.push({ key, original, restored, variable });
+        restore.push({ kind: "field", id: (restored as OutputRef).id, input: whileRuntime.input, key, line });
+        if (variable) restore.push({ kind: "set", name: variable, value: restored, line });
+        copy.set(name, restored);
+      }
+      return copy;
+    });
+    const state = (worker: boolean, nodes: IRNode[]): [string, Value][] => captures.map(capture => {
+      let value = worker ? capture.restored : capture.original;
+      if (capture.variable) {
+        const id = nextId++;
+        nodes.push({ kind: "get", id, name: capture.variable, line });
+        value = cloneRef(value, id, "Variable");
+      }
+      return [capture.key, value];
+    });
+    const innerLoop: LoopFrame = { skip: `ts_${nextId++}_skip`, broken: `ts_${nextId++}_break` };
+    const repeat: IRNode[] = [];
+    whileDepth++;
+    let iteration: IRNode[];
+    try {
+      iteration = condition(node.expression, loopScopes, () => {
+        const body = block(node.statement, loopScopes, frame, innerLoop);
+        const recurse: IRNode[] = [];
+        const result = whileRuntime.call(id, state(true, recurse), recurse, line);
+        // Serialize once more so each recursive caller receives the same text protocol.
+        const json = nextId++;
+        recurse.push({ kind: "json", operation: "stringify", id: json, input: result, line });
+        whileRuntime.returnText({ kind: "ref", id: json, outputName: "Loop State" }, recurse, line);
+        body.push(...whenFalse(innerLoop.broken!, recurse, line));
+        return body;
+      }, () => []);
+    } finally { whileDepth--; }
+    repeat.push(...restore,
+      { kind: "set", name: innerLoop.skip, value: { kind: "boolean", value: false }, line },
+      { kind: "set", name: innerLoop.broken!, value: { kind: "boolean", value: false }, line },
+      ...iteration);
+    whileRuntime.finish(state(true, repeat), repeat, line);
+    whileRuntime.routines.push({ id, body: repeat, line });
+    const result = whileRuntime.call(id, state(false, output), output, line);
+    for (const capture of captures) if (capture.variable) {
+      const id = nextId++;
+      output.push({ kind: "field", id, input: result, key: capture.key, line });
+      output.push({ kind: "set", name: capture.variable, value: cloneRef(capture.original, id, "Loop State"), line });
+    }
+    settings.WFWorkflowHasShortcutInputVariables = true;
+    return output;
+  }
   function block(node: ts.Statement, scopes: Scope[], frame?: FunctionFrame, loop?: LoopFrame, switchBreak?: string): IRNode[] {
     if (!ts.isBlock(node)) fail("Use braces around each branch or loop body.", node);
     return statements(node.statements, scopes, frame, loop, switchBreak);
@@ -1515,6 +1601,8 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
         output.push(...block(statement, nested, frame, loop, switchBreak));
       } else if (ts.isSwitchStatement(statement)) {
         output.push(...switchStatement(statement, nested, frame, loop));
+      } else if (ts.isWhileStatement(statement)) {
+        output.push(...whileStatement(statement, nested, frame));
       } else if (ts.isForStatement(statement)) {
         output.push(...countedFor(statement, nested, frame));
       } else if (ts.isForOfStatement(statement)) {
@@ -1596,7 +1684,7 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     }
     return root;
   }
-  const ir = block(entry.body, []);
+  const ir = whileRuntime.wrap(block(entry.body, []));
   if (!ir.length) fail("The shortcut must contain at least one action.", entry);
   if (!isJavaScript) checkDiagnostics(ts.getPreEmitDiagnostics(program));
   return { ir, ...emitWorkflow(ir, { name, settings }) };

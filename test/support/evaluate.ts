@@ -7,10 +7,12 @@ import type { IRNode, NativeNode, ScalarValue, Value } from "../../src/model.js"
  */
 export function evaluate(code: string, answers: number[] = [], menuChoices: string[] = [], onRequest?: (node: NativeNode, read: (value: Value) => any) => unknown): unknown[] {
   const { ir } = compile(code);
-  const refs = new Map<number, unknown>();
-  const variables = new Map<string, unknown>();
+  let refs = new Map<number, unknown>();
+  let variables = new Map<string, unknown>();
   const seen: unknown[] = [];
-  const collections: unknown[][] = [];
+  let collections: unknown[][] = [];
+  let shortcutInput: unknown = "";
+  const returned = Symbol("return");
   const stopShortcut = Symbol("Stop Shortcut");
   const result = (v: Value): any => v.kind === "number" || v.kind === "boolean" ? v.value
     : v.kind === "text" ? v.parts.map(p => typeof p === "string" ? p : result(p)).join("")
@@ -69,6 +71,35 @@ export function evaluate(code: string, answers: number[] = [], menuChoices: stri
           seen.push(result(node.argument));
           break;
         case "native":
+          if (node.identifier === "is.workflow.actions.output") {
+            assert.equal(node.parameters.kind, "parameter-object");
+            if (node.parameters.kind !== "parameter-object") throw new Error("Expected output parameters");
+            const value = node.parameters.entries.find(([key]) => key === "WFOutput")![1];
+            assert.equal(value.kind, "parameter-value");
+            if (value.kind !== "parameter-value") throw new Error("Expected output value");
+            throw { [returned]: result(value.value) };
+          }
+          if (node.identifier === "is.workflow.actions.getvariable" && node.parameters.kind === "literal") {
+            refs.set(node.id, shortcutInput);
+            break;
+          }
+          if (node.identifier === "is.workflow.actions.runworkflow") {
+            assert.equal(node.parameters.kind, "parameter-object");
+            if (node.parameters.kind !== "parameter-object") throw new Error("Expected Run Shortcut parameters");
+            const input = node.parameters.entries.find(([key]) => key === "WFInput")![1];
+            assert.equal(input.kind, "parameter-value");
+            if (input.kind !== "parameter-value") throw new Error("Expected Run Shortcut input");
+            const argument = result(input.value);
+            const saved = { refs, variables, collections, shortcutInput };
+            refs = new Map(); variables = new Map(); collections = []; shortcutInput = argument;
+            let value: unknown;
+            try { visit(ir); } catch (error) {
+              if (typeof error === "object" && error !== null && returned in error) value = (error as { [returned]: unknown })[returned];
+              else throw error;
+            } finally { ({ refs, variables, collections, shortcutInput } = saved); }
+            refs.set(node.id, value);
+            break;
+          }
           if (node.identifier === "is.workflow.actions.exit") throw stopShortcut;
           if (node.identifier === "is.workflow.actions.alert") {
             assert.equal(node.parameters.kind, "parameter-object");
@@ -154,12 +185,12 @@ export function evaluate(code: string, answers: number[] = [], menuChoices: stri
           assert.ok(answers.length, "Unexpected extra prompt");
           refs.set(node.id, answers.shift());
           break;
-        case "return": throw new Error("A helper return must not stop the containing shortcut");
+        case "return": throw { [returned]: node.value ? result(node.value) : undefined };
         default: throw new Error(`Unsupported test evaluator node ${JSON.stringify(node)}`);
       }
     }
   }
-  try { visit(ir); } catch (error) { if (error !== stopShortcut) throw error; }
+  try { visit(ir); } catch (error) { if (error !== stopShortcut && !(typeof error === "object" && error !== null && returned in error)) throw error; }
   return seen;
 }
 

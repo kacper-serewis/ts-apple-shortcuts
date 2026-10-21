@@ -279,6 +279,7 @@ export default async function main(): Promise<number> {
 | Array `join(separator?)` | Native text accumulation; preserves empty entries and renders booleans as true/false |
 | `items[index]`, `items.length` | Literal or computed zero-based index → one-based native index; Count Items |
 | Nested `for (const item of items)` | Repeat with Each, preserving outer-item references |
+| `while (condition)` | Recursive Run Shortcut with JSON loop state; no compiler iteration cap |
 | Counted `for (let i = start; i < end; i += step)` and descending/inclusive forms | Repeat Count with safe integer ranges and stable boundary/step values |
 | Unlabeled `break` / `continue` in supported loops | Scoped guards skip remaining loop body actions or iterations |
 | `map`, `filter`, `reduce`, `forEach` with synchronous arrow callbacks | Repeat with Each; collected outputs or scoped accumulation |
@@ -341,10 +342,56 @@ bindings and independent helper parameters remain writable.
 
 `continue` advances the counter; `break` and a helper return skip that advance.
 Counters are block-scoped and nested loops keep independent state. The compiler
-does not approximate general `for`/`while` loops with an arbitrary iteration limit.
-Changing a loop's range during its body, fractional progressions and general loop
-conditions remain unsupported. Native numeric representation and remaining-repeat
-overhead still apply. Build `examples/counted-loop-test.ts` with `npm run build:counted-loop`.
+does not approximate general loops with an arbitrary iteration limit.
+Changing a counted loop's range during its body, fractional progressions and general
+`for` conditions remain unsupported; use `while` for a changing condition. Native numeric representation and
+remaining-repeat overhead still apply. Build `examples/counted-loop-test.ts` with `npm run build:counted-loop`.
+
+`while (condition) { ... }` reevaluates the condition before every iteration,
+including side effects and short-circuit expressions. It supports nested loops,
+mutable bounds, `break`, `continue`, and loops inside helpers and inline callbacks.
+
+```ts
+let n = 0;
+while (n < 5) {
+  n++;
+  if (n === 2) { continue; }
+  if (n === 4) { break; }
+  await showResult(n); // 1, 3
+}
+await showResult(n); // 4
+```
+
+The generated shortcut contains an internal dispatcher. Each iteration invokes
+that same shortcut with JSON state; the completed call returns updated variables
+and execution continues after the loop. Install it under the compiled name
+(`--name`); renaming it requires recompiling or updating its Run Shortcut targets.
+There is no compiler-imposed iteration bound, but each iteration consumes native
+call-stack resources and is subject to Shortcuts memory, recursion and execution
+limits. This is not a constant-stack trampoline.
+
+State crossing the recursive boundary must be JSON-compatible: text, finite
+numbers, booleans, objects and supported flat lists. Opaque native content cannot
+be captured. Capture `input<T>()` in a variable **before** the loop; reading it
+inside an iteration is rejected because Shortcut Input carries internal state.
+A `return` that exits the containing function from inside a while body is not yet
+supported; use `break` followed by `return` after the loop. Helpers and callbacks
+called inside the loop still support their own local returns. Raw native actions
+that stop execution or read Shortcut Input operate on the recursive invocation.
+External text input beginning with `__ts_shortcuts_while_v1__:` is reserved for
+the dispatcher in shortcuts containing while loops.
+
+Build the native probe with `npm run build:while-loop`. On the iPhone 17e
+simulator (iOS 26.5), the signed `TS-While-Loops-v3` probe displayed
+`While: 1,3,; n=4`, verifying recursive state transfer, continue, break and
+execution after the loop. Broader combinations have semantic test coverage.
+See `artifacts/while-loop-verification.json` for evidence and limits.
+
+A separate depth probe completed 1,000 iterations in 70.8 seconds. A run targeting
+5,000 reached a last logged increment of 1,998 before RunningBoard killed the
+runner for an excessive number of assertions. This is an observed resource limit
+on that simulator, not a universal recursion cap or a guaranteed safe threshold.
+See `artifacts/while-recursion-results.json` and its linked logs for measurements.
 
 List indices can come from variables, arithmetic, loop items or awaited actions.
 The index expression is evaluated once. Supply a nonnegative integer within the
@@ -1372,7 +1419,7 @@ a full JS engine. Unsupported constructs produce errors with source locations.
 
 - No arbitrary npm imports, function values, classes, closures outside
   supported inline callbacks, general promises or `try/catch`.
-- No general `for`/`while` conditions, changing counted-loop bounds, labeled jumps, destructuring assignments, array
+- No general `for` conditions, `do…while`, changing counted-loop bounds, labeled jumps, destructuring assignments, array
   holes, argument spreads, object property mutation or other array methods such as `.sort()`.
 - List indexing requires a valid nonnegative integer at runtime. Out-of-range
   behavior follows Shortcuts, not JavaScript's `undefined`; dynamic bounds are not checked.

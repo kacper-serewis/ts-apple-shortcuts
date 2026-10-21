@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-21",
+  "device": {
+    "model": "iPhone 17e simulator",
+    "os": "iOS 26.5",
+    "udid": "326EA910-2DC8-45AA-A44C-8A9A1377F3E6"
+  },
+  "shortcut": "TS-While-Loops-v3",
+  "actionCount": 89,
+  "observedResult": "While: 1,3,; n=4",
+  "nativeChecks": [
+    "Signed and imported the generated shortcut.",
+    "Observed the expected result dialog in artifacts/ios-while-loop-result.png.",
+    "Native logs confirm recursive return values and restored caller variables: trace=1,3, and n=4.",
+    "Dismissed Done; editor returned to idle with Play available and retained the expected result."
+  ],
+  "automatedChecks": {
+    "tests": 740,
+    "passed": 740,
+    "failed": 0,
+    "typecheck": "passed",
+    "browserBuild": "passed",
+    "browserNodeParity": "passed",
+    "plistLint": "passed"
+  },
+  "limitations": [
+    "Native smoke test covers numeric/text state, continue, break, recursive return and continuation. Other combinations are covered by semantic tests, not this simulator run.",
+    "No physical-device verification. Separate simulator recursion-depth measurements are in artifacts/while-recursion-results.json.",
+    "Function-exiting returns in while bodies, opaque captured content and input() reads inside iterations are rejected.",
+    "Run Shortcut resolves the compiled shortcut name; renaming requires updating targets."
+  ],
+  "implementationNotes": [
+    "Run Shortcut WFInput requires WFTextTokenAttachment; text-token inputs were ignored on iOS 26.5.",
+    "Internal Stop and Output WFOutput requires WFTextTokenString; attachment encoding lost the returned JSON.",
+    "Earlier probes TS-While-Loops and TS-While-Loops-v2 failed these boundaries and were stopped. The v3 probe is the verified artifact."
+  ],
+  "sha256": {
+    "examples/while-loop-test.ts": "05b65eafb0244b312e0a896a5529d1800d1c36f4d88bc5aaa7638c79daa02898",
+    "src/compiler.ts": "122a90683e7c03a57f66205dc7747a8ff6aaeb176d865d6e62b19261b2ca9bd6",
+    "src/while-runtime.ts": "8c3f0e62a00b0972ac5bfe0da1d0347b399a680a486cccd8e83d934c2334e1a9",
+    "artifacts/while-loop-native-workflow.json": "d81a730a3320c6a57267c6f3eff6ffb67173bebb2c3b6b7275a3dfc5d40d7bc7",
+    "artifacts/ios-while-loop-result.png": "bea98840b89d3c80da233af5890c52da2cc42adc8eab5c8de82b141e0ad39b69",
+    "dist/TS-While-Loops-v3.shortcut": "cf4e42e8525e5dd8d726cae53d3e8dd0b44a99e5f2abcd6311ef68840a121c5b"
+  }
+}
