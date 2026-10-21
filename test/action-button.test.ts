@@ -113,19 +113,22 @@ test("an address destination is a Text action attachment, as the editor connects
   assert.deepEqual(normalize(emitted[1].WFWorkflowActionParameters.WFDestination), normalize(recorded.WFWorkflowActionParameters.WFDestination));
 });
 
-test("Number() marks text as a number for native conditions and calculations", () => {
+test("Number() converts text with Get Numbers from Input before conditions and calculations", () => {
   const code = source(`const hour = Number(await formatDate(await currentDate(), "H"));
     if (hour < 6) { await showResult("night"); } else if (hour >= 22) { await showResult("late"); } else { await showResult(\`day \${hour + 1}\`); }`);
   const emitted = actions(code);
-  // No conversion action: the condition coerces the formatted date to a number.
-  assert.deepEqual(emitted.slice(0, 3).map(a => a.WFWorkflowActionIdentifier), ["is.workflow.actions.date", "is.workflow.actions.format.date", "is.workflow.actions.conditional"]);
-  const input = (emitted[2].WFWorkflowActionParameters.WFInput as PlistDictionary).Variable as PlistDictionary;
-  assert.deepEqual((input.Value as PlistDictionary).Aggrandizements, [{ Type: "WFCoercionVariableAggrandizement", CoercionItemClass: "WFNumberContentItem" }]);
+  // A real conversion: a number coercion on the formatted date alone compared text on iOS
+  // ("10" < "6" took the night branch at 10:43).
+  assert.deepEqual(emitted.slice(0, 4).map(a => a.WFWorkflowActionIdentifier), ["is.workflow.actions.date", "is.workflow.actions.format.date", "is.workflow.actions.detect.number", "is.workflow.actions.conditional"]);
+  const detectInput = emitted[2].WFWorkflowActionParameters.WFInput as PlistDictionary;
+  assert.equal((detectInput.Value as PlistDictionary).OutputName, "Formatted Date");
+  const input = (emitted[3].WFWorkflowActionParameters.WFInput as PlistDictionary).Variable as PlistDictionary;
+  assert.equal((input.Value as PlistDictionary).OutputName, "Numbers");
   const at = (hour: string) => evaluate(code, [], [], undefined, { natives: node => node.identifier.endsWith("format.date") ? hour : {} });
-  assert.deepEqual([at("0"), at("5"), at("6"), at("21"), at("22"), at("23")].flat(), ["night", "night", "day 7", "day 22", "late", "late"]);
+  assert.deepEqual([at("0"), at("5"), at("6"), at("10"), at("21"), at("22"), at("23")].flat(), ["night", "night", "day 7", "day 11", "day 22", "late", "late"]);
   // Templates are materialized once as Text; numbers pass through unchanged.
   const template = actions(source('const n = Number(`${await formatDate(await currentDate(), "H")}0`); if (n > 100) { await showResult("big"); }'));
-  assert.equal(template[2].WFWorkflowActionIdentifier, "is.workflow.actions.gettext");
+  assert.deepEqual(template.slice(2, 4).map(a => a.WFWorkflowActionIdentifier), ["is.workflow.actions.gettext", "is.workflow.actions.detect.number"]);
   assert.deepEqual(normalize(actions(source('const n = Number(7); if (n > 1) { await showResult("x"); }'))),
     normalize(actions(source('const n = 7; if (n > 1) { await showResult("x"); }'))));
   assert.throws(() => compile(source("const n = Number(true);")), /converts text or numbers only/);

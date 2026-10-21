@@ -84,6 +84,12 @@ export function evaluate(code: string, answers: number[] = [], menuChoices: stri
             if (value.kind !== "parameter-value") throw new Error("Expected output value");
             throw { [returned]: result(value.value) };
           }
+          if (node.identifier === "is.workflow.actions.detect.number" && node.parameters.kind === "parameter-object") {
+            const input = node.parameters.entries.find(([key]) => key === "WFInput")![1];
+            if (input.kind !== "parameter-value") throw new Error("Expected Get Numbers input");
+            refs.set(node.id, Number(result(input.value)));
+            break;
+          }
           if (node.identifier === "is.workflow.actions.getvariable" && node.parameters.kind === "literal") {
             refs.set(node.id, shortcutInput);
             break;

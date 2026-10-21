@@ -19,26 +19,26 @@
      "Name": "Home Assistant",
      "AppIntentIdentifier": "RenderTemplateIntent"
     },
-    "UUID": "4BD5E216-CBF7-4E48-9418-82FC73D0489F"
+    "UUID": "C59AC6BF-D8AC-4EBE-823A-A7303237B5ED"
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.dnd.getfocus",
    "WFWorkflowActionParameters": {
-    "UUID": "70B28111-CC77-4329-8D5C-3D4B9B997CBF"
+    "UUID": "E8290B65-4E0F-491A-9045-C8792B2EDB2C"
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.text.replace",
    "WFWorkflowActionParameters": {
-    "UUID": "7404D92C-286C-4ECE-89E6-D1D45420E479",
+    "UUID": "58F632BD-5F65-4B23-A39A-17F7CEAF9652",
     "WFInput": {
      "Value": {
       "string": "JS:￼",
       "attachmentsByRange": {
        "{3, 1}": {
         "Type": "ActionOutput",
-        "OutputUUID": "4BD5E216-CBF7-4E48-9418-82FC73D0489F",
+        "OutputUUID": "C59AC6BF-D8AC-4EBE-823A-A7303237B5ED",
         "OutputName": "Result"
        }
       }
@@ -54,14 +54,14 @@
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.text.changecase",
    "WFWorkflowActionParameters": {
-    "UUID": "C9F8244E-01CF-4F0A-B66C-A41E681FDC7E",
+    "UUID": "5C5733A2-3C73-4608-A13B-E5992A9F847F",
     "text": {
      "Value": {
       "string": "￼",
       "attachmentsByRange": {
        "{0, 1}": {
         "Type": "ActionOutput",
-        "OutputUUID": "7404D92C-286C-4ECE-89E6-D1D45420E479",
+        "OutputUUID": "58F632BD-5F65-4B23-A39A-17F7CEAF9652",
         "OutputName": "Text"
        }
       }
@@ -74,14 +74,14 @@
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.gettext",
    "WFWorkflowActionParameters": {
-    "UUID": "E15383FC-A6C1-4EC4-B31B-EFDFF15EC46E",
+    "UUID": "E90E7B74-297C-4DD9-B9E6-4941DFA4C3BE",
     "WFTextActionText": {
      "Value": {
       "string": "JS:￼",
       "attachmentsByRange": {
        "{3, 1}": {
         "Type": "ActionOutput",
-        "OutputUUID": "C9F8244E-01CF-4F0A-B66C-A41E681FDC7E",
+        "OutputUUID": "5C5733A2-3C73-4608-A13B-E5992A9F847F",
         "OutputName": "Text"
        }
       }
@@ -93,14 +93,14 @@
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.text.replace",
    "WFWorkflowActionParameters": {
-    "UUID": "D89003B0-E002-40CF-9A83-805B0671F2BE",
+    "UUID": "CDC7DD5F-5350-4C00-89D9-100ABFE4CE4E",
     "WFInput": {
      "Value": {
       "string": "￼",
       "attachmentsByRange": {
        "{0, 1}": {
         "Type": "ActionOutput",
-        "OutputUUID": "E15383FC-A6C1-4EC4-B31B-EFDFF15EC46E",
+        "OutputUUID": "E90E7B74-297C-4DD9-B9E6-4941DFA4C3BE",
         "OutputName": "Text"
        }
       }
@@ -116,7 +116,7 @@
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
    "WFWorkflowActionParameters": {
-    "GroupingIdentifier": "125DA556-E25D-4B9E-8558-AB57276DB625",
+    "GroupingIdentifier": "137ECF84-E931-418F-8DFB-11D10801D84E",
     "WFControlFlowMode": 0,
     "WFCondition": 4,
     "WFConditionalActionString": "TS_MATCH",
@@ -125,7 +125,7 @@
      "Variable": {
       "Value": {
        "Type": "ActionOutput",
-       "OutputUUID": "D89003B0-E002-40CF-9A83-805B0671F2BE",
+       "OutputUUID": "CDC7DD5F-5350-4C00-89D9-100ABFE4CE4E",
        "OutputName": "Updated Text",
        "Aggrandizements": [
         {
@@ -159,34 +159,34 @@
      "Name": "Home Assistant",
      "AppIntentIdentifier": "FireEventIntent"
     },
-    "UUID": "8D4E02E8-CCD7-4E3B-8254-A6BF50D86CDD"
+    "UUID": "573E5D38-6F5E-492B-B493-F46BD202AB10"
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
    "WFWorkflowActionParameters": {
-    "GroupingIdentifier": "125DA556-E25D-4B9E-8558-AB57276DB625",
+    "GroupingIdentifier": "137ECF84-E931-418F-8DFB-11D10801D84E",
     "WFControlFlowMode": 1
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.gettext",
    "WFWorkflowActionParameters": {
-    "UUID": "D6C25A8D-B060-4243-8E49-8927DA1424B4",
+    "UUID": "82532784-2B26-43DF-A0E0-FACBDF0FCFD8",
     "WFTextActionText": "JS:Driving"
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.text.replace",
    "WFWorkflowActionParameters": {
-    "UUID": "6722FE27-12D8-4EBE-B86E-3919B771EFCC",
+    "UUID": "8A33BEDF-9177-4461-B113-0AB07087393A",
     "WFInput": {
      "Value": {
       "string": "￼",
       "attachmentsByRange": {
        "{0, 1}": {
         "Type": "ActionOutput",
-        "OutputUUID": "D6C25A8D-B060-4243-8E49-8927DA1424B4",
+        "OutputUUID": "82532784-2B26-43DF-A0E0-FACBDF0FCFD8",
         "OutputName": "Text"
        }
       }
@@ -202,14 +202,14 @@
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.text.replace",
    "WFWorkflowActionParameters": {
-    "UUID": "80C19CCD-C7A2-446D-825C-76FB0431D1E5",
+    "UUID": "0579A9D7-97BB-41D2-BE22-CF06711B14FF",
     "WFInput": {
      "Value": {
       "string": "￼",
       "attachmentsByRange": {
        "{0, 1}": {
         "Type": "ActionOutput",
-        "OutputUUID": "6722FE27-12D8-4EBE-B86E-3919B771EFCC",
+        "OutputUUID": "8A33BEDF-9177-4461-B113-0AB07087393A",
         "OutputName": "Updated Text"
        }
       }
@@ -225,14 +225,14 @@
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.text.replace",
    "WFWorkflowActionParameters": {
-    "UUID": "4659F87F-E365-4016-AD21-0199D7092DB4",
+    "UUID": "839C09EA-20AB-4FC7-BE26-1D6BE50E3E49",
     "WFInput": {
      "Value": {
       "string": "JS:￼",
       "attachmentsByRange": {
        "{3, 1}": {
         "Type": "ActionOutput",
-        "OutputUUID": "70B28111-CC77-4329-8D5C-3D4B9B997CBF",
+        "OutputUUID": "E8290B65-4E0F-491A-9045-C8792B2EDB2C",
         "OutputName": "Result",
         "Aggrandizements": [
          {
@@ -252,7 +252,7 @@
       "attachmentsByRange": {
        "{12, 1}": {
         "Type": "ActionOutput",
-        "OutputUUID": "80C19CCD-C7A2-446D-825C-76FB0431D1E5",
+        "OutputUUID": "0579A9D7-97BB-41D2-BE22-CF06711B14FF",
         "OutputName": "Updated Text"
        }
       }
@@ -267,7 +267,7 @@
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
    "WFWorkflowActionParameters": {
-    "GroupingIdentifier": "C4F9909C-3DD1-4FFA-9C7A-51ABADA0CEAC",
+    "GroupingIdentifier": "D60545E2-7E79-45AC-8A08-F514A1947F40",
     "WFControlFlowMode": 0,
     "WFCondition": 4,
     "WFConditionalActionString": "TS_MATCH",
@@ -276,7 +276,7 @@
      "Variable": {
       "Value": {
        "Type": "ActionOutput",
-       "OutputUUID": "4659F87F-E365-4016-AD21-0199D7092DB4",
+       "OutputUUID": "839C09EA-20AB-4FC7-BE26-1D6BE50E3E49",
        "OutputName": "Updated Text",
        "Aggrandizements": [
         {
@@ -293,36 +293,36 @@
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.number",
    "WFWorkflowActionParameters": {
-    "UUID": "1E580152-CBCD-431E-9D9F-53AA8D927E63",
+    "UUID": "C6519584-8F4A-4CC8-A9F8-3C22998AE25F",
     "WFNumberActionNumber": 1
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
    "WFWorkflowActionParameters": {
-    "GroupingIdentifier": "C4F9909C-3DD1-4FFA-9C7A-51ABADA0CEAC",
+    "GroupingIdentifier": "D60545E2-7E79-45AC-8A08-F514A1947F40",
     "WFControlFlowMode": 1
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.number",
    "WFWorkflowActionParameters": {
-    "UUID": "D112518F-BE9F-44D7-852D-13CED253F77C",
+    "UUID": "798B4BB8-5DD8-4C1B-8715-928DFB35AFB6",
     "WFNumberActionNumber": 0
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
    "WFWorkflowActionParameters": {
-    "UUID": "6750AAF1-A0F2-487B-9CCD-37937343628D",
-    "GroupingIdentifier": "C4F9909C-3DD1-4FFA-9C7A-51ABADA0CEAC",
+    "UUID": "B8D8A2FD-5C4C-442A-BD8A-47E350CB0F02",
+    "GroupingIdentifier": "D60545E2-7E79-45AC-8A08-F514A1947F40",
     "WFControlFlowMode": 2
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
    "WFWorkflowActionParameters": {
-    "GroupingIdentifier": "16DE2011-5995-429A-81D0-8ADF0C7E58FC",
+    "GroupingIdentifier": "BB4C0363-BD59-4AC8-9CA6-7C0C71BF5D30",
     "WFControlFlowMode": 0,
     "WFCondition": 4,
     "WFInput": {
@@ -330,7 +330,7 @@
      "Variable": {
       "Value": {
        "Type": "ActionOutput",
-       "OutputUUID": "6750AAF1-A0F2-487B-9CCD-37937343628D",
+       "OutputUUID": "B8D8A2FD-5C4C-442A-BD8A-47E350CB0F02",
        "OutputName": "If Result",
        "Aggrandizements": [
         {
@@ -349,17 +349,17 @@
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.getcurrentlocation",
    "WFWorkflowActionParameters": {
-    "UUID": "9E2509BB-7848-410F-BFCB-324CF41FD8E2"
+    "UUID": "4C0251E0-973D-488E-A9BB-6E2613971C0E"
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.math",
    "WFWorkflowActionParameters": {
-    "UUID": "A2C98144-09C3-4569-9E65-CAF29730D42E",
+    "UUID": "EAA24E11-CAFA-46FE-8B4C-9C2B33F9360C",
     "WFInput": {
      "Value": {
       "Type": "ActionOutput",
-      "OutputUUID": "9E2509BB-7848-410F-BFCB-324CF41FD8E2",
+      "OutputUUID": "4C0251E0-973D-488E-A9BB-6E2613971C0E",
       "OutputName": "Result",
       "Aggrandizements": [
        {
@@ -377,11 +377,11 @@
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.math",
    "WFWorkflowActionParameters": {
-    "UUID": "0408C813-B2F3-460D-87ED-6266BF3D6C07",
+    "UUID": "76133030-EAEB-4901-AE0E-BBC448702036",
     "WFInput": {
      "Value": {
       "Type": "ActionOutput",
-      "OutputUUID": "A2C98144-09C3-4569-9E65-CAF29730D42E",
+      "OutputUUID": "EAA24E11-CAFA-46FE-8B4C-9C2B33F9360C",
       "OutputName": "Calculation Result"
      },
      "WFSerializationType": "WFTextTokenAttachment"
@@ -393,11 +393,11 @@
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.math",
    "WFWorkflowActionParameters": {
-    "UUID": "373155ED-AC06-4C8B-B32E-5F9DBADE696B",
+    "UUID": "1930D9ED-E8CA-4E32-BCFC-03D75D6F90A6",
     "WFInput": {
      "Value": {
       "Type": "ActionOutput",
-      "OutputUUID": "9E2509BB-7848-410F-BFCB-324CF41FD8E2",
+      "OutputUUID": "4C0251E0-973D-488E-A9BB-6E2613971C0E",
       "OutputName": "Result",
       "Aggrandizements": [
        {
@@ -415,11 +415,11 @@
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.math",
    "WFWorkflowActionParameters": {
-    "UUID": "B47962DB-A907-4403-9FDA-3A3868BF6A14",
+    "UUID": "210A369E-5CDF-4921-AA80-0CCE8C35A932",
     "WFInput": {
      "Value": {
       "Type": "ActionOutput",
-      "OutputUUID": "373155ED-AC06-4C8B-B32E-5F9DBADE696B",
+      "OutputUUID": "1930D9ED-E8CA-4E32-BCFC-03D75D6F90A6",
       "OutputName": "Calculation Result"
      },
      "WFSerializationType": "WFTextTokenAttachment"
@@ -431,11 +431,11 @@
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.math",
    "WFWorkflowActionParameters": {
-    "UUID": "0CA2FBFE-35DA-442E-9681-7B5BE7C10255",
+    "UUID": "2F4D0623-3657-4BED-AE3F-16F284406632",
     "WFInput": {
      "Value": {
       "Type": "ActionOutput",
-      "OutputUUID": "B47962DB-A907-4403-9FDA-3A3868BF6A14",
+      "OutputUUID": "210A369E-5CDF-4921-AA80-0CCE8C35A932",
       "OutputName": "Calculation Result"
      },
      "WFSerializationType": "WFTextTokenAttachment"
@@ -447,11 +447,11 @@
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.math",
    "WFWorkflowActionParameters": {
-    "UUID": "85DE87C5-6ECD-4AC8-9159-7292178A9B1D",
+    "UUID": "699BD8FC-82C8-4465-8ABF-6825F20AC403",
     "WFInput": {
      "Value": {
       "Type": "ActionOutput",
-      "OutputUUID": "0408C813-B2F3-460D-87ED-6266BF3D6C07",
+      "OutputUUID": "76133030-EAEB-4901-AE0E-BBC448702036",
       "OutputName": "Calculation Result"
      },
      "WFSerializationType": "WFTextTokenAttachment"
@@ -460,7 +460,7 @@
     "WFMathOperand": {
      "Value": {
       "Type": "ActionOutput",
-      "OutputUUID": "0408C813-B2F3-460D-87ED-6266BF3D6C07",
+      "OutputUUID": "76133030-EAEB-4901-AE0E-BBC448702036",
       "OutputName": "Calculation Result"
      },
      "WFSerializationType": "WFTextTokenAttachment"
@@ -470,11 +470,11 @@
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.math",
    "WFWorkflowActionParameters": {
-    "UUID": "93713C21-F64B-4358-8BB5-93C2A01C7A38",
+    "UUID": "98048BAD-B615-4560-AC2D-E79A32017F8A",
     "WFInput": {
      "Value": {
       "Type": "ActionOutput",
-      "OutputUUID": "0CA2FBFE-35DA-442E-9681-7B5BE7C10255",
+      "OutputUUID": "2F4D0623-3657-4BED-AE3F-16F284406632",
       "OutputName": "Calculation Result"
      },
      "WFSerializationType": "WFTextTokenAttachment"
@@ -483,7 +483,7 @@
     "WFMathOperand": {
      "Value": {
       "Type": "ActionOutput",
-      "OutputUUID": "0CA2FBFE-35DA-442E-9681-7B5BE7C10255",
+      "OutputUUID": "2F4D0623-3657-4BED-AE3F-16F284406632",
       "OutputName": "Calculation Result"
      },
      "WFSerializationType": "WFTextTokenAttachment"
@@ -493,11 +493,11 @@
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.math",
    "WFWorkflowActionParameters": {
-    "UUID": "E882ABC2-EBC3-443A-BC16-C5D73FA14A54",
+    "UUID": "929A4F62-0294-45D2-8E33-E6EC72DADD05",
     "WFInput": {
      "Value": {
       "Type": "ActionOutput",
-      "OutputUUID": "85DE87C5-6ECD-4AC8-9159-7292178A9B1D",
+      "OutputUUID": "699BD8FC-82C8-4465-8ABF-6825F20AC403",
       "OutputName": "Calculation Result"
      },
      "WFSerializationType": "WFTextTokenAttachment"
@@ -506,7 +506,7 @@
     "WFMathOperand": {
      "Value": {
       "Type": "ActionOutput",
-      "OutputUUID": "93713C21-F64B-4358-8BB5-93C2A01C7A38",
+      "OutputUUID": "98048BAD-B615-4560-AC2D-E79A32017F8A",
       "OutputName": "Calculation Result"
      },
      "WFSerializationType": "WFTextTokenAttachment"
@@ -516,7 +516,7 @@
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.math",
    "WFWorkflowActionParameters": {
-    "UUID": "57795095-82A4-4D03-A265-EA86BEB8720B",
+    "UUID": "D4A8EC73-E585-4C40-A45D-D510CAAB0266",
     "WFInput": 1,
     "WFMathOperation": "×",
     "WFMathOperand": 1
@@ -525,7 +525,7 @@
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
    "WFWorkflowActionParameters": {
-    "GroupingIdentifier": "F2C9E709-65C2-4446-8CC1-7D2BE828677F",
+    "GroupingIdentifier": "79090ABF-080C-4E38-98A2-91B56272B334",
     "WFControlFlowMode": 0,
     "WFCondition": 1,
     "WFInput": {
@@ -533,7 +533,7 @@
      "Variable": {
       "Value": {
        "Type": "ActionOutput",
-       "OutputUUID": "E882ABC2-EBC3-443A-BC16-C5D73FA14A54",
+       "OutputUUID": "929A4F62-0294-45D2-8E33-E6EC72DADD05",
        "OutputName": "Calculation Result",
        "Aggrandizements": [
         {
@@ -548,7 +548,7 @@
     "WFNumberValue": {
      "Value": {
       "Type": "ActionOutput",
-      "OutputUUID": "57795095-82A4-4D03-A265-EA86BEB8720B",
+      "OutputUUID": "D4A8EC73-E585-4C40-A45D-D510CAAB0266",
       "OutputName": "Calculation Result"
      },
      "WFSerializationType": "WFTextTokenAttachment"
@@ -559,7 +559,7 @@
       "attachmentsByRange": {
        "{0, 1}": {
         "Type": "ActionOutput",
-        "OutputUUID": "57795095-82A4-4D03-A265-EA86BEB8720B",
+        "OutputUUID": "D4A8EC73-E585-4C40-A45D-D510CAAB0266",
         "OutputName": "Calculation Result"
        }
       }
@@ -571,7 +571,7 @@
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.gettext",
    "WFWorkflowActionParameters": {
-    "UUID": "BA78ADE8-7895-4D57-8301-68D3BDE64F14",
+    "UUID": "C8B87E28-4FEE-4AC4-9070-1146E926EBA2",
     "WFTextActionText": "Wijsthoek 209, 5403 RB Uden"
    }
   },
@@ -581,25 +581,25 @@
     "WFDestination": {
      "Value": {
       "Type": "ActionOutput",
-      "OutputUUID": "BA78ADE8-7895-4D57-8301-68D3BDE64F14",
+      "OutputUUID": "C8B87E28-4FEE-4AC4-9070-1146E926EBA2",
       "OutputName": "Text"
      },
      "WFSerializationType": "WFTextTokenAttachment"
     },
-    "UUID": "C4603D6E-726F-42BB-9604-35382167AC5F"
+    "UUID": "CEAAAEBD-7903-40B5-9C01-C661EC224D0F"
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
    "WFWorkflowActionParameters": {
-    "GroupingIdentifier": "F2C9E709-65C2-4446-8CC1-7D2BE828677F",
+    "GroupingIdentifier": "79090ABF-080C-4E38-98A2-91B56272B334",
     "WFControlFlowMode": 1
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.gettext",
    "WFWorkflowActionParameters": {
-    "UUID": "6ED1C4CF-D1FD-4BA0-BC55-2CA08CED2185",
+    "UUID": "B9B488D7-05AF-48BA-A8CC-3631540B8B0E",
     "WFTextActionText": "Klokgebouw 234, 5617 AC Eindhoven"
    }
   },
@@ -609,39 +609,39 @@
     "WFDestination": {
      "Value": {
       "Type": "ActionOutput",
-      "OutputUUID": "6ED1C4CF-D1FD-4BA0-BC55-2CA08CED2185",
+      "OutputUUID": "B9B488D7-05AF-48BA-A8CC-3631540B8B0E",
       "OutputName": "Text"
      },
      "WFSerializationType": "WFTextTokenAttachment"
     },
-    "UUID": "CC445DFC-0E46-4CA9-AB07-556D625EF6B7"
+    "UUID": "D52A8794-3E57-4BE2-AD59-83E7B2896F05"
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
    "WFWorkflowActionParameters": {
-    "GroupingIdentifier": "F2C9E709-65C2-4446-8CC1-7D2BE828677F",
+    "GroupingIdentifier": "79090ABF-080C-4E38-98A2-91B56272B334",
     "WFControlFlowMode": 2
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
    "WFWorkflowActionParameters": {
-    "GroupingIdentifier": "16DE2011-5995-429A-81D0-8ADF0C7E58FC",
+    "GroupingIdentifier": "BB4C0363-BD59-4AC8-9CA6-7C0C71BF5D30",
     "WFControlFlowMode": 1
    }
   },
   {
    "WFWorkflowActionIdentifier": "com.apple.ShortcutsActions.GetOrientationAction",
    "WFWorkflowActionParameters": {
-    "UUID": "1212B912-43DB-4E31-A0CA-3386D3484315"
+    "UUID": "379448FC-BC0E-4AF5-9C9C-C47C76A14C90"
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.date",
    "WFWorkflowActionParameters": {
     "WFDateActionMode": "Current Date",
-    "UUID": "2AE54D12-C26C-4979-8258-C6C681C5CA3C"
+    "UUID": "9F7C926C-90A1-4FF2-ADD4-0F864D32DB11"
    }
   },
   {
@@ -651,19 +651,33 @@
     "WFDate": {
      "Value": {
       "Type": "ActionOutput",
-      "OutputUUID": "2AE54D12-C26C-4979-8258-C6C681C5CA3C",
+      "OutputUUID": "9F7C926C-90A1-4FF2-ADD4-0F864D32DB11",
       "OutputName": "Date"
      },
      "WFSerializationType": "WFTextTokenAttachment"
     },
     "WFDateFormat": "H",
-    "UUID": "DEFB4797-F577-4A18-833A-153FB9DB02C8"
+    "UUID": "3D22C248-D310-4E82-B31A-2550F2023E81"
+   }
+  },
+  {
+   "WFWorkflowActionIdentifier": "is.workflow.actions.detect.number",
+   "WFWorkflowActionParameters": {
+    "WFInput": {
+     "Value": {
+      "Type": "ActionOutput",
+      "OutputUUID": "3D22C248-D310-4E82-B31A-2550F2023E81",
+      "OutputName": "Formatted Date"
+     },
+     "WFSerializationType": "WFTextTokenAttachment"
+    },
+    "UUID": "EB7CC4F0-6EDA-4822-9F27-BC133B47E86D"
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
    "WFWorkflowActionParameters": {
-    "GroupingIdentifier": "1AA74D76-0D3B-4A4D-96DE-D3A5C9F37F9D",
+    "GroupingIdentifier": "FBDC3D65-8644-4D1F-8CB3-2ABDB0D57EC3",
     "WFControlFlowMode": 0,
     "WFConditions": {
      "WFSerializationType": "WFContentPredicateTableTemplate",
@@ -678,7 +692,7 @@
          "Variable": {
           "Value": {
            "Type": "ActionOutput",
-           "OutputUUID": "1212B912-43DB-4E31-A0CA-3386D3484315",
+           "OutputUUID": "379448FC-BC0E-4AF5-9C9C-C47C76A14C90",
            "OutputName": "Result"
           },
           "WFSerializationType": "WFTextTokenAttachment"
@@ -693,7 +707,7 @@
          "Variable": {
           "Value": {
            "Type": "ActionOutput",
-           "OutputUUID": "1212B912-43DB-4E31-A0CA-3386D3484315",
+           "OutputUUID": "379448FC-BC0E-4AF5-9C9C-C47C76A14C90",
            "OutputName": "Result"
           },
           "WFSerializationType": "WFTextTokenAttachment"
@@ -710,20 +724,20 @@
    "WFWorkflowActionIdentifier": "is.workflow.actions.orientationlock.set",
    "WFWorkflowActionParameters": {
     "operation": "toggle",
-    "UUID": "CB54301B-43B0-4CEB-8808-9DFC63DD181D"
+    "UUID": "A844637A-82A7-417D-9F95-E1FEFCFF9019"
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
    "WFWorkflowActionParameters": {
-    "GroupingIdentifier": "1AA74D76-0D3B-4A4D-96DE-D3A5C9F37F9D",
+    "GroupingIdentifier": "FBDC3D65-8644-4D1F-8CB3-2ABDB0D57EC3",
     "WFControlFlowMode": 1
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
    "WFWorkflowActionParameters": {
-    "GroupingIdentifier": "42806CAA-AB5A-4FD7-8DA6-68F230FBF20E",
+    "GroupingIdentifier": "3E875B5E-CE9A-4877-8793-AF27D5783224",
     "WFControlFlowMode": 0,
     "WFCondition": 0,
     "WFInput": {
@@ -731,8 +745,8 @@
      "Variable": {
       "Value": {
        "Type": "ActionOutput",
-       "OutputUUID": "DEFB4797-F577-4A18-833A-153FB9DB02C8",
-       "OutputName": "Formatted Date",
+       "OutputUUID": "EB7CC4F0-6EDA-4822-9F27-BC133B47E86D",
+       "OutputName": "Numbers",
        "Aggrandizements": [
         {
          "Type": "WFCoercionVariableAggrandizement",
@@ -751,20 +765,20 @@
    "WFWorkflowActionIdentifier": "is.workflow.actions.flashlight",
    "WFWorkflowActionParameters": {
     "operation": "toggle",
-    "UUID": "2280124E-079E-4976-B27A-57C71D3059EC"
+    "UUID": "3C8C8EBA-B2E4-443F-BFD0-88D6883603BB"
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
    "WFWorkflowActionParameters": {
-    "GroupingIdentifier": "42806CAA-AB5A-4FD7-8DA6-68F230FBF20E",
+    "GroupingIdentifier": "3E875B5E-CE9A-4877-8793-AF27D5783224",
     "WFControlFlowMode": 1
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
    "WFWorkflowActionParameters": {
-    "GroupingIdentifier": "1EDA38CD-BA13-4915-8293-81487E00FBCA",
+    "GroupingIdentifier": "663063CF-87B3-40CF-B9B2-54EE69F46224",
     "WFControlFlowMode": 0,
     "WFCondition": 3,
     "WFInput": {
@@ -772,8 +786,8 @@
      "Variable": {
       "Value": {
        "Type": "ActionOutput",
-       "OutputUUID": "DEFB4797-F577-4A18-833A-153FB9DB02C8",
-       "OutputName": "Formatted Date",
+       "OutputUUID": "EB7CC4F0-6EDA-4822-9F27-BC133B47E86D",
+       "OutputName": "Numbers",
        "Aggrandizements": [
         {
          "Type": "WFCoercionVariableAggrandizement",
@@ -808,13 +822,13 @@
      "Name": "Home Assistant",
      "AppIntentIdentifier": "FireEventIntent"
     },
-    "UUID": "73C7AF1D-56E1-443B-B8D1-F0931A3D2118"
+    "UUID": "252CB033-63AA-4B48-BF0C-0D6B9D34170A"
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
    "WFWorkflowActionParameters": {
-    "GroupingIdentifier": "1EDA38CD-BA13-4915-8293-81487E00FBCA",
+    "GroupingIdentifier": "663063CF-87B3-40CF-B9B2-54EE69F46224",
     "WFControlFlowMode": 1
    }
   },
@@ -827,48 +841,48 @@
      "TeamIdentifier": "NYSBRSGD6C"
     },
     "WFAppIdentifier": "nl.serewis.ikweetwatikeet",
-    "UUID": "BC1ECD06-66B3-4DDA-AB9A-31FA31F9DF68"
+    "UUID": "07050873-843B-4A3C-8AC4-3F9096E70D91"
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
    "WFWorkflowActionParameters": {
-    "GroupingIdentifier": "1EDA38CD-BA13-4915-8293-81487E00FBCA",
+    "GroupingIdentifier": "663063CF-87B3-40CF-B9B2-54EE69F46224",
     "WFControlFlowMode": 2
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
    "WFWorkflowActionParameters": {
-    "GroupingIdentifier": "42806CAA-AB5A-4FD7-8DA6-68F230FBF20E",
+    "GroupingIdentifier": "3E875B5E-CE9A-4877-8793-AF27D5783224",
     "WFControlFlowMode": 2
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
    "WFWorkflowActionParameters": {
-    "GroupingIdentifier": "1AA74D76-0D3B-4A4D-96DE-D3A5C9F37F9D",
+    "GroupingIdentifier": "FBDC3D65-8644-4D1F-8CB3-2ABDB0D57EC3",
     "WFControlFlowMode": 2
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
    "WFWorkflowActionParameters": {
-    "GroupingIdentifier": "16DE2011-5995-429A-81D0-8ADF0C7E58FC",
+    "GroupingIdentifier": "BB4C0363-BD59-4AC8-9CA6-7C0C71BF5D30",
     "WFControlFlowMode": 2
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
    "WFWorkflowActionParameters": {
-    "GroupingIdentifier": "125DA556-E25D-4B9E-8558-AB57276DB625",
+    "GroupingIdentifier": "137ECF84-E931-418F-8DFB-11D10801D84E",
     "WFControlFlowMode": 2
    }
   },
   {
    "WFWorkflowActionIdentifier": "is.workflow.actions.vibrate",
    "WFWorkflowActionParameters": {
-    "UUID": "133223A0-1AD8-4629-81FF-E6BB061C29BE"
+    "UUID": "56BBA958-CF6F-4EE2-ACCD-C2A2ADDB753C"
    }
   }
  ]
