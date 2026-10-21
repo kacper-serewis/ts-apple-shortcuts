@@ -692,20 +692,30 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
       parameters: { kind: "literal", value: { WFSelectedApp: selected, WFAppIdentifier: bundle } } });
     return { kind: "ref", id, outputName: "App", valueType: "content" };
   }
-  /** Number(text) marks text as a number; native conditions and Calculate coerce it on use
-   * (Shortcuts number conversion, not JavaScript's: no hex, Infinity or NaN). */
+  /** Number(text) converts text with Get Numbers from Input, so later conditions compare real
+   * numbers. A number coercion on a text variable alone is not enough: on iOS the condition
+   * still compared text ("10" < "6"). Shortcuts number parsing, not JavaScript's: no hex,
+   * Infinity or NaN, and text without a number yields nothing. */
   function toNumber(expr: ts.CallExpression, scopes: Scope[], output: IRNode[]): ScalarValue {
     if (expr.questionDotToken || expr.typeArguments?.length || expr.arguments.length !== 1 || ts.isSpreadElement(expr.arguments[0])) fail("Number(value) takes one text or number argument.", expr);
     const input = value(expr.arguments[0], scopes, output);
     const kind = category(input);
     if (kind === "number") return input as ScalarValue;
     if (kind !== "text") fail("Number(value) converts text or numbers only.", expr.arguments[0]);
-    if (input.kind === "ref") return { ...input, valueType: "number" };
+    const line = position(expr).line;
+    let text = input;
+    if (input.kind !== "ref") {
+      const textId = nextId++;
+      output.push({ kind: "native", id: textId, identifier: "is.workflow.actions.gettext", line, parameters: { kind: "parameter-object", entries: [
+        ["WFTextActionText", { kind: "parameter-value", value: input, encoding: "text" }],
+      ] } });
+      text = { kind: "ref", id: textId, outputName: "Text" };
+    }
     const id = nextId++;
-    output.push({ kind: "native", id, identifier: "is.workflow.actions.gettext", line: position(expr).line, parameters: { kind: "parameter-object", entries: [
-      ["WFTextActionText", { kind: "parameter-value", value: input, encoding: "text" }],
+    output.push({ kind: "native", id, identifier: "is.workflow.actions.detect.number", line, parameters: { kind: "parameter-object", entries: [
+      ["WFInput", { kind: "parameter-value", value: text, encoding: "attachment" }],
     ] } });
-    return { kind: "ref", id, outputName: "Text", valueType: "number" };
+    return { kind: "ref", id, outputName: "Numbers", valueType: "number" };
   }
   function numeric(node: ts.Expression, scopes: Scope[], output: IRNode[]): ScalarValue {
     const result = value(node, scopes, output);
