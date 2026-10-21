@@ -25,7 +25,8 @@ export const wrappers: Record<string, Wrapper> = {
   wait: { identifier: "delay", args: [arg("WFDelayTime")] },
   vibrate: { identifier: "vibrate", args: [] },
   currentDate: { identifier: "date", args: [], defaults: { WFDateActionMode: "Current Date" }, output: "Date" },
-  formatDate: { identifier: "format.date", args: [arg("WFDate", "attachment"), arg("WFDateFormat", "text")], defaults: { WFDateFormatStyle: "Custom" }, output: "Formatted Date" },
+  // WFDate is a date text field: as a bare attachment, Format Date returned nothing on iOS/macOS.
+  formatDate: { identifier: "format.date", args: [arg("WFDate", "text"), arg("WFDateFormat", "text")], defaults: { WFDateFormatStyle: "Custom" }, output: "Formatted Date" },
   getBatteryLevel: { identifier: "getbatterylevel", args: [], output: "Battery Level" },
   getDictionaryValue: { identifier: "getvalueforkey", args: [arg("WFInput", "attachment"), arg("WFDictionaryKey", "text")], defaults: { WFGetDictionaryValueType: "Value" }, output: "Dictionary Value", dictionaryInput: 0 },
   dictionaryKeys: { identifier: "getvalueforkey", args: [arg("WFInput", "attachment")], defaults: { WFGetDictionaryValueType: "All Keys" }, output: "Dictionary Value", dictionaryInput: 0 },
