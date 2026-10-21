@@ -68,12 +68,15 @@ export interface FieldNode {
   line: number;
 }
 /** Reads an App Intents entity property in place: the result aliases the input's
- * action output with an added native property aggrandizement. Emits no action. */
+ * action output with an added native property aggrandizement. Emits no action.
+ * Classic Shortcuts content items (locations, Focus modes) name the property by its
+ * title instead; `contentItem` carries their optional PropertyUserInfo. */
 export interface PropertyNode {
   kind: "property";
   id: number;
   input: OutputRef;
   property: string;
+  contentItem?: { userInfo?: string };
   line: number;
 }
 export type NativeParameter =
@@ -90,6 +93,9 @@ export type DictionaryPart = { kind: "entry"; key: string; value: Value } | { ki
 export interface AssembleDictionaryNode { kind: "assemble-dictionary"; id: number; parts: DictionaryPart[]; line: number }
 export interface MathNode { kind: "math"; id: number; left: ScalarValue; right: ScalarValue; operator: "+" | "-" | "*" | "/" | "%" | "**"; line: number }
 export interface NumericIfNode { kind: "numeric-if"; left: ScalarValue; right: ScalarValue; operator: "===" | "!==" | "<" | "<=" | ">" | ">="; then: IRNode[]; else: IRNode[] | null; line: number }
+/** Native enum condition (iOS 26.5 editor): `WFLinkEnumeration` holds the case identifier.
+ * Several tests form one "Any are true" condition. */
+export interface EnumIfNode { kind: "enum-if"; tests: { input: OutputRef; caseId: string }[]; then: IRNode[]; else: IRNode[] | null; line: number }
 export interface SetNode { kind: "set"; name: string; value: Value; line: number }
 export interface GetNode { kind: "get"; id: number; name: string; line: number }
 export interface ReturnNode { kind: "return"; value?: Value; line: number }
@@ -100,7 +106,7 @@ export interface YieldNode { kind: "yield"; value?: Value; line: number }
 export interface JsonNode { kind: "json"; operation: "parse" | "stringify"; id: number; input: Value; line: number }
 export type StringMethod = "trim" | "trimStart" | "trimEnd" | "toUpperCase" | "toLowerCase" | "concat" | "startsWith" | "endsWith" | "includes";
 export interface StringNode { kind: "string"; method: StringMethod; id: number; input: ScalarValue; args: ScalarValue[]; line: number }
-export type IRNode = ActionNode | IfNode | ListNode | AssembleListNode | RepeatNode | FieldNode | NativeNode | DictionaryNode | AssembleDictionaryNode | MathNode | NumericIfNode | SetNode | GetNode | ReturnNode | RepeatCountNode | MenuNode | IndexNode | YieldNode | JsonNode | StringNode | PropertyNode;
+export type IRNode = ActionNode | IfNode | ListNode | AssembleListNode | RepeatNode | FieldNode | NativeNode | DictionaryNode | AssembleDictionaryNode | MathNode | NumericIfNode | SetNode | GetNode | ReturnNode | RepeatCountNode | MenuNode | IndexNode | YieldNode | JsonNode | StringNode | PropertyNode | EnumIfNode;
 
 export interface NativeAction extends PlistDictionary {
   WFWorkflowActionIdentifier: string;

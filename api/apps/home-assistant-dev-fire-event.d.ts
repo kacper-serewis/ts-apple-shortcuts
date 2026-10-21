@@ -109,7 +109,7 @@ declare module "@js-shortcuts/ios" {
     export function openPage(parameters: { "page"?: Entity<"PageAppEntity"> | NativeEncoded }): Promise<void>;
     /** Requires a native export binding before compilation. */
     export function reloadWidgets(parameters?: {  }): Promise<void>;
-    /** Requires a native export binding before compilation. */
+    /** Native export binding available. */
     export function renderTemplate(parameters: { "server": Entity<"IntentServerAppEntity"> | NativeEncoded; "template": string | NativeEncoded }): Promise<string>;
     /** Requires a native export binding before compilation. */
     export function resetAllCustomWidgetConfirmation(parameters?: {  }): Promise<void>;

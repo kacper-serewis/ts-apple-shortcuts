@@ -291,6 +291,150 @@
           "assistantOnly": false,
           "isDiscoverable": true
         }
+      },
+      "RenderTemplateIntent": {
+        "assistantDefinedSchemaTraits": [],
+        "assistantDefinedSchemas": [],
+        "authenticationPolicy": 0,
+        "availabilityAnnotations": {
+          "LNPlatformNameWildcard": {
+            "introducedVersion": "*"
+          }
+        },
+        "customIntentClassName": "RenderTemplateIntent",
+        "descriptionMetadata": {
+          "descriptionText": {
+            "alternatives": [],
+            "defaultValue": "Render a Home Assistant template. Only users with the admin role can perform this action.",
+            "key": "app_intents.render_template.description"
+          },
+          "searchKeywords": []
+        },
+        "effectiveBundleIdentifiers": [],
+        "fullyQualifiedTypeName": "HomeAssistant.RenderTemplateAppIntent",
+        "identifier": "RenderTemplateIntent",
+        "isAuthPolExplicit": false,
+        "isDiscoverable": true,
+        "mangledTypeName": "13HomeAssistant23RenderTemplateAppIntentV",
+        "mangledTypeNameByBundleIdentifier": {},
+        "mangledTypeNameByBundleIdentifierV2": {},
+        "mangledTypeNameV2": "13HomeAssistant23RenderTemplateAppIntentV",
+        "openAppWhenRun": false,
+        "outputFlags": 0,
+        "outputType": {
+          "primitive": {
+            "wrapper": {
+              "typeIdentifier": 0
+            }
+          }
+        },
+        "parameters": [
+          {
+            "capabilities": 0,
+            "dynamicOptionsSupport": 2,
+            "inputConnectionBehavior": 0,
+            "isInput": false,
+            "isOptional": false,
+            "name": "server",
+            "resolvableInputTypes": [],
+            "title": {
+              "alternatives": [],
+              "defaultValue": "Server",
+              "key": "app_intents.server.title"
+            },
+            "typeSpecificMetadata": [],
+            "valueType": {
+              "entity": {
+                "wrapper": {
+                  "typeName": "IntentServerAppEntity"
+                }
+              }
+            }
+          },
+          {
+            "capabilities": 1,
+            "dynamicOptionsSupport": 0,
+            "inputConnectionBehavior": 0,
+            "isInput": false,
+            "isOptional": false,
+            "name": "template",
+            "resolvableInputTypes": [
+              {
+                "kindValue": 0,
+                "valueType": {
+                  "array": {
+                    "wrapper": {
+                      "capabilities": 3,
+                      "memberValueType": {
+                        "primitive": {
+                          "wrapper": {
+                            "typeIdentifier": 2
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "kindValue": 0,
+                "valueType": {
+                  "primitive": {
+                    "wrapper": {
+                      "typeIdentifier": 0
+                    }
+                  }
+                }
+              },
+              {
+                "kindValue": 0,
+                "valueType": {
+                  "primitive": {
+                    "wrapper": {
+                      "typeIdentifier": 2
+                    }
+                  }
+                }
+              }
+            ],
+            "title": {
+              "alternatives": [],
+              "defaultValue": "Template",
+              "key": "app_intents.render_template.template.title"
+            },
+            "typeSpecificMetadata": [
+              "LNValueTypeSpecificMetadataKeyDefaultValue",
+              {
+                "string": {
+                  "wrapper": "{{ now() }}"
+                }
+              }
+            ],
+            "valueType": {
+              "primitive": {
+                "wrapper": {
+                  "typeIdentifier": 0
+                }
+              }
+            }
+          }
+        ],
+        "presentationStyle": 0,
+        "requiredCapabilities": [],
+        "supportedModes": 1,
+        "systemProtocolMetadata": [],
+        "systemProtocolMetadataV2": [],
+        "systemProtocols": [],
+        "title": {
+          "alternatives": [],
+          "defaultValue": "Render template",
+          "key": "app_intents.render_template.title"
+        },
+        "typeSpecificMetadata": [],
+        "visibilityMetadata": {
+          "assistantOnly": false,
+          "isDiscoverable": true
+        }
       }
     },
     "entities": {
@@ -351,6 +495,17 @@
           "BundleIdentifier": "io.robbie.HomeAssistant",
           "Name": "Home Assistant",
           "AppIntentIdentifier": "FireEventIntent"
+        }
+      }
+    },
+    "RenderTemplateIntent": {
+      "identifier": "io.robbie.HomeAssistant.RenderTemplateIntent",
+      "defaults": {
+        "AppIntentDescriptor": {
+          "TeamIdentifier": "QMQYCKL255",
+          "BundleIdentifier": "io.robbie.HomeAssistant",
+          "Name": "Home Assistant",
+          "AppIntentIdentifier": "RenderTemplateIntent"
         }
       }
     }

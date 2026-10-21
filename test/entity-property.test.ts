@@ -130,7 +130,7 @@ test("entityProperty rejects titles, unknown catalog identifiers, lists and non-
 test("Fire Event binding comes from the simulator export; the release manifest only renames its identity", () => {
   const reference = fixture("home-assistant-fire-event-workflow.json");
   const dev = validateAppMetadata(JSON.parse(example("api/apps/home-assistant-dev-fire-event.json")));
-  assert.deepEqual(bindAppWorkflow({ ...dev, bindings: {} }, reference).bindings, dev.bindings);
+  assert.deepEqual(bindAppWorkflow({ ...dev, bindings: {} }, reference).bindings, { FireEventIntent: dev.bindings.FireEventIntent });
   const parameters = reference.WFWorkflowActions[0].WFWorkflowActionParameters;
   // The native editor stores event data as plain text, not a dictionary.
   assert.equal(typeof parameters.eventData, "string");

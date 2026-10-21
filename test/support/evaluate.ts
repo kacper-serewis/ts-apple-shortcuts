@@ -1,12 +1,14 @@
 import assert from "node:assert/strict";
-import { compile } from "../../src/compiler.js";
+import { compile, type CompileOptions } from "../../src/compiler.js";
 import type { IRNode, NativeNode, ScalarValue, Value } from "../../src/model.js";
 
 /** Evaluate the executable IR subset for pure control-flow programs. Tests assert source-level
  * behavior, not generated instruction counts; native serialization is separately tested on iOS.
  */
-export function evaluate(code: string, answers: number[] = [], menuChoices: string[] = [], onRequest?: (node: NativeNode, read: (value: Value) => any) => unknown): unknown[] {
-  const { ir } = compile(code);
+export function evaluate(code: string, answers: number[] = [], menuChoices: string[] = [], onRequest?: (node: NativeNode, read: (value: Value) => any) => unknown,
+  options: CompileOptions & { natives?: (node: NativeNode, read: (value: Value) => any) => unknown } = {}): unknown[] {
+  const { natives, ...compileOptions } = options;
+  const { ir } = compile(code, compileOptions);
   let refs = new Map<number, unknown>();
   let variables = new Map<string, unknown>();
   const seen: unknown[] = [];
@@ -42,11 +44,14 @@ export function evaluate(code: string, answers: number[] = [], menuChoices: stri
         case "property": refs.set(node.id, result(node.input)[node.property]); break;
         case "index": refs.set(node.id, result(node.input)[typeof node.index === "number" ? node.index : result(node.index)]); break;
         case "math": {
-          const a = result(node.left), b = result(node.right);
+          // Calculate coerces its operands to numbers (e.g. Number(text) results).
+          const a = Number(result(node.left)), b = Number(result(node.right));
           refs.set(node.id, node.operator === "+" ? a + b : node.operator === "-" ? a - b : node.operator === "*" ? a * b : node.operator === "/" ? a / b : node.operator === "%" ? a % b : a ** b);
           break;
         }
         case "numeric-if": visit(condition(node.left, node.operator, result(node.right)) ? node.then : node.else ?? []); break;
+        // Test enum results are native case identifiers, as stored in WFLinkEnumeration.
+        case "enum-if": visit(node.tests.some(test => result(test.input) === test.caseId) ? node.then : node.else ?? []); break;
         case "if": visit(condition(node.left, node.operator, typeof node.right === "string" ? node.right : result(node.right)) ? node.then : node.else ?? []); break;
         case "repeat": {
           const collected: unknown[] = [];
@@ -181,6 +186,7 @@ export function evaluate(code: string, answers: number[] = [], menuChoices: stri
             }
             break;
           }
+          if (natives && node.identifier !== "is.workflow.actions.ask") { refs.set(node.id, natives(node, result)); break; }
           assert.equal(node.identifier, "is.workflow.actions.ask");
           assert.ok(answers.length, "Unexpected extra prompt");
           refs.set(node.id, answers.shift());

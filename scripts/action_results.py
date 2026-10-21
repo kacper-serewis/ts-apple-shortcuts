@@ -51,6 +51,16 @@ def declarations(actions, snapshot):
             values = sorted(set(case['title'] for case in definition['cases'] if case['title'] is not None))
             lines.append(f'    {json.dumps(identifier)}: ' + ' | '.join(json.dumps(value) for value in values) + ';')
     lines += ['  }',
+              '  /** Native case identifiers by English title, for enum conditions (WFLinkEnumeration).',
+              '   * Enums whose titles are missing or not unique are omitted. */',
+              '  export interface NativeEnumCases {']
+    for identifier, definition in snapshot['types'].items():
+        cases = definition.get('cases') or []
+        titles = [case['title'] for case in cases]
+        if cases and None not in titles and len(set(titles)) == len(titles):
+            fields = ' '.join(f'{json.dumps(case["title"])}: {json.dumps(case["id"])};' for case in cases)
+            lines.append(f'    {json.dumps(identifier)}: {{ {fields} }};')
+    lines += ['  }',
               '  /** Static App Entity property declarations (identifier: value type) from Apple metadata.',
               '   * Read with entityProperty(entity, "identifier"); titles are English display names. */',
               '  export interface NativeEntityProperties {']

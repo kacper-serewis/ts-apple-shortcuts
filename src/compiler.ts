@@ -76,7 +76,7 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
   const imports = new Map<string, string>();
   const functions = new Map<string, ts.FunctionDeclaration>();
   const callStack: ts.FunctionDeclaration[] = [];
-  const special = new Set(["actions", "native", "raw", "text", "attachment", "dictionary", "repeat", "menu", "input", "plistData", "plistDate", "stringifyJson", "parseJson", "requestJson", "entityProperty"]);
+  const special = new Set(["actions", "native", "raw", "text", "attachment", "dictionary", "repeat", "menu", "input", "plistData", "plistDate", "stringifyJson", "parseJson", "requestJson", "entityProperty", "openApp"]);
   // Load metadata only when catalog calls are used; ordinary compilation has no catalog I/O.
   let catalogKeys: Map<string, Set<string>> | undefined;
   let catalogCategories: Map<string, Map<string, CatalogAction>> | undefined;
@@ -250,6 +250,7 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
       if (json) return jsonCall(invocation, json, scopes, output);
       if (stringMethodName(invocation)) return stringMethod(invocation, scopes, output);
       if (arrayMethodName(invocation)) return arrayMethod(invocation, scopes, output, needsValue);
+      if (intrinsic(invocation, scopes) === "openApp") return openApp(node, invocation, output);
       const helper = helperDeclaration(invocation, scopes);
       if (helper) return inlineHelper(helper, invocation, scopes, output, needsValue, ts.isAwaitExpression(node));
     }
@@ -406,6 +407,8 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     if (ts.isCallExpression(node) && arrayMethodName(node)) return arrayMethod(node, scopes, output, true)!;
     if (ts.isCallExpression(node) && helperDeclaration(node, scopes)) return call(node, scopes, output, true)!;
     if (ts.isCallExpression(node) && intrinsic(node, scopes) === "entityProperty") return entityProperty(node, scopes, output);
+    if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === "Number"
+      && !scopes.some(scope => scope.has("Number")) && !functions.has("Number") && !imports.has("Number")) return toNumber(node, scopes, output);
     if (ts.isCallExpression(node) && intrinsic(node, scopes) === "input") {
       if (whileDepth) fail("Capture input<T>() before the while loop; recursive iterations use internal Shortcut Input.", node);
       if (node.arguments.length) fail("input<T>() takes no arguments.", node);
@@ -636,7 +639,12 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     const [entityNode, nameNode] = expr.arguments;
     const name = unwrap(nameNode);
     if (!ts.isStringLiteralLike(name) || !name.text) fail("entityProperty requires a literal property identifier such as \"hours\".", nameNode);
-    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name.text)) fail(`'${name.text}' is not an App Intents property identifier. Use the identifier from Apple metadata (for example "hours"), not the localized title.`, nameNode);
+    // Classic Shortcuts content items (e.g. NativeEntity<"placemark">, WFFocusModeContentItem)
+    // name properties by their English title, such as "Latitude" or "Name".
+    const nativeType = checker.getTypeAtLocation(entityNode).getProperty("__nativeType");
+    const nativeId = nativeType && checker.getTypeOfSymbolAtLocation(nativeType, entityNode);
+    const contentItem = !!nativeId?.isStringLiteral() && (!nativeId.value.includes(".") || /^com\.apple\.shortcuts\.WF\w+ContentItem$/.test(nativeId.value));
+    if (contentItem ? !/^[A-Za-z][A-Za-z0-9 ]*$/.test(name.text) : !/^[A-Za-z_][A-Za-z0-9_]*$/.test(name.text)) fail(`'${name.text}' is not an App Intents property identifier. Use the identifier from Apple metadata (for example "hours"), not the localized title.`, nameNode);
     // A catalog entity with declared properties must resolve to the typed overload;
     // otherwise the untyped fallback would hide a misspelled identifier.
     const signature = checker.getResolvedSignature(expr);
@@ -657,8 +665,47 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     const id = nextId++;
     const result = typedRef(checker.getTypeAtLocation(expr), id, input.outputName, expr, true);
     if (result.kind === "object-ref") fail("Entity properties cannot be read as JSON objects. Declare a scalar, list or NativeContent value.", expr);
-    output.push({ kind: "property", id, input, property: name.text, line: position(expr).line });
+    output.push({ kind: "property", id, input, property: name.text, line: position(expr).line,
+      ...(contentItem ? { contentItem: name.text === "Name" ? { userInfo: "WFItemName" } : {} } : {}) });
     return result;
+  }
+  /** Open App in the editor's shape: the picked app's descriptor plus WFAppIdentifier. */
+  function openApp(node: ts.Expression, expr: ts.CallExpression, output: IRNode[]): Value {
+    if (!ts.isAwaitExpression(node) || expr.questionDotToken || expr.typeArguments?.length) fail("Use await openApp({ bundleIdentifier, name }).", node);
+    if (expr.arguments.length !== 1 || !ts.isObjectLiteralExpression(unwrap(expr.arguments[0]))) fail("openApp takes one object literal: { bundleIdentifier, name, teamIdentifier? }.", expr);
+    const fields = new Map<string, string>();
+    for (const property of (unwrap(expr.arguments[0]) as ts.ObjectLiteralExpression).properties) {
+      if (!ts.isPropertyAssignment(property)) fail("openApp fields must be plain properties with static strings.", property);
+      const key = propertyName(property.name, fail);
+      const text = unwrap(property.initializer);
+      if (!ts.isStringLiteralLike(text) || !text.text) fail(`openApp ${key} must be a non-empty static string.`, property.initializer);
+      fields.set(key, text.text);
+    }
+    for (const key of fields.keys()) if (!["bundleIdentifier", "name", "teamIdentifier"].includes(key)) fail(`Unknown openApp field '${key}'.`, expr.arguments[0]);
+    if (!fields.has("bundleIdentifier") || !fields.has("name")) fail("openApp requires bundleIdentifier and name.", expr.arguments[0]);
+    const bundle = fields.get("bundleIdentifier")!;
+    if (!/^[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$/.test(bundle)) fail("openApp bundleIdentifier must be a bundle identifier such as com.apple.mobilesafari.", expr.arguments[0]);
+    const selected: PlistDictionary = { BundleIdentifier: bundle, Name: fields.get("name")! };
+    if (fields.has("teamIdentifier")) selected.TeamIdentifier = fields.get("teamIdentifier")!;
+    const id = nextId++;
+    output.push({ kind: "native", id, identifier: "is.workflow.actions.openapp", line: position(node).line,
+      parameters: { kind: "literal", value: { WFSelectedApp: selected, WFAppIdentifier: bundle } } });
+    return { kind: "ref", id, outputName: "App", valueType: "content" };
+  }
+  /** Number(text) marks text as a number; native conditions and Calculate coerce it on use
+   * (Shortcuts number conversion, not JavaScript's: no hex, Infinity or NaN). */
+  function toNumber(expr: ts.CallExpression, scopes: Scope[], output: IRNode[]): ScalarValue {
+    if (expr.questionDotToken || expr.typeArguments?.length || expr.arguments.length !== 1 || ts.isSpreadElement(expr.arguments[0])) fail("Number(value) takes one text or number argument.", expr);
+    const input = value(expr.arguments[0], scopes, output);
+    const kind = category(input);
+    if (kind === "number") return input as ScalarValue;
+    if (kind !== "text") fail("Number(value) converts text or numbers only.", expr.arguments[0]);
+    if (input.kind === "ref") return { ...input, valueType: "number" };
+    const id = nextId++;
+    output.push({ kind: "native", id, identifier: "is.workflow.actions.gettext", line: position(expr).line, parameters: { kind: "parameter-object", entries: [
+      ["WFTextActionText", { kind: "parameter-value", value: input, encoding: "text" }],
+    ] } });
+    return { kind: "ref", id, outputName: "Text", valueType: "number" };
   }
   function numeric(node: ts.Expression, scopes: Scope[], output: IRNode[]): ScalarValue {
     const result = value(node, scopes, output);
@@ -1296,6 +1343,8 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     node = unwrap(node);
     if (ts.isPrefixUnaryExpression(node) && node.operator === ts.SyntaxKind.ExclamationToken) return condition(node.operand, scopes, elseBody, thenBody);
     if (ts.isBinaryExpression(node)) {
+      const enumTests = nativeEnumTests(node, scopes);
+      if (enumTests) return [...enumTests.output, { kind: "enum-if", tests: enumTests.tests, then: thenBody(), else: elseBody(), line: position(node).line }];
       if (node.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken) return condition(node.left, scopes, () => condition(node.right, scopes, thenBody, elseBody), elseBody);
       if (node.operatorToken.kind === ts.SyntaxKind.BarBarToken) return condition(node.left, scopes, thenBody, () => condition(node.right, scopes, thenBody, elseBody));
       const operator = node.operatorToken.getText(sourceFile);
@@ -1317,6 +1366,61 @@ export function compile(source: string, { filename = "shortcut.ts", name = "TS S
     if (category(flag) !== "boolean") fail("Conditions require booleans or explicit comparisons; implicit truthiness is not supported.", node);
     output.push({ kind: "numeric-if", left: flag as ScalarValue, right: { kind: "boolean", value: true }, operator: "===", then: thenBody(), else: elseBody(), line: position(node).line });
     return output;
+  }
+  let enumCases: Map<string, Record<string, string> | null> | undefined;
+  /** NativeEnumCases keyed by their sorted titles; null marks title sets shared by several enums. */
+  function nativeEnums(): Map<string, Record<string, string> | null> {
+    if (enumCases) return enumCases;
+    enumCases = new Map();
+    const module = checker.getAmbientModules().find(symbol => symbol.name === '"@js-shortcuts/ios"');
+    const cases = module && checker.getExportsOfModule(module).find(symbol => symbol.name === "NativeEnumCases");
+    if (!cases) return enumCases;
+    for (const entry of checker.getDeclaredTypeOfSymbol(cases).getProperties()) {
+      const ids: Record<string, string> = {};
+      for (const item of checker.getTypeOfSymbol(entry).getProperties()) {
+        const id = checker.getTypeOfSymbol(item);
+        if (id.isStringLiteral()) ids[item.name] = id.value;
+      }
+      const key = Object.keys(ids).sort().join("\u0000");
+      enumCases.set(key, enumCases.has(key) ? null : ids);
+    }
+    return enumCases;
+  }
+  /** `value === "Case"` on an Apple enum result, or an `||` chain of them, as one native
+   * enum condition. Other comparisons (including !==) keep their text lowering. */
+  function nativeEnumTests(node: ts.BinaryExpression, scopes: Scope[]): { output: IRNode[]; tests: { input: OutputRef; caseId: string }[] } | undefined {
+    const leaves: ts.BinaryExpression[] = [];
+    const collect = (expr: ts.Expression): boolean => {
+      expr = unwrap(expr);
+      if (!ts.isBinaryExpression(expr)) return false;
+      if (expr.operatorToken.kind === ts.SyntaxKind.BarBarToken) return collect(expr.left) && collect(expr.right);
+      if (expr.operatorToken.kind !== ts.SyntaxKind.EqualsEqualsEqualsToken) return false;
+      leaves.push(expr);
+      return true;
+    };
+    if (!collect(node)) return undefined;
+    const found: { subject: ts.Expression; caseId: string }[] = [];
+    for (const leaf of leaves) {
+      const [subject, literal] = ts.isStringLiteralLike(unwrap(leaf.right)) ? [leaf.left, unwrap(leaf.right)] : [leaf.right, unwrap(leaf.left)];
+      if (!ts.isStringLiteralLike(literal) || ts.isStringLiteralLike(unwrap(subject))) return undefined;
+      // Use the declared type: control flow narrows `x` in `x === "A" || x === "B"`.
+      const symbol = ts.isIdentifier(unwrap(subject)) ? checker.getSymbolAtLocation(unwrap(subject)) : undefined;
+      const type = symbol ? checker.getTypeOfSymbol(symbol) : checker.getTypeAtLocation(subject);
+      const members = type.isUnion() ? type.types : [type];
+      if (!members.every(member => member.isStringLiteral())) return undefined;
+      const ids = nativeEnums().get(members.map(member => (member as ts.StringLiteralType).value).sort().join("\u0000"));
+      if (!ids || !Object.hasOwn(ids, literal.text)) return undefined;
+      found.push({ subject, caseId: ids[literal.text] });
+    }
+    const output: IRNode[] = [];
+    const tests = found.map(({ subject, caseId }) => {
+      const before = output.length;
+      const input = value(subject, scopes, output);
+      // A single condition evaluates its subject once; a combined condition must not skip actions.
+      if (input.kind !== "ref" || (found.length > 1 && output.length !== before)) fail("Combined enum conditions compare existing values; store each action result in a const first.", subject);
+      return { input, caseId };
+    });
+    return { output, tests };
   }
   function textComparisonRight(value: TextValue | OutputRef): string | TextValue | OutputRef {
     return value.kind === "text" && value.parts.every(part => typeof part === "string") ? value.parts.join("") : value;

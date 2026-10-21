@@ -1,0 +1,210 @@
+{
+ "orientation": {
+  "WFWorkflowActions": [
+   {
+    "WFWorkflowActionIdentifier": "com.apple.ShortcutsActions.GetOrientationAction",
+    "WFWorkflowActionParameters": {
+     "AppIntentDescriptor": {
+      "TeamIdentifier": "0000000000",
+      "BundleIdentifier": "com.apple.ShortcutsActions",
+      "Name": "ShortcutsActions",
+      "AppIntentIdentifier": "GetOrientationAction"
+     },
+     "UUID": "E3827304-C444-4E07-BFF4-3969ECEF0B89"
+    }
+   },
+   {
+    "WFWorkflowActionIdentifier": "is.workflow.actions.orientationlock.set",
+    "WFWorkflowActionParameters": {
+     "operation": "toggle"
+    }
+   },
+   {
+    "WFWorkflowActionIdentifier": "is.workflow.actions.flashlight",
+    "WFWorkflowActionParameters": {
+     "operation": "toggle"
+    }
+   },
+   {
+    "WFWorkflowActionIdentifier": "is.workflow.actions.openapp",
+    "WFWorkflowActionParameters": {
+     "WFSelectedApp": {
+      "BundleIdentifier": "nl.serewis.ikweetwatikeet",
+      "Name": "Ik weet wat ik eet",
+      "TeamIdentifier": "NYSBRSGD6C"
+     },
+     "WFAppIdentifier": "nl.serewis.ikweetwatikeet",
+     "UUID": "736FB1D8-9366-4C21-8C39-B706554197B9"
+    }
+   },
+   {
+    "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
+    "WFWorkflowActionParameters": {
+     "GroupingIdentifier": "E782AA82-B076-4C94-B92E-DFC577BC42D9",
+     "WFControlFlowMode": 0,
+     "WFConditions": {
+      "WFSerializationType": "WFContentPredicateTableTemplate",
+      "Value": {
+       "WFContentPredicateBoundedDate": false,
+       "WFActionParameterFilterTemplates": [
+        {
+         "WFCondition": 4,
+         "WFInput": {
+          "Type": "Variable",
+          "Variable": {
+           "Value": {
+            "OutputUUID": "E3827304-C444-4E07-BFF4-3969ECEF0B89",
+            "Type": "ActionOutput",
+            "OutputName": "Get Orientation"
+           },
+           "WFSerializationType": "WFTextTokenAttachment"
+          }
+         },
+         "WFLinkEnumeration": "2"
+        },
+        {
+         "WFLinkEnumeration": "3",
+         "WFInput": {
+          "Type": "Variable",
+          "Variable": {
+           "Value": {
+            "OutputUUID": "E3827304-C444-4E07-BFF4-3969ECEF0B89",
+            "Type": "ActionOutput",
+            "OutputName": "Get Orientation"
+           },
+           "WFSerializationType": "WFTextTokenAttachment"
+          }
+         },
+         "WFCondition": 4
+        }
+       ],
+       "WFActionParameterFilterPrefix": 0
+      }
+     }
+    }
+   },
+   {
+    "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
+    "WFWorkflowActionParameters": {
+     "GroupingIdentifier": "E782AA82-B076-4C94-B92E-DFC577BC42D9",
+     "WFControlFlowMode": 1
+    }
+   },
+   {
+    "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
+    "WFWorkflowActionParameters": {
+     "GroupingIdentifier": "E782AA82-B076-4C94-B92E-DFC577BC42D9",
+     "UUID": "9E0D8D2B-77B4-4CDA-BBA7-1A404BD11BBC",
+     "WFControlFlowMode": 2
+    }
+   }
+  ]
+ },
+ "location": {
+  "WFWorkflowActions": [
+   {
+    "WFWorkflowActionIdentifier": "is.workflow.actions.getcurrentlocation",
+    "WFWorkflowActionParameters": {
+     "UUID": "E962997B-1AFD-4F58-BF7D-3F28D6AA5813"
+    }
+   },
+   {
+    "WFWorkflowActionIdentifier": "is.workflow.actions.dnd.getfocus",
+    "WFWorkflowActionParameters": {
+     "UUID": "EDCE442E-3F33-4719-8C7E-1C91623FCCBF"
+    }
+   },
+   {
+    "WFWorkflowActionIdentifier": "is.workflow.actions.gettext",
+    "WFWorkflowActionParameters": {
+     "WFTextActionText": {
+      "Value": {
+       "string": "￼",
+       "attachmentsByRange": {
+        "{0, 1}": {
+         "Type": "ActionOutput",
+         "OutputName": "Current Location",
+         "OutputUUID": "E962997B-1AFD-4F58-BF7D-3F28D6AA5813",
+         "Aggrandizements": [
+          {
+           "Type": "WFPropertyVariableAggrandizement",
+           "PropertyName": "Latitude"
+          }
+         ]
+        }
+       }
+      },
+      "WFSerializationType": "WFTextTokenString"
+     },
+     "UUID": "3CAF5EAE-A49F-4D0F-B7E8-6F5824F04FE6"
+    }
+   }
+  ]
+ },
+ "textDestination": {
+  "WFWorkflowActions": [
+   {
+    "WFWorkflowActionIdentifier": "is.workflow.actions.gettext",
+    "WFWorkflowActionParameters": {
+     "WFTextActionText": {
+      "Value": {
+       "string": "￼",
+       "attachmentsByRange": {
+        "{0, 1}": {
+         "Type": "ActionOutput",
+         "OutputName": "Current Focus",
+         "OutputUUID": "CE6A595B-EF8D-4193-81F7-5BB03A1AB800"
+        }
+       }
+      },
+      "WFSerializationType": "WFTextTokenString"
+     },
+     "UUID": "540F9E75-9AB1-4087-AB40-04DE772B10CF"
+    }
+   },
+   {
+    "WFWorkflowActionIdentifier": "is.workflow.actions.getdirections",
+    "WFWorkflowActionParameters": {
+     "WFDestination": {
+      "Value": {
+       "OutputUUID": "540F9E75-9AB1-4087-AB40-04DE772B10CF",
+       "Type": "ActionOutput",
+       "OutputName": "Text"
+      },
+      "WFSerializationType": "WFTextTokenAttachment"
+     }
+    }
+   }
+  ]
+ },
+ "focusName": {
+  "WFWorkflowActions": [
+   {
+    "WFWorkflowActionIdentifier": "is.workflow.actions.dnd.getfocus",
+    "WFWorkflowActionParameters": {
+     "UUID": "CE6A595B-EF8D-4193-81F7-5BB03A1AB800"
+    }
+   },
+   {
+    "WFWorkflowActionIdentifier": "is.workflow.actions.getdirections",
+    "WFWorkflowActionParameters": {
+     "WFDestination": {
+      "Value": {
+       "Type": "ActionOutput",
+       "OutputName": "Current Focus",
+       "OutputUUID": "CE6A595B-EF8D-4193-81F7-5BB03A1AB800",
+       "Aggrandizements": [
+        {
+         "PropertyUserInfo": "WFItemName",
+         "Type": "WFPropertyVariableAggrandizement",
+         "PropertyName": "Name"
+        }
+       ]
+      },
+      "WFSerializationType": "WFTextTokenAttachment"
+     }
+    }
+   }
+  ]
+ }
+}
