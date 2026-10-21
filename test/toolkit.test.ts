@@ -194,6 +194,10 @@ test("wrapper outputs retain number, list and opaque content types", () => {
   assert.equal(params(actions, "text.split")[0].WFTextSeparator, "Custom");
   assert.equal(params(actions, "choosefromlist")[0].WFChooseFromListActionSelectMultiple, false);
   assert.equal(params(actions, "format.date")[0].WFDateFormatStyle, "Custom");
+  // A date text field: the date must be a text token, not a bare attachment (empty on device).
+  const date = params(actions, "format.date")[0].WFDate as Record<string, unknown>;
+  assert.equal(date.WFSerializationType, "WFTextTokenString");
+  assert.equal(((date.Value as Record<string, unknown>).attachmentsByRange as Record<string, Record<string, unknown>>)["{0, 1}"].OutputName, "Date");
 });
 
 test("import -> TypeScript -> workflow preserves complete tested workflows byte-for-byte as JSON", () => {
